@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // 2. 如果是平倉，自動配對開倉並計算盈虧
+  // 2. 平倉時自動配對開倉並計算盈虧
   const isClose = body.action === '平多' || body.action === '平空'
   if (isClose) {
     const direction = body.action === '平多' ? 'long' : 'short'
@@ -48,17 +48,31 @@ export async function POST(request: NextRequest) {
       .eq('symbol', body.symbol)
       .eq('action', openAction)
       .order('trade_time', { ascending: false })
-      .limit(10)
+      .limit(1)
 
     if (openTrades && openTrades.length > 0) {
       const openTrade = openTrades[0]
 
-      // 計算盈虧（簡單計算，之後可以加 tick 計算）
+      // 從標的設定取得 tick_size 和 tick_value
+      const { data: symbolData } = await supabase
+        .from('symbols')
+        .select('tick_size, tick_value')
+        .eq('name', body.symbol)
+        .single()
+
       let pnl = 0
-      if (direction === 'long') {
-        pnl = (body.price - openTrade.price) * body.quantity
+      if (symbolData && symbolData.tick_size > 0) {
+        // 用 tick 計算盈虧
+        const priceDiff = direction === 'long'
+          ? body.price - openTrade.price
+          : openTrade.price - body.price
+        const ticks = priceDiff / symbolData.tick_size
+        pnl = ticks * symbolData.tick_value * body.quantity
       } else {
-        pnl = (openTrade.price - body.price) * body.quantity
+        // 沒有 tick 設定時用價差計算
+        pnl = direction === 'long'
+          ? (body.price - openTrade.price) * body.quantity
+          : (openTrade.price - body.price) * body.quantity
       }
       pnl = pnl - (openTrade.fee || 0) - (body.fee || 0)
 
@@ -77,6 +91,20 @@ export async function POST(request: NextRequest) {
         strategy: body.strategy || openTrade.strategy || '',
         remark: body.remark || openTrade.remark || '',
         pnl: Math.round(pnl * 100) / 100,
+        big_dif: openTrade.big_dif,
+        big_dea: openTrade.big_dea,
+        big_hist: openTrade.big_hist,
+        big_rsi: openTrade.big_rsi,
+        big_k: openTrade.big_k,
+        big_d: openTrade.big_d,
+        big_j: openTrade.big_j,
+        small_dif: openTrade.small_dif,
+        small_dea: openTrade.small_dea,
+        small_hist: openTrade.small_hist,
+        small_rsi: openTrade.small_rsi,
+        small_k: openTrade.small_k,
+        small_d: openTrade.small_d,
+        small_j: openTrade.small_j,
       })
     }
   }
