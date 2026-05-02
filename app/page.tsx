@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import TradeForm from './components/TradeForm'
 import TradeList from './components/TradeList'
 import StatsPanel from './components/StatsPanel'
+import CalendarView from './components/CalendarView'
 import Sidebar from './components/Sidebar'
 
 export type Portfolio = {
@@ -47,7 +48,7 @@ export default function Home() {
   const [activePortfolio, setActivePortfolio] = useState<string>('')
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
-  const [page, setPage] = useState<'trade' | 'stats' | 'history'>('trade')
+  const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar'>('trade')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadPortfolios() }, [])
@@ -103,6 +104,9 @@ export default function Home() {
         )}
         {page === 'stats' && (
           <StatsPanel completed={completed} trades={trades} />
+        )}
+        {page === 'calendar' && (
+          <CalendarView completed={completed} />
         )}
         {page === 'history' && (
           <div className="flex-1 overflow-auto p-6">
