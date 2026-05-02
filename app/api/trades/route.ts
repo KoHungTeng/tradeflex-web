@@ -121,22 +121,28 @@ export async function DELETE(request: NextRequest) {
   const { error } = await supabase.from('trades').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // 同步刪除對應的已平倉記錄
+// 同步刪除對應的已平倉記錄（用 portfolio_id + symbol + 時間範圍比對）
   if (trade) {
+    const tradeTime = new Date(trade.trade_time)
+    const from = new Date(tradeTime.getTime() - 5000).toISOString()
+    const to = new Date(tradeTime.getTime() + 5000).toISOString()
+
     if (trade.action === '平多' || trade.action === '平空') {
       await supabase
         .from('completed_trades')
         .delete()
         .eq('portfolio_id', trade.portfolio_id)
         .eq('symbol', trade.symbol)
-        .eq('close_time', trade.trade_time)
+        .gte('close_time', from)
+        .lte('close_time', to)
     } else if (trade.action === '做多' || trade.action === '做空') {
       await supabase
         .from('completed_trades')
         .delete()
         .eq('portfolio_id', trade.portfolio_id)
         .eq('symbol', trade.symbol)
-        .eq('open_time', trade.trade_time)
+        .gte('open_time', from)
+        .lte('open_time', to)
     }
   }
 
