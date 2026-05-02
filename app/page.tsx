@@ -5,6 +5,7 @@ import TradeForm from './components/TradeForm'
 import TradeList from './components/TradeList'
 import StatsPanel from './components/StatsPanel'
 import CalendarView from './components/CalendarView'
+import StrategyAnalysis from './components/StrategyAnalysis'
 import Sidebar from './components/Sidebar'
 
 export type Portfolio = {
@@ -41,6 +42,20 @@ export type CompletedTrade = {
   close_time: string
   strategy: string
   pnl: number
+  big_dif?: number
+  big_dea?: number
+  big_hist?: number
+  big_rsi?: number
+  big_k?: number
+  big_d?: number
+  big_j?: number
+  small_dif?: number
+  small_dea?: number
+  small_hist?: number
+  small_rsi?: number
+  small_k?: number
+  small_d?: number
+  small_j?: number
 }
 
 export default function Home() {
@@ -48,7 +63,7 @@ export default function Home() {
   const [activePortfolio, setActivePortfolio] = useState<string>('')
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
-  const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar'>('trade')
+const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy'>('trade')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadPortfolios() }, [])
@@ -107,6 +122,9 @@ export default function Home() {
         )}
         {page === 'calendar' && (
           <CalendarView completed={completed} />
+        )}
+        {page === 'strategy' && (
+          <StrategyAnalysis completed={completed} />
         )}
         {page === 'history' && (
           <div className="flex-1 overflow-auto p-6">
