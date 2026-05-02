@@ -8,8 +8,20 @@ type Props = {
 }
 
 export default function TradeList({ trades, onDeleted }: Props) {
-  async function deleteTrade(id: string) {
+async function deleteTrade(id: string) {
+    // 先取得這筆交易資訊
+    const trade = trades.find(t => t.id === id)
+    
+    // 刪除交易記錄
     await fetch(`/api/trades?id=${id}`, { method: 'DELETE' })
+    
+    // 同步刪除已平倉記錄
+    if (trade) {
+      await fetch(`/api/completed?trade_time=${encodeURIComponent(trade.trade_time)}&symbol=${trade.symbol}&action=${trade.action}&portfolio_id=${trade.portfolio_id}`, { 
+        method: 'DELETE' 
+      })
+    }
+    
     onDeleted()
   }
 

@@ -36,3 +36,38 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const trade_time = searchParams.get('trade_time')
+  const symbol = searchParams.get('symbol')
+  const action = searchParams.get('action')
+  const portfolio_id = searchParams.get('portfolio_id')
+
+  if (!trade_time || !symbol || !action || !portfolio_id) {
+    return NextResponse.json({ error: 'missing params' }, { status: 400 })
+  }
+
+  const tradeTime = new Date(trade_time)
+  const from = new Date(tradeTime.getTime() - 10000).toISOString()
+  const to = new Date(tradeTime.getTime() + 10000).toISOString()
+
+  if (action === '平多' || action === '平空') {
+    await supabase
+      .from('completed_trades')
+      .delete()
+      .eq('portfolio_id', portfolio_id)
+      .eq('symbol', symbol)
+      .gte('close_time', from)
+      .lte('close_time', to)
+  } else {
+    await supabase
+      .from('completed_trades')
+      .delete()
+      .eq('portfolio_id', portfolio_id)
+      .eq('symbol', symbol)
+      .gte('open_time', from)
+      .lte('open_time', to)
+  }
+
+  return NextResponse.json({ success: true })
+}
