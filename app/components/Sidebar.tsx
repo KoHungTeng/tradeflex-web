@@ -11,12 +11,12 @@ type Props = {
 }
 
 export default function Sidebar({ page, setPage, portfolios, activePortfolio, setActivePortfolio }: Props) {
-  const navItems = [
+const navItems = [
     { id: 'trade', label: '交易', icon: '📝' },
     { id: 'stats', label: '統計', icon: '📊' },
+    { id: 'calendar', label: '日曆', icon: '📅' },
     { id: 'history', label: '歷史', icon: '🕐' },
   ]
-
   return (
     <div className="w-14 bg-gray-900 border-r border-gray-800 flex flex-col items-center py-4 gap-1">
       {/* Logo */}
