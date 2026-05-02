@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const body = await request.json()
 
-  // 1. 儲存交易記錄
   const { data: trade, error } = await supabase
     .from('trades')
     .insert(body)
@@ -34,13 +33,11 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // 2. 平倉時自動配對開倉並計算盈虧
   const isClose = body.action === '平多' || body.action === '平空'
   if (isClose) {
     const direction = body.action === '平多' ? 'long' : 'short'
     const openAction = direction === 'long' ? '做多' : '做空'
 
-    // 找最近一筆對應的開倉
     const { data: openTrades } = await supabase
       .from('trades')
       .select('*')
@@ -53,7 +50,6 @@ export async function POST(request: NextRequest) {
     if (openTrades && openTrades.length > 0) {
       const openTrade = openTrades[0]
 
-      // 從標的設定取得 tick_size 和 tick_value
       const { data: symbolData } = await supabase
         .from('symbols')
         .select('tick_size, tick_value')
@@ -62,21 +58,18 @@ export async function POST(request: NextRequest) {
 
       let pnl = 0
       if (symbolData && symbolData.tick_size > 0) {
-        // 用 tick 計算盈虧
         const priceDiff = direction === 'long'
           ? body.price - openTrade.price
           : openTrade.price - body.price
         const ticks = priceDiff / symbolData.tick_size
         pnl = ticks * symbolData.tick_value * body.quantity
       } else {
-        // 沒有 tick 設定時用價差計算
         pnl = direction === 'long'
           ? (body.price - openTrade.price) * body.quantity
           : (openTrade.price - body.price) * body.quantity
       }
       pnl = pnl - (openTrade.fee || 0) - (body.fee || 0)
 
-      // 建立已平倉記錄
       await supabase.from('completed_trades').insert({
         portfolio_id: body.portfolio_id,
         symbol: body.symbol,
@@ -117,7 +110,35 @@ export async function DELETE(request: NextRequest) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
+  // 先取得這筆交易資訊
+  const { data: trade } = await supabase
+    .from('trades')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  // 刪除交易記錄
   const { error } = await supabase.from('trades').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // 同步刪除對應的已平倉記錄
+  if (trade) {
+    if (trade.action === '平多' || trade.action === '平空') {
+      await supabase
+        .from('completed_trades')
+        .delete()
+        .eq('portfolio_id', trade.portfolio_id)
+        .eq('symbol', trade.symbol)
+        .eq('close_time', trade.trade_time)
+    } else if (trade.action === '做多' || trade.action === '做空') {
+      await supabase
+        .from('completed_trades')
+        .delete()
+        .eq('portfolio_id', trade.portfolio_id)
+        .eq('symbol', trade.symbol)
+        .eq('open_time', trade.trade_time)
+    }
+  }
+
   return NextResponse.json({ success: true })
 }
