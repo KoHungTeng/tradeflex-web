@@ -17,6 +17,7 @@ const navItems = [
     { id: 'calendar', label: '日曆', icon: '📅' },
     { id: 'history', label: '歷史', icon: '🕐' },
     { id: 'strategy', label: '策略分析', icon: '🧠' },
+    { id: 'settings', label: '設定', icon: '⚙️' },
   ]
   return (
     <div className="w-14 bg-gray-900 border-r border-gray-800 flex flex-col items-center py-4 gap-1">

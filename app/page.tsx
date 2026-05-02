@@ -6,6 +6,7 @@ import TradeList from './components/TradeList'
 import StatsPanel from './components/StatsPanel'
 import CalendarView from './components/CalendarView'
 import StrategyAnalysis from './components/StrategyAnalysis'
+import SettingsPanel from './components/SettingsPanel'
 import Sidebar from './components/Sidebar'
 
 export type Portfolio = {
@@ -63,7 +64,7 @@ export default function Home() {
   const [activePortfolio, setActivePortfolio] = useState<string>('')
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
-const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy'>('trade')
+const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadPortfolios() }, [])
@@ -125,6 +126,9 @@ const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 's
         )}
         {page === 'strategy' && (
           <StrategyAnalysis completed={completed} />
+        )}
+        {page === 'settings' && (
+          <SettingsPanel />
         )}
         {page === 'history' && (
           <div className="flex-1 overflow-auto p-6">
