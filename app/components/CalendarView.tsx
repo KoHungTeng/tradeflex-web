@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CompletedTrade } from '../page'
 
 type Props = {
@@ -19,11 +19,23 @@ export default function CalendarView({ completed }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [noteInput, setNoteInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 
   useEffect(() => { loadDayNotes() }, [year, month])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setSelectedDay(null)
+        setNoteInput('')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   async function loadDayNotes() {
     const res = await fetch('/api/notes')
@@ -85,8 +97,7 @@ export default function CalendarView({ completed }: Props) {
   const today = new Date()
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      {/* 月份導航 */}
+    <div className="flex-1 overflow-auto p-6" ref={containerRef}>
       <div className="flex items-center justify-between mb-6">
         <button onClick={prevMonth} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">←</button>
         <div className="text-center">
@@ -104,14 +115,12 @@ export default function CalendarView({ completed }: Props) {
         <button onClick={nextMonth} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">→</button>
       </div>
 
-      {/* 星期標題 */}
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map(d => (
           <div key={d} className="text-center text-xs text-gray-500 py-2">{d}</div>
         ))}
       </div>
 
-      {/* 日曆格子 */}
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
 
@@ -126,7 +135,8 @@ export default function CalendarView({ completed }: Props) {
           return (
             <div key={day}>
               <div
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   setSelectedDay(isSelected ? null : day)
                   setNoteInput('')
                 }}
@@ -149,9 +159,11 @@ export default function CalendarView({ completed }: Props) {
                 )}
               </div>
 
-              {/* 點選後展開備注區 */}
               {isSelected && (
-                <div className="col-span-7 mt-1 bg-gray-800 rounded-lg p-3">
+                <div
+                  onClick={e => e.stopPropagation()}
+                  className="mt-1 bg-gray-800 rounded-lg p-3"
+                >
                   <p className="text-xs text-gray-400 mb-2">{year}/{month + 1}/{day} 備注</p>
                   {notes.map(n => (
                     <div key={n.id} className="flex items-center justify-between text-sm text-white mb-1 group">
@@ -165,6 +177,7 @@ export default function CalendarView({ completed }: Props) {
                       onChange={e => setNoteInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveNote() } }}
                       placeholder="輸入備注..."
+                      autoFocus
                       className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500"
                     />
                     <button onClick={saveNote} disabled={saving} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white disabled:opacity-50">儲存</button>
