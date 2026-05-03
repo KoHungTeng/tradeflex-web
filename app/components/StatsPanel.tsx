@@ -1,7 +1,7 @@
 'use client'
 
 import { CompletedTrade, Trade } from '../page'
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 type Props = {
   completed: CompletedTrade[]
@@ -68,49 +68,57 @@ export default function StatsPanel({ completed, trades }: Props) {
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
-  const dragIndex = useRef<number | null>(null)
-  const dragOverIndex = useRef<number | null>(null)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [overIndex, setOverIndex] = useState<number | null>(null)
+  const draggingIndex = useRef<number | null>(null)
 
-  function handleDragStart(index: number) {
-    dragIndex.current = index
+  function onMouseDown(index: number, id: string) {
+    draggingIndex.current = index
+    setDraggingId(id)
   }
 
-  function handleDragEnter(index: number) {
-    dragOverIndex.current = index
-    if (dragIndex.current === null || dragIndex.current === index) return
+  function onMouseEnter(index: number) {
+    if (draggingIndex.current === null || draggingIndex.current === index) return
+    setOverIndex(index)
     setCards(prev => {
       const next = [...prev]
-      const dragged = next.splice(dragIndex.current!, 1)[0]
+      const dragged = next.splice(draggingIndex.current!, 1)[0]
       next.splice(index, 0, dragged)
-      dragIndex.current = index
+      draggingIndex.current = index
       return next
     })
   }
 
-  function handleDragEnd() {
-    dragIndex.current = null
-    dragOverIndex.current = null
+  function onMouseUp() {
+    draggingIndex.current = null
+    setDraggingId(null)
+    setOverIndex(null)
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div
+      className="flex-1 overflow-auto p-6"
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+    >
       <h2 className="text-lg font-semibold mb-6">統計總覽</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" onMouseUp={onMouseUp}>
         {cards.map((card, index) => {
           const isPos = card.value >= 0
           const color = card.isPrice
             ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
             : 'text-white'
+          const isDragging = draggingId === card.id
           return (
             <div
               key={card.id}
-              draggable
-              onDragStart={() => handleDragStart(index)}
-              onDragEnter={() => handleDragEnter(index)}
-              onDragEnd={handleDragEnd}
-              onDragOver={e => e.preventDefault()}
-              className="bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between select-none"
+              onMouseDown={() => onMouseDown(index, card.id)}
+              onMouseEnter={() => onMouseEnter(index)}
+              onMouseUp={onMouseUp}
+              className={`bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between select-none transition-all ${
+                isDragging ? 'ring-2 ring-blue-500 opacity-70 scale-95' : ''
+              }`}
             >
               <div className="text-xs text-gray-500">{card.label}</div>
               <div className={`text-xl font-bold ${color}`}>
