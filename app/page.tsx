@@ -8,6 +8,7 @@ import CalendarView from './components/CalendarView'
 import StrategyAnalysis from './components/StrategyAnalysis'
 import SettingsPanel from './components/SettingsPanel'
 import Sidebar from './components/Sidebar'
+import QuickNote from './components/QuickNote'
 
 export type Portfolio = {
   id: string
@@ -64,7 +65,7 @@ export default function Home() {
   const [activePortfolio, setActivePortfolio] = useState<string>('')
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
-const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
+  const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadPortfolios() }, [])
@@ -111,10 +112,12 @@ const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 's
             <TradeForm
               activePortfolio={activePortfolio}
               onAdded={loadTrades}
+              onCompletedChanged={loadCompleted}
             />
             <TradeList
               trades={trades}
               onDeleted={loadTrades}
+              onCompletedChanged={loadCompleted}
             />
           </div>
         )}
@@ -161,6 +164,7 @@ const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 's
             </div>
           </div>
         )}
+        <QuickNote />
       </div>
     </div>
   )

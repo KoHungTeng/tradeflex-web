@@ -5,9 +5,10 @@ import { useState } from 'react'
 type Props = {
   activePortfolio: string
   onAdded: () => void
+  onCompletedChanged: () => void
 }
 
-export default function TradeForm({ activePortfolio, onAdded }: Props) {
+export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
   const [price, setPrice] = useState('')
@@ -20,7 +21,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
   const [showIndicators, setShowIndicators] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  // 大時間框架指標
   const [bigDIF, setBigDIF] = useState('')
   const [bigDEA, setBigDEA] = useState('')
   const [bigHist, setBigHist] = useState('')
@@ -29,7 +29,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
   const [bigD, setBigD] = useState('')
   const [bigJ, setBigJ] = useState('')
 
-  // 小時間框架指標
   const [smallDIF, setSmallDIF] = useState('')
   const [smallDEA, setSmallDEA] = useState('')
   const [smallHist, setSmallHist] = useState('')
@@ -77,7 +76,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
       }),
     })
 
-    // Reset
     setSymbol(''); setPrice(''); setQuantity('1')
     setFee('0'); setTp(''); setSl('')
     setStrategy(''); setRemark('')
@@ -87,13 +85,13 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
     setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
     setSubmitting(false)
     onAdded()
+    onCompletedChanged()
   }
 
   return (
     <div className="w-64 bg-gray-900 border-r border-gray-800 p-4 overflow-y-auto flex flex-col gap-3">
       <h2 className="text-sm font-semibold text-gray-400">新增交易</h2>
 
-      {/* 動作切換 */}
       <div className="grid grid-cols-4 gap-1">
         {['做多', '做空', '平多', '平空'].map(a => (
           <button
@@ -157,7 +155,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
             placeholder="選填" className="input" />
         </Field>
 
-        {/* 指標輸入（開倉才顯示）*/}
         {isOpen && (
           <div>
             <button
@@ -170,7 +167,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
 
             {showIndicators && (
               <div className="mt-3 space-y-3">
-                {/* 大時間框架 */}
                 <div>
                   <p className="text-xs text-gray-500 mb-2">大時間框架指標</p>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -184,7 +180,6 @@ export default function TradeForm({ activePortfolio, onAdded }: Props) {
                   </div>
                 </div>
 
-                {/* 小時間框架 */}
                 <div>
                   <p className="text-xs text-gray-500 mb-2">小時間框架指標</p>
                   <div className="grid grid-cols-3 gap-1.5">
