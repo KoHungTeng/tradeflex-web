@@ -41,41 +41,38 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!symbol || !price) return
+    if (!symbol || !price || submitting) return
     setSubmitting(true)
 
-    await fetch('/api/trades', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        portfolio_id: activePortfolio,
-        symbol: symbol.toUpperCase(),
-        action,
-        price: parseFloat(price),
-        quantity: parseFloat(quantity),
-        fee: parseFloat(fee) * parseFloat(quantity),
-        tp: tp ? parseFloat(tp) : 0,
-        sl: sl ? parseFloat(sl) : 0,
-        strategy,
-        remark,
-        trade_time: new Date().toISOString(),
-        big_dif: bigDIF ? parseFloat(bigDIF) : null,
-        big_dea: bigDEA ? parseFloat(bigDEA) : null,
-        big_hist: bigHist ? parseFloat(bigHist) : null,
-        big_rsi: bigRSI ? parseFloat(bigRSI) : null,
-        big_k: bigK ? parseFloat(bigK) : null,
-        big_d: bigD ? parseFloat(bigD) : null,
-        big_j: bigJ ? parseFloat(bigJ) : null,
-        small_dif: smallDIF ? parseFloat(smallDIF) : null,
-        small_dea: smallDEA ? parseFloat(smallDEA) : null,
-        small_hist: smallHist ? parseFloat(smallHist) : null,
-        small_rsi: smallRSI ? parseFloat(smallRSI) : null,
-        small_k: smallK ? parseFloat(smallK) : null,
-        small_d: smallD ? parseFloat(smallD) : null,
-        small_j: smallJ ? parseFloat(smallJ) : null,
-      }),
-    })
+    const body = {
+      portfolio_id: activePortfolio,
+      symbol: symbol.toUpperCase(),
+      action,
+      price: parseFloat(price),
+      quantity: parseFloat(quantity),
+      fee: parseFloat(fee) * parseFloat(quantity),
+      tp: tp ? parseFloat(tp) : 0,
+      sl: sl ? parseFloat(sl) : 0,
+      strategy,
+      remark,
+      trade_time: new Date().toISOString(),
+      big_dif: bigDIF ? parseFloat(bigDIF) : null,
+      big_dea: bigDEA ? parseFloat(bigDEA) : null,
+      big_hist: bigHist ? parseFloat(bigHist) : null,
+      big_rsi: bigRSI ? parseFloat(bigRSI) : null,
+      big_k: bigK ? parseFloat(bigK) : null,
+      big_d: bigD ? parseFloat(bigD) : null,
+      big_j: bigJ ? parseFloat(bigJ) : null,
+      small_dif: smallDIF ? parseFloat(smallDIF) : null,
+      small_dea: smallDEA ? parseFloat(smallDEA) : null,
+      small_hist: smallHist ? parseFloat(smallHist) : null,
+      small_rsi: smallRSI ? parseFloat(smallRSI) : null,
+      small_k: smallK ? parseFloat(smallK) : null,
+      small_d: smallD ? parseFloat(smallD) : null,
+      small_j: smallJ ? parseFloat(smallJ) : null,
+    }
 
+    // 先清空表單、先更新畫面
     setSymbol(''); setPrice(''); setQuantity('1')
     setFee('0'); setTp(''); setSl('')
     setStrategy(''); setRemark('')
@@ -84,8 +81,16 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     setSmallDIF(''); setSmallDEA(''); setSmallHist('')
     setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
     setSubmitting(false)
-    onAdded()
-    onCompletedChanged()
+
+    // 背景執行 API，完成後再重新載入
+    fetch('/api/trades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(() => {
+      onAdded()
+      onCompletedChanged()
+    })
   }
 
   return (
