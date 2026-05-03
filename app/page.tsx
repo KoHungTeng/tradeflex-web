@@ -28,6 +28,20 @@ export type Trade = {
   strategy: string
   remark: string
   trade_time: string
+  big_dif?: number
+  big_dea?: number
+  big_hist?: number
+  big_rsi?: number
+  big_k?: number
+  big_d?: number
+  big_j?: number
+  small_dif?: number
+  small_dea?: number
+  small_hist?: number
+  small_rsi?: number
+  small_k?: number
+  small_d?: number
+  small_j?: number
 }
 
 export type CompletedTrade = {
