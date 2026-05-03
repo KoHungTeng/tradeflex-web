@@ -45,10 +45,10 @@ export default function CalendarView({ completed }: Props) {
     loadDayNotes()
   }
 
-  async function deleteNote(id: string) {
-    await fetch(`/api/calendar-notes?id=${id}`, { method: 'DELETE' })
-    loadDayNotes()
-  }
+async function deleteNote(id: string) {
+  setDayNotes(prev => prev.filter(n => n.id !== id))
+  await fetch(`/api/calendar-notes?id=${id}`, { method: 'DELETE' })
+}
 
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()

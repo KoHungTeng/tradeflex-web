@@ -82,10 +82,10 @@ export default function SettingsPanel() {
     loadSymbols()
   }
 
-  async function deleteSymbol(id: string) {
-    await fetch(`/api/symbols?id=${id}`, { method: 'DELETE' })
-    loadSymbols()
-  }
+async function deleteSymbol(id: string) {
+  setSymbols(prev => prev.filter(s => s.id !== id))
+  await fetch(`/api/symbols?id=${id}`, { method: 'DELETE' })
+}
 
   async function addCategory() {
     if (!newCategoryName) return
@@ -98,10 +98,10 @@ export default function SettingsPanel() {
     loadCategories()
   }
 
-  async function deleteCategory(id: string) {
-    await fetch(`/api/categories?id=${id}`, { method: 'DELETE' })
-    loadCategories()
-  }
+async function deleteCategory(id: string) {
+  setCategories(prev => prev.filter(c => c.id !== id))
+  await fetch(`/api/categories?id=${id}`, { method: 'DELETE' })
+}
 
   return (
     <div className="flex-1 overflow-auto p-6">
