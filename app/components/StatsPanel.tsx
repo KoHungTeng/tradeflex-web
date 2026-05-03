@@ -1,10 +1,67 @@
 'use client'
 
 import { CompletedTrade, Trade } from '../page'
+import { useState } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 type Props = {
   completed: CompletedTrade[]
   trades: Trade[]
+}
+
+type CardItem = {
+  id: string
+  label: string
+  value: number
+  isPrice?: boolean
+  suffix?: string
+}
+
+function SortableCard({ id, label, value, isPrice, suffix }: CardItem) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const isPos = value >= 0
+  const color = isPrice
+    ? value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
+    : 'text-white'
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between"
+    >
+      <div className="text-xs text-gray-500">{label}</div>
+      <div className={`text-xl font-bold ${color}`}>
+        {isPrice && value !== 0 && isPos ? '+' : ''}
+        {isPrice ? value.toFixed(0) : value.toFixed(suffix ? 1 : 0)}
+        {suffix}
+      </div>
+    </div>
+  )
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
@@ -15,19 +72,16 @@ export default function StatsPanel({ completed, trades }: Props) {
   const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0
   const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : 0
 
-  // 本日盈虧
   const today = new Date().toDateString()
   const todayPnL = completed
     .filter(t => new Date(t.close_time).toDateString() === today)
     .reduce((s, t) => s + t.pnl, 0)
 
-  // 本月盈虧
   const thisMonth = new Date().getMonth()
   const monthPnL = completed
     .filter(t => new Date(t.close_time).getMonth() === thisMonth)
     .reduce((s, t) => s + t.pnl, 0)
 
-  // 策略勝率
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
   completed.forEach(t => {
     const s = t.strategy || '無策略'
@@ -37,7 +91,6 @@ export default function StatsPanel({ completed, trades }: Props) {
     if (t.pnl > 0) strategyMap[s].wins++
   })
 
-  // 最近7天每日盈虧
   const last7: { date: string; pnl: number }[] = []
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
@@ -52,23 +105,48 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
 
+  const initialCards: CardItem[] = [
+    { id: 'totalPnL', label: '總盈虧', value: totalPnL, isPrice: true },
+    { id: 'todayPnL', label: '今日盈虧', value: todayPnL, isPrice: true },
+    { id: 'monthPnL', label: '本月盈虧', value: monthPnL, isPrice: true },
+    { id: 'winRate', label: '勝率', value: winRate, suffix: '%' },
+    { id: 'total', label: '總交易數', value: completed.length },
+    { id: 'avgWin', label: '平均獲利', value: avgWin, isPrice: true },
+    { id: 'avgLoss', label: '平均虧損', value: avgLoss, isPrice: true },
+  ]
+
+  const [cards, setCards] = useState<CardItem[]>(initialCards)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setCards(prev => {
+        const oldIndex = prev.findIndex(c => c.id === active.id)
+        const newIndex = prev.findIndex(c => c.id === over.id)
+        return arrayMove(prev, oldIndex, newIndex)
+      })
+    }
+  }
+
   return (
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-6">統計總覽</h2>
 
-      {/* 頂部數據卡 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard label="總盈虧" value={totalPnL} isPrice />
-        <StatCard label="今日盈虧" value={todayPnL} isPrice />
-        <StatCard label="本月盈虧" value={monthPnL} isPrice />
-        <StatCard label="勝率" value={winRate} suffix="%" />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard label="總交易數" value={completed.length} />
-        <StatCard label="平均獲利" value={avgWin} isPrice />
-        <StatCard label="平均虧損" value={avgLoss} isPrice />
-      </div>
+      {/* 可拖拉格子 */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={cards.map(c => c.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {cards.map(card => (
+              <SortableCard key={card.id} {...card} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* 近7天盈虧圖 */}
       <div className="bg-gray-900 rounded-xl p-5 mb-4">
@@ -135,29 +213,6 @@ export default function StatsPanel({ completed, trades }: Props) {
       {completed.length === 0 && (
         <div className="text-center text-gray-600 py-20">尚無已平倉交易</div>
       )}
-    </div>
-  )
-}
-
-function StatCard({ label, value, isPrice, suffix }: {
-  label: string
-  value: number
-  isPrice?: boolean
-  suffix?: string
-}) {
-  const isPos = value >= 0
-  const color = isPrice
-    ? value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
-    : 'text-white'
-
-  return (
-    <div className="bg-gray-900 rounded-xl p-4">
-      <div className="text-xs text-gray-500 mb-1">{label}</div>
-      <div className={`text-xl font-bold ${color}`}>
-        {isPrice && value !== 0 && isPos ? '+' : ''}
-        {isPrice ? value.toFixed(0) : value.toFixed(suffix ? 1 : 0)}
-        {suffix}
-      </div>
     </div>
   )
 }
