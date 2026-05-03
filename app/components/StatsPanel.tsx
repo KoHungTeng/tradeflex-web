@@ -1,7 +1,7 @@
 'use client'
 
 import { CompletedTrade, Trade } from '../page'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 
 type Props = {
   completed: CompletedTrade[]
@@ -14,6 +14,7 @@ type CardItem = {
   value: number
   isPrice?: boolean
   suffix?: string
+  empty?: boolean
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
@@ -65,11 +66,11 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'total', label: '總交易數', value: completed.length },
     { id: 'avgWin', label: '平均獲利', value: avgWin, isPrice: true },
     { id: 'avgLoss', label: '平均虧損', value: avgLoss, isPrice: true },
+    { id: 'empty', label: '', value: 0, empty: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-  const [overIndex, setOverIndex] = useState<number | null>(null)
   const draggingIndex = useRef<number | null>(null)
 
   function onMouseDown(index: number, id: string) {
@@ -79,7 +80,6 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   function onMouseEnter(index: number) {
     if (draggingIndex.current === null || draggingIndex.current === index) return
-    setOverIndex(index)
     setCards(prev => {
       const next = [...prev]
       const dragged = next.splice(draggingIndex.current!, 1)[0]
@@ -92,15 +92,10 @@ export default function StatsPanel({ completed, trades }: Props) {
   function onMouseUp() {
     draggingIndex.current = null
     setDraggingId(null)
-    setOverIndex(null)
   }
 
   return (
-    <div
-      className="flex-1 overflow-auto p-6"
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-    >
+    <div className="flex-1 overflow-auto p-6" onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
       <h2 className="text-lg font-semibold mb-6">統計總覽</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" onMouseUp={onMouseUp}>
@@ -110,28 +105,32 @@ export default function StatsPanel({ completed, trades }: Props) {
             ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
             : 'text-white'
           const isDragging = draggingId === card.id
+
           return (
             <div
               key={card.id}
-              onMouseDown={() => onMouseDown(index, card.id)}
+              onMouseDown={() => !card.empty && onMouseDown(index, card.id)}
               onMouseEnter={() => onMouseEnter(index)}
               onMouseUp={onMouseUp}
-              className={`bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between select-none transition-all ${
-                isDragging ? 'ring-2 ring-blue-500 opacity-70 scale-95' : ''
-              }`}
+              className={`bg-gray-900 rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
+                card.empty ? 'opacity-20 cursor-default' : 'cursor-grab active:cursor-grabbing'
+              } ${isDragging ? 'ring-2 ring-blue-500 opacity-70 scale-95' : ''}`}
             >
-              <div className="text-xs text-gray-500">{card.label}</div>
-              <div className={`text-xl font-bold ${color}`}>
-                {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
-                {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
-                {card.suffix}
-              </div>
+              {!card.empty && (
+                <>
+                  <div className="text-xs text-gray-500">{card.label}</div>
+                  <div className={`text-xl font-bold ${color}`}>
+                    {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
+                    {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
+                    {card.suffix}
+                  </div>
+                </>
+              )}
             </div>
           )
         })}
       </div>
 
-      {/* 近7天盈虧圖 */}
       <div className="bg-gray-900 rounded-xl p-5 mb-4">
         <h3 className="text-sm font-semibold text-gray-400 mb-4">近 7 天盈虧</h3>
         <div className="flex items-end gap-2 h-32">
@@ -159,7 +158,6 @@ export default function StatsPanel({ completed, trades }: Props) {
         </div>
       </div>
 
-      {/* 策略勝率 */}
       {Object.keys(strategyMap).length > 0 && (
         <div className="bg-gray-900 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-gray-400 mb-4">策略勝率</h3>
