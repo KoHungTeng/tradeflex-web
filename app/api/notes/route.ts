@@ -16,10 +16,11 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { content } = await req.json()
+  const { content, date } = await req.json()
+  const note_date = date || new Date().toISOString().split('T')[0]
   const { data, error } = await supabase
     .from('day_notes')
-    .insert({ text: content, note_date: new Date().toISOString().split('T')[0] })
+    .insert({ text: content, note_date })
     .select()
     .single()
   if (error) return NextResponse.json({ error }, { status: 500 })
