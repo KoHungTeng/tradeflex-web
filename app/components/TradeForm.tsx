@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 type Props = {
   activePortfolio: string
-  onAdded: () => void
+  onAdded: (trade: any) => void
   onCompletedChanged: () => void
 }
 
@@ -39,23 +39,46 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
   const isOpen = action === '做多' || action === '做空'
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!symbol || !price || submitting) return
-    setSubmitting(true)
+async function submit(e: React.FormEvent) {
+  e.preventDefault()
+  if (!symbol || !price || submitting) return
+  setSubmitting(true)
 
-    const body = {
-      portfolio_id: activePortfolio,
-      symbol: symbol.toUpperCase(),
-      action,
-      price: parseFloat(price),
-      quantity: parseFloat(quantity),
-      fee: parseFloat(fee) * parseFloat(quantity),
+  const trade_time = new Date().toISOString()
+  const newTrade: any = {
+    id: crypto.randomUUID(),
+    portfolio_id: activePortfolio,
+    symbol: symbol.toUpperCase(),
+    action,
+    price: parseFloat(price),
+    quantity: parseFloat(quantity),
+    fee: parseFloat(fee) * parseFloat(quantity),
+    strategy,
+    remark,
+    trade_time,
+  }
+
+  // 先更新畫面
+  onAdded(newTrade)
+
+  // 清空表單
+  setSymbol(''); setPrice(''); setQuantity('1')
+  setFee('0'); setTp(''); setSl('')
+  setStrategy(''); setRemark('')
+  setBigDIF(''); setBigDEA(''); setBigHist('')
+  setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
+  setSmallDIF(''); setSmallDEA(''); setSmallHist('')
+  setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
+  setSubmitting(false)
+
+  // 背景執行 API
+  fetch('/api/trades', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...newTrade,
       tp: tp ? parseFloat(tp) : 0,
       sl: sl ? parseFloat(sl) : 0,
-      strategy,
-      remark,
-      trade_time: new Date().toISOString(),
       big_dif: bigDIF ? parseFloat(bigDIF) : null,
       big_dea: bigDEA ? parseFloat(bigDEA) : null,
       big_hist: bigHist ? parseFloat(bigHist) : null,
@@ -70,28 +93,9 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
       small_k: smallK ? parseFloat(smallK) : null,
       small_d: smallD ? parseFloat(smallD) : null,
       small_j: smallJ ? parseFloat(smallJ) : null,
-    }
-
-    // 先清空表單、先更新畫面
-    setSymbol(''); setPrice(''); setQuantity('1')
-    setFee('0'); setTp(''); setSl('')
-    setStrategy(''); setRemark('')
-    setBigDIF(''); setBigDEA(''); setBigHist('')
-    setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
-    setSmallDIF(''); setSmallDEA(''); setSmallHist('')
-    setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
-    setSubmitting(false)
-
-    // 背景執行 API，完成後再重新載入
-    fetch('/api/trades', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }).then(() => {
-      onAdded()
-      onCompletedChanged()
-    })
-  }
+    }),
+  }).then(() => onCompletedChanged())
+}
 
   return (
     <div className="w-64 bg-gray-900 border-r border-gray-800 p-4 overflow-y-auto flex flex-col gap-3">

@@ -91,6 +91,17 @@ export default function Home() {
     setCompleted(Array.isArray(data) ? data : [])
   }
 
+  // 樂觀新增交易
+  function optimisticAddTrade(trade: Trade) {
+    setTrades(prev => [trade, ...prev])
+  }
+
+  // 樂觀刪除交易
+  function optimisticDeleteTrade(id: string) {
+    setTrades(prev => prev.filter(t => t.id !== id))
+    loadCompleted()
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center h-screen bg-gray-950 text-white text-lg">
       載入中...
@@ -111,12 +122,12 @@ export default function Home() {
           <div className="flex flex-1 overflow-hidden">
             <TradeForm
               activePortfolio={activePortfolio}
-              onAdded={loadTrades}
+              onAdded={optimisticAddTrade}
               onCompletedChanged={loadCompleted}
             />
             <TradeList
               trades={trades}
-              onDeleted={loadTrades}
+              onDeleted={optimisticDeleteTrade}
               onCompletedChanged={loadCompleted}
             />
           </div>
