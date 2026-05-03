@@ -40,8 +40,8 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       if (!dragging.current) return
       const diff = e.clientX - dragging.current.startX
       const newWidth = Math.max(50, dragging.current.startWidth + diff)
-      setWidths(prev => {
-        const next = { ...prev, [dragging.current!.col]: newWidth }
+      setWidths((prev: typeof DEFAULT_WIDTHS) => {
+  const next = { ...prev, [dragging.current!.col]: newWidth }
         localStorage.setItem('tradeListWidths', JSON.stringify(next))
         return next
       })
