@@ -197,7 +197,7 @@ async function submit(e: React.FormEvent) {
                     <MiniField label="MACD柱" value={smallHist} onChange={setSmallHist} />
                     <MiniField label="RSI(14)" value={smallRSI} onChange={setSmallRSI} />
                     <MiniField label="KDJ K" value={smallK} onChange={setSmallK} />
-                    <MiniField label="KDJ D" value={smallD} onChange={setBigD} />
+                    <MiniField label="KDJ D" value={smallD} onChange={setSmallD} />
                     <MiniField label="KDJ J" value={smallJ} onChange={setSmallJ} />
                   </div>
                 </div>
