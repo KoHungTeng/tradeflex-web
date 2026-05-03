@@ -12,6 +12,9 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
   async function deleteTrade(id: string) {
     const trade = trades.find(t => t.id === id)
     
+    onDeleted()
+    onCompletedChanged()
+
     await fetch(`/api/trades?id=${id}`, { method: 'DELETE' })
     
     if (trade) {
@@ -19,9 +22,6 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
         method: 'DELETE' 
       })
     }
-    
-    onDeleted()
-    onCompletedChanged()
   }
 
   const actionColor = (action: string) => {
