@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { CompletedTrade } from '../page'
 
 type Props = {
@@ -19,26 +19,14 @@ export default function CalendarView({ completed }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [noteInput, setNoteInput] = useState('')
   const [saving, setSaving] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 
   useEffect(() => { loadDayNotes() }, [year, month])
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setSelectedDay(null)
-        setNoteInput('')
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   async function loadDayNotes() {
-    const res = await fetch('/api/notes')
+    const res = await fetch('/api/calendar-notes')
     const data = await res.json()
     setDayNotes(Array.isArray(data) ? data : [])
   }
@@ -47,19 +35,18 @@ export default function CalendarView({ completed }: Props) {
     if (!noteInput.trim() || saving) return
     setSaving(true)
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`
-    await fetch('/api/notes', {
+    await fetch('/api/calendar-notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: noteInput.trim(), date: dateStr }),
     })
     setNoteInput('')
     setSaving(false)
-    setSelectedDay(null)
     loadDayNotes()
   }
 
   async function deleteNote(id: string) {
-    await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
+    await fetch(`/api/calendar-notes?id=${id}`, { method: 'DELETE' })
     loadDayNotes()
   }
 
@@ -80,8 +67,8 @@ export default function CalendarView({ completed }: Props) {
     return dayNotes.filter(n => n.note_date === dateStr)
   }
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1))
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1))
+  const prevMonth = () => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDay(null) }
+  const nextMonth = () => { setCurrentDate(new Date(year, month + 1, 1)); setSelectedDay(null) }
 
   const weekDays = ['日', '一', '二', '三', '四', '五', '六']
   const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
@@ -97,7 +84,7 @@ export default function CalendarView({ completed }: Props) {
   const today = new Date()
 
   return (
-    <div className="flex-1 overflow-auto p-6" ref={containerRef}>
+    <div className="flex-1 overflow-auto p-6" onClick={() => { setSelectedDay(null); setNoteInput('') }}>
       <div className="flex items-center justify-between mb-6">
         <button onClick={prevMonth} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">←</button>
         <div className="text-center">
