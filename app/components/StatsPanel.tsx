@@ -79,15 +79,16 @@ export default function StatsPanel({ completed, trades }: Props) {
   }
 
   function onMouseEnter(index: number) {
-    if (draggingIndex.current === null || draggingIndex.current === index) return
-    setCards(prev => {
-      const next = [...prev]
-      const dragged = next.splice(draggingIndex.current!, 1)[0]
-      next.splice(index, 0, dragged)
-      draggingIndex.current = index
-      return next
-    })
-  }
+  if (draggingIndex.current === null || draggingIndex.current === index) return
+  setCards(prev => {
+    const next = [...prev]
+    const temp = next[draggingIndex.current!]
+    next[draggingIndex.current!] = next[index]
+    next[index] = temp
+    draggingIndex.current = index
+    return next
+  })
+}
 
   function onMouseUp() {
     draggingIndex.current = null
