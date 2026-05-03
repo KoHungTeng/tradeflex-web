@@ -103,7 +103,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 <th
                   key={col.key}
                   style={{ width: widths[col.key as keyof typeof widths], position: 'relative' }}
-                  className="py-2 px-3 select-none"
+                  className="py-2 px-3 select-none overflow-visible"
                 >
                   {col.label}
 {col.key !== 'delete' && (
