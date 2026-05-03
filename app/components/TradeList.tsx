@@ -4,22 +4,18 @@ import { Trade } from '../page'
 
 type Props = {
   trades: Trade[]
-  onDeleted: () => void
+  onDeleted: (id: string) => void
   onCompletedChanged: () => void
 }
 
 export default function TradeList({ trades, onDeleted, onCompletedChanged }: Props) {
   async function deleteTrade(id: string) {
     const trade = trades.find(t => t.id === id)
-    
-    onDeleted()
-    onCompletedChanged()
-
+    onDeleted(id)
     await fetch(`/api/trades?id=${id}`, { method: 'DELETE' })
-    
     if (trade) {
-      await fetch(`/api/completed?trade_time=${encodeURIComponent(trade.trade_time)}&symbol=${trade.symbol}&action=${trade.action}&portfolio_id=${trade.portfolio_id}`, { 
-        method: 'DELETE' 
+      await fetch(`/api/completed?trade_time=${encodeURIComponent(trade.trade_time)}&symbol=${trade.symbol}&action=${trade.action}&portfolio_id=${trade.portfolio_id}`, {
+        method: 'DELETE'
       })
     }
   }
