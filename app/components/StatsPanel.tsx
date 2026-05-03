@@ -1,24 +1,7 @@
 'use client'
 
 import { CompletedTrade, Trade } from '../page'
-import { useState } from 'react'
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  rectSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { useState, useRef } from 'react'
 
 type Props = {
   completed: CompletedTrade[]
@@ -31,37 +14,6 @@ type CardItem = {
   value: number
   isPrice?: boolean
   suffix?: string
-}
-
-function SortableCard({ id, label, value, isPrice, suffix }: CardItem) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  }
-
-  const isPos = value >= 0
-  const color = isPrice
-    ? value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
-    : 'text-white'
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between"
-    >
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className={`text-xl font-bold ${color}`}>
-        {isPrice && value !== 0 && isPos ? '+' : ''}
-        {isPrice ? value.toFixed(0) : value.toFixed(suffix ? 1 : 0)}
-        {suffix}
-      </div>
-    </div>
-  )
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
@@ -116,37 +68,60 @@ export default function StatsPanel({ completed, trades }: Props) {
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
+  const dragIndex = useRef<number | null>(null)
+  const dragOverIndex = useRef<number | null>(null)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  )
+  function handleDragStart(index: number) {
+    dragIndex.current = index
+  }
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      setCards(prev => {
-        const oldIndex = prev.findIndex(c => c.id === active.id)
-        const newIndex = prev.findIndex(c => c.id === over.id)
-        return arrayMove(prev, oldIndex, newIndex)
-      })
-    }
+  function handleDragEnter(index: number) {
+    dragOverIndex.current = index
+    if (dragIndex.current === null || dragIndex.current === index) return
+    setCards(prev => {
+      const next = [...prev]
+      const dragged = next.splice(dragIndex.current!, 1)[0]
+      next.splice(index, 0, dragged)
+      dragIndex.current = index
+      return next
+    })
+  }
+
+  function handleDragEnd() {
+    dragIndex.current = null
+    dragOverIndex.current = null
   }
 
   return (
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-6">統計總覽</h2>
 
-      {/* 可拖拉格子 */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={cards.map(c => c.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {cards.map(card => (
-              <SortableCard key={card.id} {...card} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {cards.map((card, index) => {
+          const isPos = card.value >= 0
+          const color = card.isPrice
+            ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
+            : 'text-white'
+          return (
+            <div
+              key={card.id}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={e => e.preventDefault()}
+              className="bg-gray-900 rounded-xl p-4 cursor-grab active:cursor-grabbing h-24 flex flex-col justify-between select-none"
+            >
+              <div className="text-xs text-gray-500">{card.label}</div>
+              <div className={`text-xl font-bold ${color}`}>
+                {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
+                {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
+                {card.suffix}
+              </div>
+            </div>
+          )
+        })}
+      </div>
 
       {/* 近7天盈虧圖 */}
       <div className="bg-gray-900 rounded-xl p-5 mb-4">
