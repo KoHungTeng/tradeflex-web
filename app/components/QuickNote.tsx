@@ -35,10 +35,10 @@ export default function QuickNote() {
     loadNotes()
   }
 
-  async function deleteNote(id: string) {
-    await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
-    loadNotes()
-  }
+async function deleteNote(id: string) {
+  setNotes(prev => prev.filter(n => n.id !== id))
+  await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
+}
 
   return (
     <div className="border-t border-gray-800 bg-gray-900 px-4 py-3">
