@@ -9,20 +9,24 @@ type Props = {
   onCompletedChanged: () => void
 }
 
-const DEFAULT_WIDTHS = {
-  action: 80,
-  symbol: 80,
-  price: 90,
-  quantity: 70,
-  fee: 90,
-  strategy: 120,
-  remark: 120,
-  time: 160,
-  delete: 40,
-}
+const COLS = [
+  { key: 'action', label: '動作', minWidth: 60, defaultWidth: 80, align: 'left' },
+  { key: 'symbol', label: '標的', minWidth: 50, defaultWidth: 80, align: 'left' },
+  { key: 'price', label: '價格', minWidth: 60, defaultWidth: 90, align: 'right' },
+  { key: 'quantity', label: '口數', minWidth: 40, defaultWidth: 60, align: 'right' },
+  { key: 'fee', label: '手續費', minWidth: 55, defaultWidth: 80, align: 'right' },
+  { key: 'tp', label: 'TP', minWidth: 40, defaultWidth: 70, align: 'right' },
+  { key: 'sl', label: 'SL', minWidth: 40, defaultWidth: 70, align: 'right' },
+  { key: 'strategy', label: '策略', minWidth: 50, defaultWidth: 120, align: 'left' },
+  { key: 'remark', label: '備註', minWidth: 50, defaultWidth: 120, align: 'left' },
+  { key: 'time', label: '時間', minWidth: 130, defaultWidth: 150, align: 'left' },
+  { key: 'delete', label: '', minWidth: 30, defaultWidth: 40, align: 'left' },
+]
+
+const DEFAULT_WIDTHS = Object.fromEntries(COLS.map(c => [c.key, c.defaultWidth]))
 
 export default function TradeList({ trades, onDeleted, onCompletedChanged }: Props) {
-  const [widths, setWidths] = useState<typeof DEFAULT_WIDTHS>(() => {
+  const [widths, setWidths] = useState<Record<string, number>>(() => {
     if (typeof window === 'undefined') return DEFAULT_WIDTHS
     try {
       const saved = localStorage.getItem('tradeListWidths')
@@ -31,17 +35,22 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
   })
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
-  const dragging = useRef<{ col: string; startX: number; startWidth: number } | null>(null)
+  const dragging = useRef<{ col: string; startX: number; startWidth: number; minWidth: number } | null>(null)
 
-  function onResizeStart(e: React.MouseEvent, col: string) {
+  function onResizeStart(e: React.MouseEvent, col: typeof COLS[0]) {
     e.preventDefault()
-    dragging.current = { col, startX: e.clientX, startWidth: widths[col as keyof typeof widths] }
+    dragging.current = {
+      col: col.key,
+      startX: e.clientX,
+      startWidth: widths[col.key],
+      minWidth: col.minWidth,
+    }
 
     function onMove(e: MouseEvent) {
       if (!dragging.current) return
       const diff = e.clientX - dragging.current.startX
-      const newWidth = Math.max(50, dragging.current.startWidth + diff)
-      setWidths((prev: typeof DEFAULT_WIDTHS) => {
+      const newWidth = Math.max(dragging.current.minWidth, dragging.current.startWidth + diff)
+      setWidths(prev => {
         const next = { ...prev, [dragging.current!.col]: newWidth }
         localStorage.setItem('tradeListWidths', JSON.stringify(next))
         return next
@@ -76,17 +85,15 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
     return 'bg-red-800/50 text-red-500'
   }
 
-  const cols = [
-    { key: 'action', label: '動作', align: 'left' },
-    { key: 'symbol', label: '標的', align: 'left' },
-    { key: 'price', label: '價格', align: 'right' },
-    { key: 'quantity', label: '口數', align: 'right' },
-    { key: 'fee', label: '手續費', align: 'right' },
-    { key: 'strategy', label: '策略', align: 'left' },
-    { key: 'remark', label: '備註', align: 'left' },
-    { key: 'time', label: '時間', align: 'left' },
-    { key: 'delete', label: '', align: 'left' },
-  ]
+  const formatTime = (time: string) => {
+    const d = new Date(time)
+    const y = d.getFullYear()
+    const mo = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const h = String(d.getHours()).padStart(2, '0')
+    const mi = String(d.getMinutes()).padStart(2, '0')
+    return `${y}/${mo}/${day} ${h}:${mi}`
+  }
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -99,21 +106,22 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       ) : (
         <table className="text-sm border-collapse" style={{ tableLayout: 'fixed', width: 'max-content' }}>
           <colgroup>
-            {cols.map(col => (
-              <col key={col.key} style={{ width: widths[col.key as keyof typeof widths] }} />
+            {COLS.map(col => (
+              <col key={col.key} style={{ width: widths[col.key] }} />
             ))}
           </colgroup>
           <thead>
             <tr className="text-gray-500 border-b border-gray-800 text-left">
-              {cols.map(col => (
+              {COLS.map(col => (
                 <th
                   key={col.key}
-                  className={`py-2 px-3 select-none relative ${col.align === 'right' ? 'text-right' : ''}`}
+                  className={`py-2 px-3 select-none relative whitespace-nowrap overflow-hidden ${col.align === 'right' ? 'text-right' : ''}`}
+                  style={{ width: widths[col.key] }}
                 >
                   {col.label}
                   {col.key !== 'delete' && (
                     <div
-                      onMouseDown={e => onResizeStart(e, col.key)}
+                      onMouseDown={e => onResizeStart(e, col)}
                       className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-blue-500 hover:opacity-50"
                       style={{ zIndex: 10 }}
                     />
@@ -130,21 +138,23 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 onMouseEnter={() => setHoveredId(t.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
-                <td className="py-2 px-3">
+                <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${actionColor(t.action)}`}>
                     {t.action}
                   </span>
                 </td>
-                <td className="py-2 px-3 font-semibold">{t.symbol}</td>
-                <td className="py-2 px-3 text-right">{t.price}</td>
-                <td className="py-2 px-3 text-right">{t.quantity}</td>
-                <td className="py-2 px-3 text-right text-gray-400">{t.fee || '--'}</td>
-                <td className="py-2 px-3 text-blue-400 text-xs">{t.strategy || '--'}</td>
-                <td className="py-2 px-3 text-gray-400 text-xs">{t.remark || '--'}</td>
-                <td className="py-2 px-3 text-gray-500 text-xs">
-                  {new Date(t.trade_time).toLocaleString('zh-TW')}
+                <td className="py-2 px-3 font-semibold whitespace-nowrap overflow-hidden">{t.symbol}</td>
+                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.price}</td>
+                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.quantity}</td>
+                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.fee || '--'}</td>
+                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).tp || '--'}</td>
+                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).sl || '--'}</td>
+                <td className="py-2 px-3 text-blue-400 text-xs whitespace-nowrap overflow-hidden">{t.strategy || '--'}</td>
+                <td className="py-2 px-3 text-gray-400 text-xs whitespace-nowrap overflow-hidden">{t.remark || '--'}</td>
+                <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
+                  {formatTime(t.trade_time)}
                 </td>
-                <td className="py-2 px-3">
+                <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
                   <button
                     onClick={() => deleteTrade(t.id)}
                     className="text-red-500 hover:text-red-400 text-sm px-1"
@@ -153,10 +163,8 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   </button>
                 </td>
 
-                {/* 指標浮動表格 */}
-                {hoveredId === t.id && (t.big_dif || t.big_rsi || t.big_k || t.small_dif || t.small_rsi || t.small_k) && (
-                  <td
-                    colSpan={0}
+                {hoveredId === t.id && (t.big_dif != null || t.big_rsi != null || t.small_dif != null || t.small_rsi != null) && (
+                  <div
                     className="absolute left-0 top-full z-50 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-xl text-xs"
                     style={{ minWidth: 320 }}
                   >
@@ -186,7 +194,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                         </div>
                       </div>
                     </div>
-                  </td>
+                  </div>
                 )}
               </tr>
             ))}
