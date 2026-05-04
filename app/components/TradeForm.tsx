@@ -57,6 +57,13 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showRSI = requiredIndicators.includes('RSI')
   const showKDJ = requiredIndicators.includes('KDJ')
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
+  const [tags, setTags] = useState<{id: string, name: string}[]>([])
+
+useEffect(() => {
+  fetch('/api/tags').then(r => r.json()).then(data => {
+    setTags(Array.isArray(data) ? data : [])
+  })
+}, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -180,9 +187,24 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         </Field>
 
         <Field label="備註">
-          <input value={remark} onChange={e => setRemark(e.target.value)}
-            placeholder="選填" className="input" />
-        </Field>
+  <input value={remark} onChange={e => setRemark(e.target.value)}
+    placeholder="選填" className="input mb-1" />
+  {tags.length > 0 && (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {tags.map(t => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => setRemark(prev => prev ? `${prev} #${t.name}` : `#${t.name}`)}
+          className="text-xs px-2 py-0.5 rounded-full transition-colors"
+          style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+        >
+          #{t.name}
+        </button>
+      ))}
+    </div>
+  )}
+</Field>
 
         {showIndicators && (
           <div className="space-y-3">
