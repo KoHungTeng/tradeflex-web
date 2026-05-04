@@ -67,6 +67,23 @@ function parseCSVLines(lines: string[], headers: string[]) {
     headers.forEach((h, i) => {
       row[h] = (values[i] || '').trim()
     })
+    // 偵測欄位錯位：如果「成交值」欄位不是數字但「停損值」欄位是數字
+    // 且「狀態」欄位不是預期值，嘗試修正
+    if (row['狀態'] && !['已成交', '已取消', '已拒絕'].includes(row['狀態'])) {
+      // 欄位可能少了一格，往後移
+      const shifted: any = {}
+      headers.forEach((h, i) => {
+        shifted[h] = (values[i + 1] || '').trim()
+      })
+      // 如果移位後狀態正確，使用移位後的值，但保留原始的成交值
+      if (['已成交', '已取消', '已拒絕'].includes(shifted['狀態'])) {
+        headers.forEach((h, i) => {
+          row[h] = shifted[h]
+        })
+        // 成交價從原始第6欄取（停損值欄位）
+        row['成交值'] = (values[5] || '').trim()
+      }
+    }
     return row
   })
 }
