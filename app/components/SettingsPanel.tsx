@@ -35,10 +35,11 @@ type SettingsProps = {
   onImported?: () => void
 }
 
-function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'tradovate' | 'unknown' {
+function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'tradovate' | 'tradovate_tv' | 'unknown' {
   if (headers.includes('平倉時間')) return 'tradeflex'
   if (headers.includes('商品') && headers.includes('Side')) return 'tradingview'
   if (headers.includes('B/S') && headers.includes('Contract')) return 'tradovate'
+  if (headers.includes('買/賣') && headers.includes('成交均價') && headers.includes('訂單 ID')) return 'tradovate_tv'
   return 'unknown'
 }
 
@@ -150,6 +151,91 @@ function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
     if (!byContract[contract]) byContract[contract] = []
     byContract[contract].push(r)
   })
+  function parseTradovateTVCSV(rows: any[], symbolsData: Symbol[]): any[] {
+  const filled = rows.filter(r => r['狀態'] === '已成交')
+
+  const byContract: Record<string, any[]> = {}
+  filled.forEach(r => {
+    const contract = r['商品']?.trim() || ''
+    if (!contract) return
+    if (!byContract[contract]) byContract[contract] = []
+    byContract[contract].push(r)
+  })
+
+  const results: any[] = []
+
+  Object.entries(byContract).forEach(([contract, orders]) => {
+    // 清理商品名稱：MNQM6 → MNQ
+    const cleanSymbol = contract.replace(/M\d+$/, '').replace(/[A-Z]\d+$/, '').replace(/\d+$/, '')
+    const product = cleanSymbol || contract
+
+    const symbolInfo = symbolsData.find(s => {
+      const sName = s.name.toUpperCase().replace(/\d+$/, '')
+      const pName = product.toUpperCase().replace(/\d+$/, '')
+      return sName === pName || s.name.toUpperCase() === product.toUpperCase()
+    })
+    const tickSize = symbolInfo?.tick_size || 1
+    const tickValue = symbolInfo?.tick_value || 1
+
+    // 依時間排序
+    orders.sort((a, b) => new Date(a['更新時間']).getTime() - new Date(b['更新時間']).getTime())
+
+    // 用累計持倉配對
+    let netPosition = 0
+    let currentOrders: any[] = []
+
+    orders.forEach(order => {
+      const side = order['買/賣']?.trim()
+      const qty = parseFloat(order['已成交數量']) || 0
+      const delta = side === '買入' ? qty : -qty
+      netPosition += delta
+      currentOrders.push(order)
+
+      if (Math.abs(netPosition) < 0.001 && currentOrders.length >= 2) {
+        const buyOrders = currentOrders.filter(o => o['買/賣']?.trim() === '買入')
+        const sellOrders = currentOrders.filter(o => o['買/賣']?.trim() === '賣出')
+        const totalBuyQty = buyOrders.reduce((s, o) => s + (parseFloat(o['已成交數量']) || 0), 0)
+        const totalSellQty = sellOrders.reduce((s, o) => s + (parseFloat(o['已成交數量']) || 0), 0)
+
+        const firstBuyTime = buyOrders[0] ? new Date(buyOrders[0]['更新時間']) : new Date(9999999999999)
+        const firstSellTime = sellOrders[0] ? new Date(sellOrders[0]['更新時間']) : new Date(9999999999999)
+        const direction = firstBuyTime < firstSellTime ? 'long' : 'short'
+
+        const openOrders = direction === 'long' ? buyOrders : sellOrders
+        const closeOrders = direction === 'long' ? sellOrders : buyOrders
+        const totalQty = direction === 'long' ? totalBuyQty : totalSellQty
+
+        const openPrice = openOrders.reduce((s, o) => s + parseFloat(o['成交均價']) * parseFloat(o['已成交數量']), 0) / totalQty
+        const closePrice = closeOrders.reduce((s, o) => s + parseFloat(o['成交均價']) * parseFloat(o['已成交數量']), 0) / totalQty
+
+        const ticks = direction === 'long'
+          ? (closePrice - openPrice) / tickSize
+          : (openPrice - closePrice) / tickSize
+        const pnl = Math.round(ticks * tickValue * totalQty * 100) / 100
+
+        results.push({
+          symbol: product,
+          direction,
+          open_price: Math.round(openPrice * 100) / 100,
+          close_price: Math.round(closePrice * 100) / 100,
+          quantity: totalQty,
+          open_fee: 0,
+          close_fee: 0,
+          pnl,
+          open_time: new Date(openOrders[0]['更新時間']).toISOString(),
+          close_time: new Date(closeOrders[closeOrders.length - 1]['更新時間']).toISOString(),
+          strategy: '',
+          remark: '',
+        })
+
+        currentOrders = []
+        netPosition = 0
+      }
+    })
+  })
+
+  return results
+}
 
   const results: any[] = []
 
@@ -252,7 +338,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [importPreview, setImportPreview] = useState<any[]>([])
   const [importStatus, setImportStatus] = useState<'idle' | 'preview' | 'importing' | 'done' | 'error'>('idle')
   const [importMessage, setImportMessage] = useState('')
-  const [importFormat, setImportFormat] = useState<'tradeflex' | 'tradingview' | 'tradovate' | 'unknown'>('unknown')
+  const [importFormat, setImportFormat] = useState<'tradeflex' | 'tradingview' | 'tradovate' | 'tradovate_tv' | 'unknown'>('unknown')
   const [convertedRows, setConvertedRows] = useState<any[]>([])
   const [exportRange, setExportRange] = useState<'all' | 'custom'>('all')
   const [exportFrom, setExportFrom] = useState('')
@@ -480,11 +566,16 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         setImportPreview(converted.slice(0, 5))
         setImportMessage(`偵測到 TradingView 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
       } else if (format === 'tradovate') {
-        const converted = parseTradovateCSV(rawRows, symbols)
-        setConvertedRows(converted)
-        setImportPreview(converted.slice(0, 5))
-        setImportMessage(`偵測到 Tradovate 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
-      } else {
+  const converted = parseTradovateCSV(rawRows, symbols)
+  setConvertedRows(converted)
+  setImportPreview(converted.slice(0, 5))
+  setImportMessage(`偵測到 Tradovate 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
+} else if (format === 'tradovate_tv') {
+  const converted = parseTradovateCSV(rawRows, symbols)
+  setConvertedRows(converted)
+  setImportPreview(converted.slice(0, 5))
+  setImportMessage(`偵測到 Tradovate(TradingView) 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
+} else {
         setConvertedRows(rawRows)
         setImportPreview(rawRows.slice(0, 5))
         setImportMessage(`偵測到 TradeFlex 格式，共 ${rawRows.length} 筆資料，預覽前 5 筆`)
@@ -507,7 +598,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       return
     }
     const payload = convertedRows.map((row: any) => {
-      if (importFormat === 'tradingview' || importFormat === 'tradovate') {
+      if (importFormat === 'tradingview' || importFormat === 'tradovate' || importFormat === 'tradovate_tv') {
         return { ...row, portfolio_id: portfolioId }
       }
       return {
@@ -808,10 +899,11 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
             <p className="text-xs text-gray-600 mb-1">支援格式：</p>
             <ul className="text-xs text-gray-500 mb-4 list-disc list-inside space-y-0.5">
-              <li>TradeFlex 匯出格式</li>
-              <li>TradingView Paper Trading 歷史訂單</li>
-              <li>Tradovate Fills 成交記錄</li>
-            </ul>
+  <li>TradeFlex 匯出格式</li>
+  <li>TradingView Paper Trading 歷史訂單</li>
+  <li>Tradovate Fills 成交記錄（直接匯出）</li>
+  <li>Tradovate 訂單記錄（TradingView 匯出）</li>
+</ul>
 
             <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
 
