@@ -67,33 +67,29 @@ function parseCSVLines(lines: string[], headers: string[]) {
     headers.forEach((h, i) => {
       row[h] = (values[i] || '').trim()
     })
-    // 偵測欄位錯位：如果「成交值」欄位不是數字但「停損值」欄位是數字
-    // 且「狀態」欄位不是預期值，嘗試修正
-    if (row['狀態'] && !['已成交', '已取消', '已拒絕'].includes(row['狀態'])) {
-      // 欄位可能少了一格，往後移
-      const shifted: any = {}
-      headers.forEach((h, i) => {
-        shifted[h] = (values[i + 1] || '').trim()
-      })
-      // 如果移位後狀態正確，使用移位後的值，但保留原始的成交值
-      if (['已成交', '已取消', '已拒絕'].includes(shifted['狀態'])) {
-        headers.forEach((h, i) => {
-          row[h] = shifted[h]
-        })
-        // 成交價從原始第6欄取（停損值欄位）
-        row['成交值'] = (values[5] || '').trim()
-      }
-    }
     return row
   })
 }
 
-function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
-  console.log('🔍 symbols:', symbolsData.map(s => s.name))
-  console.log('🔍 total rows:', rows.length)
+// 從訂單 row 找合理的成交價，處理 TradingView CSV 欄位不一致的問題
+function getOrderPrice(order: any): number {
+  // 標準欄位順序
+  const v1 = parseFloat(order['成交值'])
+  if (v1 > 0) return v1
+  const v2 = parseFloat(order['停損值'])
+  if (v2 > 0) return v2
+  const v3 = parseFloat(order['限價'])
+  if (v3 > 0) return v3
+  // 欄位錯位補救：掃描所有欄位找合理價格數字
+  for (const val of Object.values(order)) {
+    const n = parseFloat(String(val))
+    if (n > 1 && n < 9999999 && !isNaN(n)) return n
+  }
+  return 0
+}
 
+function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
   const filled = rows.filter(r => r['狀態'] === '已成交')
-  console.log('🔍 已成交:', filled.length)
 
   const bySymbol: Record<string, any[]> = {}
   filled.forEach(r => {
@@ -121,7 +117,6 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
 
     const tickSize = symbolInfo?.tick_size || 1
     const tickValue = symbolInfo?.tick_value || 1
-    console.log(`🔍 ${cleanSymbol} → tickSize:${tickSize} tickValue:${tickValue} orders:${orders.length}`)
 
     orders.sort((a, b) => {
       const timeDiff = new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
@@ -135,20 +130,17 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
     const sellQueue: any[] = []
 
     orders.forEach(order => {
-      const price = parseFloat(order['成交值']) || parseFloat(order['停損值']) || parseFloat(order['限價']) || 0
+      const price = getOrderPrice(order)
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
-
-      console.log(`📌 ${order['Placing time']} ${order['Side']} price:${price} buyQ:${buyQueue.length} sellQ:${sellQueue.length}`)
 
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['停損值']) || parseFloat(open['限價']) || 0
+          const openPrice = getOrderPrice(open)
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (openPrice - price) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          console.log(`✅ 配對 short: ${openPrice}→${price} pnl:${pnl}`)
           results.push({
             symbol: cleanSymbol,
             direction: 'short',
@@ -164,17 +156,15 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
             remark: '',
           })
         } else {
-          console.log(`➕ 買入進 buyQueue`)
           buyQueue.push(order)
         }
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['停損值']) || parseFloat(open['限價']) || 0
+          const openPrice = getOrderPrice(open)
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (price - openPrice) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          console.log(`✅ 配對 long: ${openPrice}→${price} pnl:${pnl}`)
           results.push({
             symbol: cleanSymbol,
             direction: 'long',
@@ -190,16 +180,12 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
             remark: '',
           })
         } else {
-          console.log(`➕ 賣出進 sellQueue`)
           sellQueue.push(order)
         }
       }
     })
-
-    console.log(`🔍 ${cleanSymbol} 剩餘未配對 buyQ:${buyQueue.length} sellQ:${sellQueue.length}`)
   })
 
-  console.log('🔍 results:', results.length)
   return results
 }
 
