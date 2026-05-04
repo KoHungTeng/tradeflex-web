@@ -42,12 +42,16 @@ async function deleteNote(id: string) {
 
   return (
     <div className="border-t border-[#222222] bg-[#111111] px-4 py-3">
-      <div className="flex gap-2 mb-2">
+      <div className="flex gap-2 mb-2 items-center">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNote() } }}
-          placeholder="📝 隨手筆記，按 Enter 儲存..."
+          placeholder="隨手筆記，按 Enter 儲存..."
           className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#d4a843]"
         />
         <button
