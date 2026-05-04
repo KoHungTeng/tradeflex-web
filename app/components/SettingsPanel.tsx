@@ -296,69 +296,76 @@ export default function SettingsPanel() {
   }
 
   async function confirmImport() {
-    const file = fileInputRef.current?.files?.[0]
-    if (!file) return
-    setImportStatus('importing')
+  const file = fileInputRef.current?.files?.[0]
+  if (!file) return
+  setImportStatus('importing')
 
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const text = event.target?.result as string
-      const clean = text.replace(/^\uFEFF/, '')
-      const lines = clean.split('\n').filter(l => l.trim())
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
-      const rows = lines.slice(1).map(line => {
-        const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
-        const row: any = {}
-        headers.forEach((h, i) => {
-          row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
-        })
-        return row
-      })
-
-      let success = 0
-      let failed = 0
-
-      for (const row of rows) {
-        try {
-          // 取得第一個 portfolio
-          const portfolioRes = await fetch('/api/portfolios')
-          const portfolios = await portfolioRes.json()
-          const portfolioId = portfolios[0]?.id
-          if (!portfolioId) { failed++; continue }
-
-          const res = await fetch('/api/completed', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              portfolio_id: portfolioId,
-              symbol: row['標的'] || '',
-              direction: row['方向'] === '做多' ? 'long' : 'short',
-              open_price: parseFloat(row['開倉價']) || 0,
-              close_price: parseFloat(row['平倉價']) || 0,
-              quantity: parseFloat(row['口數']) || 1,
-              open_fee: parseFloat(row['開倉手續費']) || 0,
-              close_fee: parseFloat(row['平倉手續費']) || 0,
-              pnl: parseFloat(row['盈虧']) || 0,
-              strategy: row['策略'] || '',
-              remark: row['備註'] || '',
-              open_time: row['開倉時間'] ? new Date(row['開倉時間']).toISOString() : new Date().toISOString(),
-              close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
-            }),
-          })
-          if (res.ok) success++
-          else failed++
-        } catch {
-          failed++
-        }
-      }
-
-      setImportStatus('done')
-      setImportMessage(`匯入完成：成功 ${success} 筆，失敗 ${failed} 筆`)
-      setImportPreview([])
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-    reader.readAsText(file, 'utf-8')
+  // 先取得 portfolio，只抓一次
+  const portfolioRes = await fetch('/api/portfolios')
+  const portfolios = await portfolioRes.json()
+  const portfolioId = portfolios[0]?.id
+  if (!portfolioId) {
+    setImportStatus('error')
+    setImportMessage('找不到投資組合，請先建立一個')
+    return
   }
+
+  const reader = new FileReader()
+  reader.onload = async (event) => {
+    const text = event.target?.result as string
+    const clean = text.replace(/^\uFEFF/, '')
+    const lines = clean.split('\n').filter(l => l.trim())
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+    const rows = lines.slice(1).map(line => {
+      const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
+      const row: any = {}
+      headers.forEach((h, i) => {
+        row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
+      })
+      return row
+    })
+
+    // 一次送出所有資料（batch）
+    const payload = rows.map(row => ({
+      portfolio_id: portfolioId,
+      symbol: row['標的'] || '',
+      direction: row['方向'] === '做多' ? 'long' : 'short',
+      open_price: parseFloat(row['開倉價']) || 0,
+      close_price: parseFloat(row['平倉價']) || 0,
+      quantity: parseFloat(row['口數']) || 1,
+      open_fee: parseFloat(row['開倉手續費']) || 0,
+      close_fee: parseFloat(row['平倉手續費']) || 0,
+      pnl: parseFloat(row['盈虧']) || 0,
+      strategy: row['策略'] || '',
+      remark: row['備註'] || '',
+      open_time: row['開倉時間'] ? new Date(row['開倉時間']).toISOString() : new Date().toISOString(),
+      close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
+    }))
+
+    try {
+      const res = await fetch('/api/completed/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trades: payload }),
+      })
+      const result = await res.json()
+      if (res.ok) {
+        setImportStatus('done')
+        setImportMessage(`匯入完成：成功 ${result.count} 筆`)
+      } else {
+        setImportStatus('error')
+        setImportMessage(`匯入失敗：${result.error}`)
+      }
+    } catch {
+      setImportStatus('error')
+      setImportMessage('匯入失敗，請稍後再試')
+    }
+
+    setImportPreview([])
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+  reader.readAsText(file, 'utf-8')
+}
 
   function resetImport() {
     setImportStatus('idle')
