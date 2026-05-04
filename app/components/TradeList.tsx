@@ -17,6 +17,7 @@ const COLS = [
   { key: 'fee', label: '手續費', minWidth: 55, defaultWidth: 80, align: 'right' },
   { key: 'tp', label: 'TP', minWidth: 40, defaultWidth: 70, align: 'right' },
   { key: 'sl', label: 'SL', minWidth: 40, defaultWidth: 70, align: 'right' },
+  { key: 'rr', label: 'R:R', minWidth: 40, defaultWidth: 60, align: 'right' },
   { key: 'strategy', label: '策略', minWidth: 50, defaultWidth: 120, align: 'left' },
   { key: 'remark', label: '備註', minWidth: 50, defaultWidth: 120, align: 'left' },
   { key: 'time', label: '時間', minWidth: 130, defaultWidth: 150, align: 'left' },
@@ -234,8 +235,15 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.price}</td>
                 <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.quantity}</td>
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.fee || '--'}</td>
-                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).tp || '--'}</td>
-                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).sl || '--'}</td>
+               <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.tp || '--'}</td>
+<td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.sl || '--'}</td>
+<td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
+  {t.tp && t.sl && t.sl !== t.price ? (
+    <span className="text-[#d4a843] text-xs">
+      {Math.abs((t.tp - t.price) / (t.price - t.sl)).toFixed(2)}R
+    </span>
+  ) : '--'}
+</td>
                 <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
                   <EditableCell value={t.strategy || ''} tradeId={t.id} field="strategy" color="text-[#d4a843]" onSaved={onCompletedChanged} />
                 </td>

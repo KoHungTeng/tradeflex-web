@@ -127,7 +127,7 @@ async function deleteNote(id: string) {
                   setSelectedDay(isSelected ? null : day)
                   setNoteInput('')
                 }}
-                className={`rounded-lg p-2 min-h-16 flex flex-col cursor-pointer transition-colors ${
+                className={`rounded-lg p-2 min-h-24 flex flex-col cursor-pointer transition-colors ${
                   isToday ? 'ring-2 ring-[#d4a843]' : ''
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''} ${
                   hasTrade
