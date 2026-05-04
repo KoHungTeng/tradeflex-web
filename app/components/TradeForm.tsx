@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Props = {
   activePortfolio: string
   onAdded: (trade: any) => void
   onCompletedChanged: () => void
+}
+
+type Strategy = {
+  id: string
+  name: string
+  indicators: string[]
 }
 
 export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
@@ -18,8 +24,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [sl, setSl] = useState('')
   const [strategy, setStrategy] = useState('')
   const [remark, setRemark] = useState('')
-  const [showIndicators, setShowIndicators] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [strategies, setStrategies] = useState<Strategy[]>([])
 
   const [bigDIF, setBigDIF] = useState('')
   const [bigDEA, setBigDEA] = useState('')
@@ -39,63 +45,73 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
   const isOpen = action === '做多' || action === '做空'
 
-async function submit(e: React.FormEvent) {
-  e.preventDefault()
-  if (!symbol || !price || submitting) return
-  setSubmitting(true)
+  useEffect(() => {
+    fetch('/api/strategies').then(r => r.json()).then(data => {
+      setStrategies(Array.isArray(data) ? data : [])
+    })
+  }, [])
 
-  const trade_time = new Date().toISOString()
-  const newTrade: any = {
-    id: crypto.randomUUID(),
-    portfolio_id: activePortfolio,
-    symbol: symbol.toUpperCase(),
-    action,
-    price: parseFloat(price),
-    quantity: parseFloat(quantity),
-    fee: parseFloat(fee) * parseFloat(quantity),
-    strategy,
-    remark,
-    trade_time,
+  const selectedStrategy = strategies.find(s => s.name === strategy)
+  const requiredIndicators = selectedStrategy?.indicators || []
+  const showMACD = requiredIndicators.includes('MACD')
+  const showRSI = requiredIndicators.includes('RSI')
+  const showKDJ = requiredIndicators.includes('KDJ')
+  const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!symbol || !price || submitting) return
+    setSubmitting(true)
+
+    const trade_time = new Date().toISOString()
+    const newTrade: any = {
+      id: crypto.randomUUID(),
+      portfolio_id: activePortfolio,
+      symbol: symbol.toUpperCase(),
+      action,
+      price: parseFloat(price),
+      quantity: parseFloat(quantity),
+      fee: parseFloat(fee) * parseFloat(quantity),
+      strategy,
+      remark,
+      trade_time,
+    }
+
+    onAdded(newTrade)
+
+    setSymbol(''); setPrice(''); setQuantity('1')
+    setFee('0'); setTp(''); setSl('')
+    setStrategy(''); setRemark('')
+    setBigDIF(''); setBigDEA(''); setBigHist('')
+    setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
+    setSmallDIF(''); setSmallDEA(''); setSmallHist('')
+    setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
+    setSubmitting(false)
+
+    fetch('/api/trades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...newTrade,
+        tp: tp ? parseFloat(tp) : 0,
+        sl: sl ? parseFloat(sl) : 0,
+        big_dif: bigDIF ? parseFloat(bigDIF) : null,
+        big_dea: bigDEA ? parseFloat(bigDEA) : null,
+        big_hist: bigHist ? parseFloat(bigHist) : null,
+        big_rsi: bigRSI ? parseFloat(bigRSI) : null,
+        big_k: bigK ? parseFloat(bigK) : null,
+        big_d: bigD ? parseFloat(bigD) : null,
+        big_j: bigJ ? parseFloat(bigJ) : null,
+        small_dif: smallDIF ? parseFloat(smallDIF) : null,
+        small_dea: smallDEA ? parseFloat(smallDEA) : null,
+        small_hist: smallHist ? parseFloat(smallHist) : null,
+        small_rsi: smallRSI ? parseFloat(smallRSI) : null,
+        small_k: smallK ? parseFloat(smallK) : null,
+        small_d: smallD ? parseFloat(smallD) : null,
+        small_j: smallJ ? parseFloat(smallJ) : null,
+      }),
+    }).then(() => onCompletedChanged())
   }
-
-  // 先更新畫面
-  onAdded(newTrade)
-
-  // 清空表單
-  setSymbol(''); setPrice(''); setQuantity('1')
-  setFee('0'); setTp(''); setSl('')
-  setStrategy(''); setRemark('')
-  setBigDIF(''); setBigDEA(''); setBigHist('')
-  setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
-  setSmallDIF(''); setSmallDEA(''); setSmallHist('')
-  setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
-  setSubmitting(false)
-
-  // 背景執行 API
-  fetch('/api/trades', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...newTrade,
-      tp: tp ? parseFloat(tp) : 0,
-      sl: sl ? parseFloat(sl) : 0,
-      big_dif: bigDIF ? parseFloat(bigDIF) : null,
-      big_dea: bigDEA ? parseFloat(bigDEA) : null,
-      big_hist: bigHist ? parseFloat(bigHist) : null,
-      big_rsi: bigRSI ? parseFloat(bigRSI) : null,
-      big_k: bigK ? parseFloat(bigK) : null,
-      big_d: bigD ? parseFloat(bigD) : null,
-      big_j: bigJ ? parseFloat(bigJ) : null,
-      small_dif: smallDIF ? parseFloat(smallDIF) : null,
-      small_dea: smallDEA ? parseFloat(smallDEA) : null,
-      small_hist: smallHist ? parseFloat(smallHist) : null,
-      small_rsi: smallRSI ? parseFloat(smallRSI) : null,
-      small_k: smallK ? parseFloat(smallK) : null,
-      small_d: smallD ? parseFloat(smallD) : null,
-      small_j: smallJ ? parseFloat(smallJ) : null,
-    }),
-  }).then(() => onCompletedChanged())
-}
 
   return (
     <div className="w-64 bg-gray-900 border-r border-gray-800 p-4 overflow-y-auto flex flex-col gap-3">
@@ -155,8 +171,12 @@ async function submit(e: React.FormEvent) {
         )}
 
         <Field label="策略">
-          <input value={strategy} onChange={e => setStrategy(e.target.value)}
-            placeholder="選填" className="input" />
+          <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
+            <option value="">-- 不選策略 --</option>
+            {strategies.map(s => (
+              <option key={s.id} value={s.name}>{s.name}</option>
+            ))}
+          </select>
         </Field>
 
         <Field label="備註">
@@ -164,42 +184,45 @@ async function submit(e: React.FormEvent) {
             placeholder="選填" className="input" />
         </Field>
 
-        {isOpen && (
-          <div>
-            <button
-              type="button"
-              onClick={() => setShowIndicators(!showIndicators)}
-              className="w-full text-xs text-blue-400 hover:text-blue-300 py-1.5 bg-gray-800 rounded-lg transition-colors"
-            >
-              {showIndicators ? '▲ 收起指標' : '▼ 填入進場指標'}
-            </button>
-
-            {showIndicators && (
-              <div className="mt-3 space-y-3">
-                <div>
-                  <p className="text-xs text-gray-500 mb-2">大時間框架指標</p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <MiniField label="MACD DIF" value={bigDIF} onChange={setBigDIF} />
-                    <MiniField label="MACD DEA" value={bigDEA} onChange={setBigDEA} />
-                    <MiniField label="MACD柱" value={bigHist} onChange={setBigHist} />
-                    <MiniField label="RSI(14)" value={bigRSI} onChange={setBigRSI} />
-                    <MiniField label="KDJ K" value={bigK} onChange={setBigK} />
-                    <MiniField label="KDJ D" value={bigD} onChange={setBigD} />
-                    <MiniField label="KDJ J" value={bigJ} onChange={setBigJ} />
-                  </div>
+        {showIndicators && (
+          <div className="space-y-3">
+            {showMACD && (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">MACD 大時間框架</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <MiniField label="DIF" value={bigDIF} onChange={setBigDIF} />
+                  <MiniField label="DEA" value={bigDEA} onChange={setBigDEA} />
+                  <MiniField label="柱" value={bigHist} onChange={setBigHist} />
                 </div>
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-2">小時間框架指標</p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <MiniField label="MACD DIF" value={smallDIF} onChange={setSmallDIF} />
-                    <MiniField label="MACD DEA" value={smallDEA} onChange={setSmallDEA} />
-                    <MiniField label="MACD柱" value={smallHist} onChange={setSmallHist} />
-                    <MiniField label="RSI(14)" value={smallRSI} onChange={setSmallRSI} />
-                    <MiniField label="KDJ K" value={smallK} onChange={setSmallK} />
-                    <MiniField label="KDJ D" value={smallD} onChange={setSmallD} />
-                    <MiniField label="KDJ J" value={smallJ} onChange={setSmallJ} />
-                  </div>
+                <p className="text-xs text-gray-500 mb-2 mt-2">MACD 小時間框架</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <MiniField label="DIF" value={smallDIF} onChange={setSmallDIF} />
+                  <MiniField label="DEA" value={smallDEA} onChange={setSmallDEA} />
+                  <MiniField label="柱" value={smallHist} onChange={setSmallHist} />
+                </div>
+              </div>
+            )}
+            {showRSI && (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">RSI 大時間框架</p>
+                <MiniField label="RSI(14)" value={bigRSI} onChange={setBigRSI} />
+                <p className="text-xs text-gray-500 mb-2 mt-2">RSI 小時間框架</p>
+                <MiniField label="RSI(14)" value={smallRSI} onChange={setSmallRSI} />
+              </div>
+            )}
+            {showKDJ && (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">KDJ 大時間框架</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <MiniField label="K" value={bigK} onChange={setBigK} />
+                  <MiniField label="D" value={bigD} onChange={setBigD} />
+                  <MiniField label="J" value={bigJ} onChange={setBigJ} />
+                </div>
+                <p className="text-xs text-gray-500 mb-2 mt-2">KDJ 小時間框架</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <MiniField label="K" value={smallK} onChange={setSmallK} />
+                  <MiniField label="D" value={smallD} onChange={setSmallD} />
+                  <MiniField label="J" value={smallJ} onChange={setSmallJ} />
                 </div>
               </div>
             )}
