@@ -40,6 +40,9 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+  setVal(value)
+}, [value])
 
   const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
 
