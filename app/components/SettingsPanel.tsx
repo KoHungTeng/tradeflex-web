@@ -35,9 +35,10 @@ type SettingsProps = {
   onImported?: () => void
 }
 
-function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'unknown' {
+function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'tradovate' | 'unknown' {
   if (headers.includes('平倉時間')) return 'tradeflex'
   if (headers.includes('商品') && headers.includes('Side')) return 'tradingview'
+  if (headers.includes('B/S') && headers.includes('Contract')) return 'tradovate'
   return 'unknown'
 }
 
@@ -71,16 +72,13 @@ function parseCSVLines(lines: string[], headers: string[]) {
   })
 }
 
-// 從訂單 row 找合理的成交價，處理 TradingView CSV 欄位不一致的問題
 function getOrderPrice(order: any): number {
-  // 標準欄位順序
   const v1 = parseFloat(order['成交值'])
   if (v1 > 0) return v1
   const v2 = parseFloat(order['停損值'])
   if (v2 > 0) return v2
   const v3 = parseFloat(order['限價'])
   if (v3 > 0) return v3
-  // 欄位錯位補救：掃描所有欄位找合理價格數字
   for (const val of Object.values(order)) {
     const n = parseFloat(String(val))
     if (n > 100 && n < 9999999 && !isNaN(n)) return n
@@ -142,22 +140,14 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
           const ticks = (openPrice - price) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
           results.push({
-            symbol: cleanSymbol,
-            direction: 'short',
-            open_price: openPrice,
-            close_price: price,
-            quantity: matchQty,
-            open_fee: parseFloat(open['佣金']) || 0,
-            close_fee: fee,
-            pnl,
+            symbol: cleanSymbol, direction: 'short',
+            open_price: openPrice, close_price: price, quantity: matchQty,
+            open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl,
             open_time: new Date(open['Placing time']).toISOString(),
             close_time: new Date(order['Placing time']).toISOString(),
-            strategy: '',
-            remark: '',
+            strategy: '', remark: '',
           })
-        } else {
-          buyQueue.push(order)
-        }
+        } else { buyQueue.push(order) }
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
@@ -166,22 +156,89 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
           const ticks = (price - openPrice) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
           results.push({
-            symbol: cleanSymbol,
-            direction: 'long',
-            open_price: openPrice,
-            close_price: price,
-            quantity: matchQty,
-            open_fee: parseFloat(open['佣金']) || 0,
-            close_fee: fee,
-            pnl,
+            symbol: cleanSymbol, direction: 'long',
+            open_price: openPrice, close_price: price, quantity: matchQty,
+            open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl,
             open_time: new Date(open['Placing time']).toISOString(),
             close_time: new Date(order['Placing time']).toISOString(),
-            strategy: '',
-            remark: '',
+            strategy: '', remark: '',
           })
-        } else {
-          sellQueue.push(order)
-        }
+        } else { sellQueue.push(order) }
+      }
+    })
+  })
+
+  return results
+}
+
+function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
+  const byContract: Record<string, any[]> = {}
+  rows.forEach(r => {
+    const contract = r['Contract']?.trim() || ''
+    if (!contract) return
+    if (!byContract[contract]) byContract[contract] = []
+    byContract[contract].push(r)
+  })
+
+  const results: any[] = []
+
+  Object.entries(byContract).forEach(([contract, fills]) => {
+    const product = fills[0]['Product']?.trim() || contract
+
+    const csvTickSize = parseFloat(fills[0]['_tickSize'])
+    const symbolInfo = symbolsData.find(s => {
+      const sName = s.name.toUpperCase().replace(/\d+$/, '')
+      const pName = product.toUpperCase().replace(/\d+$/, '')
+      return sName === pName || s.name.toUpperCase() === product.toUpperCase()
+    })
+    const tickSize = csvTickSize > 0 ? csvTickSize : (symbolInfo?.tick_size || 1)
+    const tickValue = symbolInfo?.tick_value || 1
+
+    fills.sort((a, b) =>
+      new Date(a['_timestamp']).getTime() - new Date(b['_timestamp']).getTime()
+    )
+
+    const buyQueue: any[] = []
+    const sellQueue: any[] = []
+
+    fills.forEach(fill => {
+      const side = (fill['B/S'] || '').trim()
+      const price = parseFloat(fill['Price']) || 0
+      const qty = parseFloat(fill['Quantity']) || 1
+      const fee = parseFloat(fill['commission']) || 0
+
+      if (side === 'Buy') {
+        if (sellQueue.length > 0) {
+          const open = sellQueue.shift()
+          const openPrice = parseFloat(open['Price']) || 0
+          const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
+          const ticks = (openPrice - price) / tickSize
+          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
+          results.push({
+            symbol: product, direction: 'short',
+            open_price: openPrice, close_price: price, quantity: matchQty,
+            open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl,
+            open_time: new Date(open['_timestamp']).toISOString(),
+            close_time: new Date(fill['_timestamp']).toISOString(),
+            strategy: '', remark: '',
+          })
+        } else { buyQueue.push(fill) }
+      } else if (side === 'Sell') {
+        if (buyQueue.length > 0) {
+          const open = buyQueue.shift()
+          const openPrice = parseFloat(open['Price']) || 0
+          const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
+          const ticks = (price - openPrice) / tickSize
+          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
+          results.push({
+            symbol: product, direction: 'long',
+            open_price: openPrice, close_price: price, quantity: matchQty,
+            open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl,
+            open_time: new Date(open['_timestamp']).toISOString(),
+            close_time: new Date(fill['_timestamp']).toISOString(),
+            strategy: '', remark: '',
+          })
+        } else { sellQueue.push(fill) }
       }
     })
   })
@@ -215,7 +272,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [importPreview, setImportPreview] = useState<any[]>([])
   const [importStatus, setImportStatus] = useState<'idle' | 'preview' | 'importing' | 'done' | 'error'>('idle')
   const [importMessage, setImportMessage] = useState('')
-  const [importFormat, setImportFormat] = useState<'tradeflex' | 'tradingview' | 'unknown'>('unknown')
+  const [importFormat, setImportFormat] = useState<'tradeflex' | 'tradingview' | 'tradovate' | 'unknown'>('unknown')
   const [convertedRows, setConvertedRows] = useState<any[]>([])
   const [exportRange, setExportRange] = useState<'all' | 'custom'>('all')
   const [exportFrom, setExportFrom] = useState('')
@@ -398,14 +455,9 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       t.open_time ? new Date(t.open_time).toLocaleString('zh-TW') : '',
       t.symbol,
       t.direction === 'long' ? '做多' : '做空',
-      t.open_price,
-      t.close_price,
-      t.quantity,
-      t.open_fee,
-      t.close_fee,
-      t.pnl,
-      t.strategy || '',
-      t.remark || '',
+      t.open_price, t.close_price, t.quantity,
+      t.open_fee, t.close_fee, t.pnl,
+      t.strategy || '', t.remark || '',
     ])
 
     const csvContent = [headers, ...rows]
@@ -440,7 +492,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
       if (format === 'unknown') {
         setImportStatus('error')
-        setImportMessage('不支援的 CSV 格式，目前支援：TradeFlex 格式、TradingView 格式')
+        setImportMessage('不支援的 CSV 格式，目前支援：TradeFlex、TradingView、Tradovate 格式')
         return
       }
 
@@ -451,6 +503,11 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         setConvertedRows(converted)
         setImportPreview(converted.slice(0, 5))
         setImportMessage(`偵測到 TradingView 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
+      } else if (format === 'tradovate') {
+        const converted = parseTradovateCSV(rawRows, symbols)
+        setConvertedRows(converted)
+        setImportPreview(converted.slice(0, 5))
+        setImportMessage(`偵測到 Tradovate 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
       } else {
         setConvertedRows(rawRows)
         setImportPreview(rawRows.slice(0, 5))
@@ -477,7 +534,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     }
 
     const payload = convertedRows.map((row: any) => {
-      if (importFormat === 'tradingview') {
+      if (importFormat === 'tradingview' || importFormat === 'tradovate') {
         return { ...row, portfolio_id: portfolioId }
       }
       return {
@@ -779,6 +836,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <ul className="text-xs text-gray-500 mb-4 list-disc list-inside space-y-0.5">
               <li>TradeFlex 匯出格式</li>
               <li>TradingView Paper Trading 歷史訂單</li>
+              <li>Tradovate Fills 成交記錄</li>
             </ul>
 
             <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
