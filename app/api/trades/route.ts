@@ -2,20 +2,28 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-async function getSupabaseAndUser() {
-  // @ts-ignore
-  const cookieStore = await cookies()
+async function getSupabaseAndUser(request: Request) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get(name) { return cookieStore.get(name)?.value }, set() {}, remove() {} } }
+    {
+      cookies: {
+        get(name: string) {
+          return request.headers.get('cookie')?.split(';')
+            .find(c => c.trim().startsWith(name + '='))
+            ?.split('=')[1]
+        },
+        set() {},
+        remove() {},
+      },
+    }
   )
   const { data: { user } } = await supabase.auth.getUser()
   return { supabase, user }
 }
 
 export async function GET(request: NextRequest) {
-  const { supabase, user } = await getSupabaseAndUser()
+  const { supabase, user } = await getSupabaseAndUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const portfolioId = searchParams.get('portfolio_id')
@@ -27,7 +35,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { supabase, user } = await getSupabaseAndUser()
+  const { supabase, user } = await getSupabaseAndUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await request.json()
   const { data: trade, error } = await supabase.from('trades').insert({ ...body, user_id: user.id }).select().single()
@@ -71,7 +79,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { supabase, user } = await getSupabaseAndUser()
+  const { supabase, user } = await getSupabaseAndUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
@@ -93,7 +101,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const { supabase, user } = await getSupabaseAndUser()
+  const { supabase, user } = await getSupabaseAndUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
