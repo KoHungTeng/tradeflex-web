@@ -2,7 +2,7 @@
 
 import { CompletedTrade, Trade } from '../page'
 import { useCurrency } from '../CurrencyContext'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type Props = {
   completed: CompletedTrade[]
@@ -21,11 +21,18 @@ type CardItem = {
 
 type BlockItem = {
   id: string
-  type: 'cards' | 'chart' | 'strategy'
+  type: 'cards' | 'chart' | 'strategy' | 'growth'
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
   const { convert, symbol } = useCurrency()
+  const [initialCapital, setInitialCapital] = useState(10000)
+
+useEffect(() => {
+  fetch('/api/capital').then(r => r.json()).then(data => {
+    setInitialCapital(data.amount || 10000)
+  })
+}, [])
   const totalPnL = completed.reduce((s, t) => s + t.pnl, 0)
   const wins = completed.filter(t => t.pnl > 0)
   const losses = completed.filter(t => t.pnl < 0)
@@ -87,6 +94,23 @@ export default function StatsPanel({ completed, trades }: Props) {
     last7.push({ date: label, pnl })
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
+  // 資金成長曲線
+const sortedTrades = [...completed].sort((a, b) => 
+  new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
+)
+const growthData: { date: string; capital: number }[] = []
+let capital = initialCapital
+growthData.push({ date: '起始', capital })
+sortedTrades.forEach(t => {
+  capital += t.pnl
+  growthData.push({
+    date: new Date(t.close_time).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
+    capital,
+  })
+})
+const maxCapital = Math.max(...growthData.map(d => d.capital))
+const minCapital = Math.min(...growthData.map(d => d.capital))
+const capitalRange = maxCapital - minCapital || 1
 
   const initialCards: CardItem[] = [
     { id: 'totalPnL', label: '總盈虧', value: totalPnL, isPrice: true },
@@ -105,10 +129,11 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
   const [blocks, setBlocks] = useState<BlockItem[]>([
-    { id: 'cards', type: 'cards' },
-    { id: 'chart', type: 'chart' },
-    { id: 'strategy', type: 'strategy' },
-  ])
+  { id: 'cards', type: 'cards' },
+  { id: 'chart', type: 'chart' },
+  { id: 'growth', type: 'growth' },
+  { id: 'strategy', type: 'strategy' },
+])
 
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
   const draggingCardIndex = useRef<number | null>(null)
@@ -247,7 +272,60 @@ export default function StatsPanel({ completed, trades }: Props) {
           </div>
         )}
 
-        {block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
+        {block.type === 'growth' && (
+  <div className="p-5 cursor-grab">
+    <h3 className="text-sm font-semibold text-gray-400 mb-1">資金成長曲線</h3>
+    <p className="text-xs text-gray-600 mb-4">初始資金：{convert(initialCapital)}</p>
+    {growthData.length <= 1 ? (
+      <div className="text-center text-gray-600 py-8">尚無已平倉交易</div>
+    ) : (
+      <div className="relative h-40">
+        <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#d4a843" stopOpacity="0.3"/>
+              <stop offset="100%" stopColor="#d4a843" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <polyline
+            points={growthData.map((d, i) => {
+              const x = i * 40 + 20
+              const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
+              return `${x},${y}`
+            }).join(' ')}
+            fill="none"
+            stroke="#d4a843"
+            strokeWidth="2"
+          />
+          <polygon
+            points={[
+              ...growthData.map((d, i) => {
+                const x = i * 40 + 20
+                const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
+                return `${x},${y}`
+              }),
+              `${(growthData.length - 1) * 40 + 20},160`,
+              `20,160`,
+            ].join(' ')}
+            fill="url(#growthGrad)"
+          />
+        </svg>
+        <div className="flex justify-between mt-2">
+          {growthData.filter((_, i) => i === 0 || i === growthData.length - 1 || i % Math.ceil(growthData.length / 5) === 0).map((d, i) => (
+            <span key={i} className="text-xs text-gray-600">{d.date}</span>
+          ))}
+        </div>
+        <div className="absolute right-0 top-0 text-right">
+          <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
+          <div className="text-xs text-gray-600">
+            {capital >= initialCapital ? '+' : ''}{((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+{block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
           <div className="p-5 cursor-grab">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">策略勝率</h3>
             <div className="space-y-3">
