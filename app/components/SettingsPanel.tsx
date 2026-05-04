@@ -35,6 +35,107 @@ type SettingsProps = {
   onImported?: () => void
 }
 
+// ── 格式偵測 ──────────────────────────────────────────
+function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'unknown' {
+  if (headers.includes('平倉時間')) return 'tradeflex'
+  if (headers.includes('商品') && headers.includes('Side')) return 'tradingview'
+  return 'unknown'
+}
+
+// ── TradingView 格式轉換 ──────────────────────────────
+function parseTradingViewCSV(rows: any[]): any[] {
+  // 只保留已成交
+  const filled = rows.filter(r => r['狀態'] === '已成交')
+
+  // 依商品分組
+  const bySymbol: Record<string, any[]> = {}
+  filled.forEach(r => {
+    const sym = r['商品']
+    if (!bySymbol[sym]) bySymbol[sym] = []
+    bySymbol[sym].push(r)
+  })
+
+  const results: any[] = []
+
+  Object.entries(bySymbol).forEach(([symbolKey, orders]) => {
+    // 清理商品名稱
+    const cleanSymbol = symbolKey
+      .replace('CME_MINI:', '')
+      .replace('CME_MICRO:', '')
+      .replace('BINANCE:', '')
+      .replace('BITUNIX:', '')
+      .split(':')[0]
+      .split('!')[0]
+
+    // 依時間排序
+    orders.sort((a, b) =>
+      new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
+    )
+
+    const buyQueue: any[] = []
+    const sellQueue: any[] = []
+
+    orders.forEach(order => {
+      // 成交價優先，沒有則用限價
+      const price = parseFloat(order['成交量']) || parseFloat(order['限價']) || 0
+      const qty = parseFloat(order['數量']) || 1
+      const fee = parseFloat(order['佣金']) || 0
+
+      if (order['Side'] === '買入') {
+        if (sellQueue.length > 0) {
+          // 平空
+          const open = sellQueue.shift()
+          const openPrice = parseFloat(open['成交量']) || parseFloat(open['限價']) || 0
+          const openQty = parseFloat(open['數量']) || 1
+          const matchQty = Math.min(qty, openQty)
+          results.push({
+            symbol: cleanSymbol,
+            direction: 'short',
+            open_price: openPrice,
+            close_price: price,
+            quantity: matchQty,
+            open_fee: parseFloat(open['佣金']) || 0,
+            close_fee: fee,
+            pnl: Math.round((openPrice - price) * matchQty * 100) / 100,
+            open_time: new Date(open['Placing time']).toISOString(),
+            close_time: new Date(order['Placing time']).toISOString(),
+            strategy: '',
+            remark: '',
+          })
+        } else {
+          buyQueue.push(order)
+        }
+      } else if (order['Side'] === '賣出') {
+        if (buyQueue.length > 0) {
+          // 平多
+          const open = buyQueue.shift()
+          const openPrice = parseFloat(open['成交量']) || parseFloat(open['限價']) || 0
+          const openQty = parseFloat(open['數量']) || 1
+          const matchQty = Math.min(qty, openQty)
+          results.push({
+            symbol: cleanSymbol,
+            direction: 'long',
+            open_price: openPrice,
+            close_price: price,
+            quantity: matchQty,
+            open_fee: parseFloat(open['佣金']) || 0,
+            close_fee: fee,
+            pnl: Math.round((price - openPrice) * matchQty * 100) / 100,
+            open_time: new Date(open['Placing time']).toISOString(),
+            close_time: new Date(order['Placing time']).toISOString(),
+            strategy: '',
+            remark: '',
+          })
+        } else {
+          sellQueue.push(order)
+        }
+      }
+    })
+  })
+
+  return results
+}
+
 export default function SettingsPanel({ onImported }: SettingsProps) {
   const [symbols, setSymbols] = useState<Symbol[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -57,11 +158,12 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const { currency, symbol, setCurrency } = useCurrency()
   const [initialCapital, setInitialCapital] = useState<string>('10000')
 
-  // 匯入匯出相關
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importPreview, setImportPreview] = useState<any[]>([])
   const [importStatus, setImportStatus] = useState<'idle' | 'preview' | 'importing' | 'done' | 'error'>('idle')
   const [importMessage, setImportMessage] = useState('')
+  const [importFormat, setImportFormat] = useState<'tradeflex' | 'tradingview' | 'unknown'>('unknown')
+  const [convertedRows, setConvertedRows] = useState<any[]>([])
   const [exportRange, setExportRange] = useState<'all' | 'custom'>('all')
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
@@ -258,7 +360,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n')
 
-    const bom = '\uFEFF' // UTF-8 BOM，讓 Excel 正確顯示中文
+    const bom = '\uFEFF'
     const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -269,13 +371,23 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   }
 
   // ── 匯入 CSV ──────────────────────────────────────────
+  function parseCSVLines(lines: string[], headers: string[]) {
+    return lines.slice(1).map(line => {
+      const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
+      const row: any = {}
+      headers.forEach((h, i) => {
+        row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
+      })
+      return row
+    })
+  }
+
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
     reader.onload = (event) => {
       const text = event.target?.result as string
-      // 移除 BOM
       const clean = text.replace(/^\uFEFF/, '')
       const lines = clean.split('\n').filter(l => l.trim())
       if (lines.length < 2) {
@@ -284,67 +396,66 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         return
       }
       const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
-      const rows = lines.slice(1).map(line => {
-        const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
-        const row: any = {}
-        headers.forEach((h, i) => {
-          row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
-        })
-        return row
-      })
-      setImportPreview(rows.slice(0, 5)) // 預覽前5筆
+      const format = detectFormat(headers)
+
+      if (format === 'unknown') {
+        setImportStatus('error')
+        setImportMessage('不支援的 CSV 格式，目前支援：TradeFlex 格式、TradingView 格式')
+        return
+      }
+
+      const rawRows = parseCSVLines(lines, headers)
+
+      if (format === 'tradingview') {
+        const converted = parseTradingViewCSV(rawRows)
+        setConvertedRows(converted)
+        setImportPreview(converted.slice(0, 5))
+        setImportMessage(`偵測到 TradingView 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
+      } else {
+        setConvertedRows(rawRows)
+        setImportPreview(rawRows.slice(0, 5))
+        setImportMessage(`偵測到 TradeFlex 格式，共 ${rawRows.length} 筆資料，預覽前 5 筆`)
+      }
+
+      setImportFormat(format)
       setImportStatus('preview')
-      setImportMessage(`共 ${rows.length} 筆資料，預覽前 5 筆`)
     }
     reader.readAsText(file, 'utf-8')
   }
 
   async function confirmImport() {
-  const file = fileInputRef.current?.files?.[0]
-  if (!file) return
-  setImportStatus('importing')
+    if (convertedRows.length === 0) return
+    setImportStatus('importing')
 
-  // 先取得 portfolio，只抓一次
-  const portfolioRes = await fetch('/api/portfolios')
-  const portfolios = await portfolioRes.json()
-  const portfolioId = portfolios[0]?.id
-  if (!portfolioId) {
-    setImportStatus('error')
-    setImportMessage('找不到投資組合，請先建立一個')
-    return
-  }
+    const portfolioRes = await fetch('/api/portfolios')
+    const portfolios = await portfolioRes.json()
+    const portfolioId = portfolios[0]?.id
+    if (!portfolioId) {
+      setImportStatus('error')
+      setImportMessage('找不到投資組合，請先建立一個')
+      return
+    }
 
-  const reader = new FileReader()
-  reader.onload = async (event) => {
-    const text = event.target?.result as string
-    const clean = text.replace(/^\uFEFF/, '')
-    const lines = clean.split('\n').filter(l => l.trim())
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
-    const rows = lines.slice(1).map(line => {
-      const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
-      const row: any = {}
-      headers.forEach((h, i) => {
-        row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
-      })
-      return row
+    const payload = convertedRows.map((row: any) => {
+      if (importFormat === 'tradingview') {
+        return { ...row, portfolio_id: portfolioId }
+      }
+      return {
+        portfolio_id: portfolioId,
+        symbol: row['標的'] || '',
+        direction: row['方向'] === '做多' ? 'long' : 'short',
+        open_price: parseFloat(row['開倉價']) || 0,
+        close_price: parseFloat(row['平倉價']) || 0,
+        quantity: parseFloat(row['口數']) || 1,
+        open_fee: parseFloat(row['開倉手續費']) || 0,
+        close_fee: parseFloat(row['平倉手續費']) || 0,
+        pnl: parseFloat(row['盈虧']) || 0,
+        strategy: row['策略'] || '',
+        remark: row['備註'] || '',
+        open_time: row['開倉時間'] ? new Date(row['開倉時間']).toISOString() : new Date().toISOString(),
+        close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
+      }
     })
-
-    // 一次送出所有資料（batch）
-    const payload = rows.map(row => ({
-      portfolio_id: portfolioId,
-      symbol: row['標的'] || '',
-      direction: row['方向'] === '做多' ? 'long' : 'short',
-      open_price: parseFloat(row['開倉價']) || 0,
-      close_price: parseFloat(row['平倉價']) || 0,
-      quantity: parseFloat(row['口數']) || 1,
-      open_fee: parseFloat(row['開倉手續費']) || 0,
-      close_fee: parseFloat(row['平倉手續費']) || 0,
-      pnl: parseFloat(row['盈虧']) || 0,
-      strategy: row['策略'] || '',
-      remark: row['備註'] || '',
-      open_time: row['開倉時間'] ? new Date(row['開倉時間']).toISOString() : new Date().toISOString(),
-      close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
-    }))
 
     try {
       const res = await fetch('/api/completed/bulk', {
@@ -354,10 +465,10 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       })
       const result = await res.json()
       if (res.ok) {
-  setImportStatus('done')
-  setImportMessage(`匯入完成：成功 ${result.count} 筆`)
-  onImported?.()
-} else {
+        setImportStatus('done')
+        setImportMessage(`匯入完成：成功 ${result.count} 筆`)
+        onImported?.()
+      } else {
         setImportStatus('error')
         setImportMessage(`匯入失敗：${result.error}`)
       }
@@ -367,15 +478,15 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     }
 
     setImportPreview([])
+    setConvertedRows([])
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
-  reader.readAsText(file, 'utf-8')
-}
 
   function resetImport() {
     setImportStatus('idle')
     setImportMessage('')
     setImportPreview([])
+    setConvertedRows([])
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -422,7 +533,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             </div>
             <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>新增標的</button>
           </div>
-
           <div className="rounded-xl overflow-hidden" style={cardStyle}>
             <table className="w-full text-sm">
               <thead><tr className="text-gray-500 border-b border-[#2a2a2a] text-left"><th className="py-3 px-4">標的</th><th className="py-3 px-4">類別</th><th className="py-3 px-4">Tick Size</th><th className="py-3 px-4">Tick Value</th><th className="py-3 px-4">貨幣</th><th className="py-3 px-4">手續費/口</th><th className="py-3 px-4"></th></tr></thead>
@@ -580,37 +690,20 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <p className="text-xs text-gray-500 mb-4">選擇後所有金額顯示將自動換算</p>
             <div className="flex gap-2 flex-wrap">
               {['USD', 'TWD', 'EUR', 'JPY', 'CNY'].map(c => (
-                <button
-                  key={c}
-                  onClick={() => setCurrency(c)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                <button key={c} onClick={() => setCurrency(c)} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={currency === c
                     ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
                     : { background: '#1a1a1a', color: '#888' }
                   }
-                >
-                  {c}
-                </button>
+                >{c}</button>
               ))}
             </div>
             <div className="rounded-xl p-4 mt-4" style={cardStyle}>
               <h3 className="text-sm font-semibold text-gray-400 mb-4">初始資金</h3>
               <p className="text-xs text-gray-500 mb-4">用於計算資金成長曲線</p>
               <div className="flex gap-3">
-                <input
-                  value={initialCapital}
-                  onChange={e => setInitialCapital(e.target.value)}
-                  type="number"
-                  className="input flex-1"
-                  placeholder="10000"
-                />
-                <button
-                  onClick={saveCapital}
-                  className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-                  style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
-                >
-                  儲存
-                </button>
+                <input value={initialCapital} onChange={e => setInitialCapital(e.target.value)} type="number" className="input flex-1" placeholder="10000" />
+                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>儲存</button>
               </div>
             </div>
             <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
@@ -620,76 +713,40 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
       {activeTab === 'data' && (
         <div className="space-y-6">
-
           {/* 匯出 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯出交易記錄</h3>
             <p className="text-xs text-gray-600 mb-4">將已完成的交易匯出為 CSV 檔案，可用 Excel 開啟</p>
-
             <div className="flex gap-3 mb-4">
-              <button
-                onClick={() => setExportRange('all')}
-                className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'all'
-                  ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                  : { background: '#1a1a1a', color: '#888' }
-                }
-              >
-                全部資料
-              </button>
-              <button
-                onClick={() => setExportRange('custom')}
-                className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'custom'
-                  ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                  : { background: '#1a1a1a', color: '#888' }
-                }
-              >
-                自訂日期
-              </button>
+              <button onClick={() => setExportRange('all')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
+              >全部資料</button>
+              <button onClick={() => setExportRange('custom')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
+              >自訂日期</button>
             </div>
-
             {exportRange === 'custom' && (
               <div className="flex gap-3 mb-4">
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">開始日期</label>
-                  <input type="date" value={exportFrom} onChange={e => setExportFrom(e.target.value)} className="input" />
-                </div>
-                <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">結束日期</label>
-                  <input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" />
-                </div>
+                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">開始日期</label><input type="date" value={exportFrom} onChange={e => setExportFrom(e.target.value)} className="input" /></div>
+                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">結束日期</label><input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" /></div>
               </div>
             )}
-
-            <button
-              onClick={exportCSV}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
-            >
-              ↓ 下載 CSV
-            </button>
+            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>↓ 下載 CSV</button>
           </div>
 
           {/* 匯入 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
-            <p className="text-xs text-gray-600 mb-4">支援從本系統匯出的 CSV 格式，匯入前請先備份資料</p>
+            <p className="text-xs text-gray-600 mb-1">支援格式：</p>
+            <ul className="text-xs text-gray-500 mb-4 list-disc list-inside space-y-0.5">
+              <li>TradeFlex 匯出格式</li>
+              <li>TradingView Paper Trading 歷史訂單</li>
+            </ul>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
+            <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
 
             {importStatus === 'idle' && (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
-              >
+              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}>
                 ↑ 選擇 CSV 檔案
               </button>
             )}
@@ -709,33 +766,27 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                     <tbody>
                       {importPreview.map((row, i) => (
                         <tr key={i} className="border-b border-[#1a1a1a]">
-                          <td className="py-1.5 px-2 text-gray-400">{row['平倉時間']}</td>
-                          <td className="py-1.5 px-2 font-semibold">{row['標的']}</td>
-                          <td className="py-1.5 px-2" style={{ color: row['方向'] === '做多' ? '#4ade80' : '#f87171' }}>{row['方向']}</td>
-                          <td className="py-1.5 px-2">{row['開倉價']}</td>
-                          <td className="py-1.5 px-2">{row['平倉價']}</td>
-                          <td className="py-1.5 px-2">{row['口數']}</td>
-                          <td className="py-1.5 px-2" style={{ color: parseFloat(row['盈虧']) >= 0 ? '#4ade80' : '#f87171' }}>{row['盈虧']}</td>
+                          <td className="py-1.5 px-2 text-gray-400">
+                            {row.close_time ? new Date(row.close_time).toLocaleDateString('zh-TW') : row['平倉時間'] || ''}
+                          </td>
+                          <td className="py-1.5 px-2 font-semibold">{row.symbol || row['標的'] || ''}</td>
+                          <td className="py-1.5 px-2" style={{ color: (row.direction === 'long' || row['方向'] === '做多') ? '#4ade80' : '#f87171' }}>
+                            {row.direction === 'long' ? '做多' : row.direction === 'short' ? '做空' : row['方向'] || ''}
+                          </td>
+                          <td className="py-1.5 px-2">{row.open_price ?? row['開倉價'] ?? ''}</td>
+                          <td className="py-1.5 px-2">{row.close_price ?? row['平倉價'] ?? ''}</td>
+                          <td className="py-1.5 px-2">{row.quantity ?? row['口數'] ?? ''}</td>
+                          <td className="py-1.5 px-2" style={{ color: (parseFloat(row.pnl) || parseFloat(row['盈虧'])) >= 0 ? '#4ade80' : '#f87171' }}>
+                            {row.pnl ?? row['盈虧'] ?? ''}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
                 <div className="flex gap-3">
-                  <button
-                    onClick={confirmImport}
-                    className="px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
-                  >
-                    確認匯入
-                  </button>
-                  <button
-                    onClick={resetImport}
-                    className="px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-                  >
-                    取消
-                  </button>
+                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>確認匯入</button>
+                  <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>取消</button>
                 </div>
               </div>
             )}
@@ -746,16 +797,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
             {(importStatus === 'done' || importStatus === 'error') && (
               <div>
-                <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>
-                  {importMessage}
-                </p>
-                <button
-                  onClick={resetImport}
-                  className="px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-                >
-                  重新選擇
-                </button>
+                <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>{importMessage}</p>
+                <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>重新選擇</button>
               </div>
             )}
           </div>
