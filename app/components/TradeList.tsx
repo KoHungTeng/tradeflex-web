@@ -38,6 +38,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(value)
   const [search, setSearch] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
@@ -46,37 +47,57 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
     if (!editing) return
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        save()
+        setEditing(false)
+        setShowDropdown(false)
+        setSearch('')
+        if (val !== value) {
+          fetch(`/api/trades?id=${tradeId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [field]: val }),
+          }).then(() => onSaved())
+        }
       }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [editing, val])
-
-  async function save() {
-    setEditing(false)
-    setSearch('')
-    if (val === value) return
-    await fetch(`/api/trades?id=${tradeId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [field]: val }),
-    })
-    onSaved()
-  }
+  }, [editing, val, value])
 
   function select(opt: string) {
     if (field === 'remark') {
-      setVal(prev => prev ? `${prev} ${opt}` : opt)
+      const newVal = val ? `${val} ${opt}` : opt
+      setVal(newVal)
+      setSearch('')
     } else {
       setVal(opt)
       setEditing(false)
+      setShowDropdown(false)
       setSearch('')
       fetch(`/api/trades?id=${tradeId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: opt }),
       }).then(() => onSaved())
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      setEditing(false)
+      setShowDropdown(false)
+      setSearch('')
+      if (val !== value) {
+        fetch(`/api/trades?id=${tradeId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: val }),
+        }).then(() => onSaved())
+      }
+    }
+    if (e.key === 'Escape') {
+      setEditing(false)
+      setShowDropdown(false)
+      setVal(value)
     }
   }
 
@@ -89,18 +110,22 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           onChange={e => {
             if (field === 'remark') setVal(e.target.value)
             else setSearch(e.target.value)
+            setShowDropdown(true)
           }}
-          onKeyDown={e => { if (e.key === 'Enter') save() }}
+          onFocus={() => setShowDropdown(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
         />
-        {filtered.length > 0 && (
-          <div className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
-            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150 }}>
+        {showDropdown && filtered.length > 0 && (
+          <div
+            className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
+          >
             {filtered.map(opt => (
               <div
                 key={opt}
-                onMouseDown={() => select(opt)}
+                onMouseDown={e => { e.preventDefault(); select(opt) }}
                 className="px-3 py-1.5 text-xs cursor-pointer hover:bg-[#2a2a2a] text-gray-300"
               >
                 {opt}
@@ -114,7 +139,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
 
   return (
     <div
-      onClick={() => { setEditing(true); setSearch('') }}
+      onClick={() => { setEditing(true); setShowDropdown(true); setSearch('') }}
       className={`cursor-pointer flex items-center gap-1 group ${color}`}
     >
       {val || <span className="text-gray-600 group-hover:text-gray-400">+</span>}
