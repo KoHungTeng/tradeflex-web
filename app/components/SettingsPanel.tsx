@@ -17,28 +17,31 @@ type Category = {
   name: string
 }
 
+type Strategy = {
+  id: string
+  name: string
+}
+
 export default function SettingsPanel() {
   const [symbols, setSymbols] = useState<Symbol[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [activeTab, setActiveTab] = useState<'symbols' | 'categories'>('symbols')
+  const [strategies, setStrategies] = useState<Strategy[]>([])
+  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies'>('symbols')
 
-  // 新增標的
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('期貨')
   const [newTickSize, setNewTickSize] = useState('0.25')
   const [newTickValue, setNewTickValue] = useState('1.25')
   const [newCurrency, setNewCurrency] = useState('USD')
   const [newFee, setNewFee] = useState('0')
-
-  // 新增類別
   const [newCategoryName, setNewCategoryName] = useState('')
-
-  // 編輯標的
+  const [newStrategyName, setNewStrategyName] = useState('')
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
 
   useEffect(() => {
     loadSymbols()
     loadCategories()
+    loadStrategies()
   }, [])
 
   async function loadSymbols() {
@@ -51,6 +54,12 @@ export default function SettingsPanel() {
     const res = await fetch('/api/categories')
     const data = await res.json()
     setCategories(Array.isArray(data) ? data : [])
+  }
+
+  async function loadStrategies() {
+    const res = await fetch('/api/strategies')
+    const data = await res.json()
+    setStrategies(Array.isArray(data) ? data : [])
   }
 
   async function addSymbol() {
@@ -82,10 +91,10 @@ export default function SettingsPanel() {
     loadSymbols()
   }
 
-async function deleteSymbol(id: string) {
-  setSymbols(prev => prev.filter(s => s.id !== id))
-  await fetch(`/api/symbols?id=${id}`, { method: 'DELETE' })
-}
+  async function deleteSymbol(id: string) {
+    setSymbols(prev => prev.filter(s => s.id !== id))
+    await fetch(`/api/symbols?id=${id}`, { method: 'DELETE' })
+  }
 
   async function addCategory() {
     if (!newCategoryName) return
@@ -98,88 +107,89 @@ async function deleteSymbol(id: string) {
     loadCategories()
   }
 
-async function deleteCategory(id: string) {
-  setCategories(prev => prev.filter(c => c.id !== id))
-  await fetch(`/api/categories?id=${id}`, { method: 'DELETE' })
-}
+  async function deleteCategory(id: string) {
+    setCategories(prev => prev.filter(c => c.id !== id))
+    await fetch(`/api/categories?id=${id}`, { method: 'DELETE' })
+  }
+
+  async function addStrategy() {
+    if (!newStrategyName) return
+    await fetch('/api/strategies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newStrategyName }),
+    })
+    setNewStrategyName('')
+    loadStrategies()
+  }
+
+  async function deleteStrategy(id: string) {
+    setStrategies(prev => prev.filter(s => s.id !== id))
+    await fetch(`/api/strategies?id=${id}`, { method: 'DELETE' })
+  }
 
   return (
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-6">設定</h2>
 
-      {/* Tab */}
       <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setActiveTab('symbols')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            activeTab === 'symbols' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          標的設定
-        </button>
-        <button
-          onClick={() => setActiveTab('categories')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            activeTab === 'categories' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-          }`}
-        >
-          類別設定
-        </button>
+        {[
+          { key: 'symbols', label: '標的設定' },
+          { key: 'categories', label: '類別設定' },
+          { key: 'strategies', label: '策略設定' },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as any)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === tab.key ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* 標的設定 */}
       {activeTab === 'symbols' && (
         <div className="space-y-4">
-          {/* 新增標的 */}
           <div className="bg-gray-900 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">新增標的</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">標的名稱</label>
-                <input value={newName} onChange={e => setNewName(e.target.value)}
-                  placeholder="MES" className="input" />
+                <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="MES" className="input" />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">類別</label>
-                <select value={newCategory} onChange={e => setNewCategory(e.target.value)}
-                  className="input">
-                  {categories.map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
+                <select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="input">
+                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">貨幣</label>
-                <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)}
-                  className="input">
-                  <option>USD</option>
-                  <option>TWD</option>
-                  <option>USDT</option>
+                <select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="input">
+                  <option>USD</option><option>TWD</option><option>USDT</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Tick Size（最小跳動）</label>
-                <input value={newTickSize} onChange={e => setNewTickSize(e.target.value)}
-                  type="number" step="0.01" placeholder="0.25" className="input" />
+                <label className="text-xs text-gray-500 mb-1 block">Tick Size</label>
+                <input value={newTickSize} onChange={e => setNewTickSize(e.target.value)} type="number" step="0.01" className="input" />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Tick Value（每tick價值）</label>
-                <input value={newTickValue} onChange={e => setNewTickValue(e.target.value)}
-                  type="number" step="0.01" placeholder="1.25" className="input" />
+                <label className="text-xs text-gray-500 mb-1 block">Tick Value</label>
+                <input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">預設手續費/口</label>
-                <input value={newFee} onChange={e => setNewFee(e.target.value)}
-                  type="number" step="0.01" placeholder="0.62" className="input" />
+                <input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" />
               </div>
             </div>
-            <button onClick={addSymbol}
-              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors">
+            <button onClick={addSymbol} className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors">
               新增標的
             </button>
           </div>
 
-          {/* 標的列表 */}
           <div className="bg-gray-900 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -198,50 +208,24 @@ async function deleteCategory(id: string) {
                   <tr key={s.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
                     {editingSymbol?.id === s.id ? (
                       <>
+                        <td className="py-2 px-4"><input value={editingSymbol.name} onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})} className="input w-24" /></td>
                         <td className="py-2 px-4">
-                          <input value={editingSymbol.name}
-                            onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})}
-                            className="input w-24" />
-                        </td>
-                        <td className="py-2 px-4">
-                          <select value={editingSymbol.category}
-                            onChange={e => setEditingSymbol({...editingSymbol, category: e.target.value})}
-                            className="input">
+                          <select value={editingSymbol.category} onChange={e => setEditingSymbol({...editingSymbol, category: e.target.value})} className="input">
                             {categories.map(c => <option key={c.id}>{c.name}</option>)}
                           </select>
                         </td>
+                        <td className="py-2 px-4"><input value={editingSymbol.tick_size} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_size: parseFloat(e.target.value)})} className="input w-24" /></td>
+                        <td className="py-2 px-4"><input value={editingSymbol.tick_value} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_value: parseFloat(e.target.value)})} className="input w-24" /></td>
                         <td className="py-2 px-4">
-                          <input value={editingSymbol.tick_size} type="number" step="0.01"
-                            onChange={e => setEditingSymbol({...editingSymbol, tick_size: parseFloat(e.target.value)})}
-                            className="input w-24" />
-                        </td>
-                        <td className="py-2 px-4">
-                          <input value={editingSymbol.tick_value} type="number" step="0.01"
-                            onChange={e => setEditingSymbol({...editingSymbol, tick_value: parseFloat(e.target.value)})}
-                            className="input w-24" />
-                        </td>
-                        <td className="py-2 px-4">
-                          <select value={editingSymbol.currency}
-                            onChange={e => setEditingSymbol({...editingSymbol, currency: e.target.value})}
-                            className="input">
+                          <select value={editingSymbol.currency} onChange={e => setEditingSymbol({...editingSymbol, currency: e.target.value})} className="input">
                             <option>USD</option><option>TWD</option><option>USDT</option>
                           </select>
                         </td>
-                        <td className="py-2 px-4">
-                          <input value={editingSymbol.default_fee} type="number" step="0.01"
-                            onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value)})}
-                            className="input w-24" />
-                        </td>
+                        <td className="py-2 px-4"><input value={editingSymbol.default_fee} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value)})} className="input w-24" /></td>
                         <td className="py-2 px-4">
                           <div className="flex gap-2">
-                            <button onClick={updateSymbol}
-                              className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded hover:bg-green-950">
-                              儲存
-                            </button>
-                            <button onClick={() => setEditingSymbol(null)}
-                              className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded hover:bg-gray-700">
-                              取消
-                            </button>
+                            <button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded hover:bg-green-950">儲存</button>
+                            <button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded hover:bg-gray-700">取消</button>
                           </div>
                         </td>
                       </>
@@ -255,14 +239,8 @@ async function deleteCategory(id: string) {
                         <td className="py-3 px-4">{s.default_fee}</td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
-                            <button onClick={() => setEditingSymbol(s)}
-                              className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded hover:bg-blue-950">
-                              編輯
-                            </button>
-                            <button onClick={() => deleteSymbol(s.id)}
-                              className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">
-                              刪除
-                            </button>
+                            <button onClick={() => setEditingSymbol(s)} className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded hover:bg-blue-950">編輯</button>
+                            <button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
                           </div>
                         </td>
                       </>
@@ -281,12 +259,8 @@ async function deleteCategory(id: string) {
           <div className="bg-gray-900 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">新增類別</h3>
             <div className="flex gap-3">
-              <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)}
-                placeholder="類別名稱" className="input flex-1" />
-              <button onClick={addCategory}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-                新增
-              </button>
+              <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="類別名稱" className="input flex-1" />
+              <button onClick={addCategory} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">新增</button>
             </div>
           </div>
           <div className="bg-gray-900 rounded-xl p-4">
@@ -294,12 +268,33 @@ async function deleteCategory(id: string) {
               {categories.map(c => (
                 <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-800">
                   <span className="text-sm">{c.name}</span>
-                  <button onClick={() => deleteCategory(c.id)}
-                    className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">
-                    刪除
-                  </button>
+                  <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 策略設定 */}
+      {activeTab === 'strategies' && (
+        <div className="space-y-4">
+          <div className="bg-gray-900 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">新增策略</h3>
+            <div className="flex gap-3">
+              <input value={newStrategyName} onChange={e => setNewStrategyName(e.target.value)} placeholder="策略名稱，例如：60k CISD" className="input flex-1" />
+              <button onClick={addStrategy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">新增</button>
+            </div>
+          </div>
+          <div className="bg-gray-900 rounded-xl p-4">
+            <div className="space-y-2">
+              {strategies.map(s => (
+                <div key={s.id} className="flex items-center justify-between py-2 border-b border-gray-800">
+                  <span className="text-sm">{s.name}</span>
+                  <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
+                </div>
+              ))}
+              {strategies.length === 0 && <p className="text-gray-600 text-sm py-2">尚無策略</p>}
             </div>
           </div>
         </div>
