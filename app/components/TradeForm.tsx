@@ -18,7 +18,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
   const [price, setPrice] = useState('')
-  const [extraPrices, setExtraPrices] = useState<string[]>([])
+  const [extraPrices, setExtraPrices] = useState<{price: string, quantity: string}[]>([])
   const [quantity, setQuantity] = useState('1')
   const [fee, setFee] = useState('0')
   const [tp, setTp] = useState('')
@@ -58,6 +58,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showRSI = requiredIndicators.includes('RSI')
   const showKDJ = requiredIndicators.includes('KDJ')
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
+
   const [tags, setTags] = useState<{id: string, name: string}[]>([])
 
   useEffect(() => {
@@ -67,11 +68,11 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   }, [])
 
   function addExtraPrice() {
-    setExtraPrices(prev => [...prev, ''])
+    setExtraPrices(prev => [...prev, { price: '', quantity: quantity }])
   }
 
-  function updateExtraPrice(index: number, value: string) {
-    setExtraPrices(prev => prev.map((p, i) => i === index ? value : p))
+  function updateExtraPrice(index: number, field: 'price' | 'quantity', value: string) {
+    setExtraPrices(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p))
   }
 
   function removeExtraPrice(index: number) {
@@ -84,11 +85,14 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     setSubmitting(true)
 
     const trade_time = new Date().toISOString()
-
-    // 計算所有價格（主要價格 + 分倉價格）的平均
-    const allPrices = [parseFloat(price), ...extraPrices.filter(p => p !== '').map(p => parseFloat(p))]
-    const avgPrice = allPrices.reduce((a, b) => a + b, 0) / allPrices.length
-    const totalQuantity = parseFloat(quantity) * allPrices.length
+    const mainQty = parseFloat(quantity) || 0
+    const validExtras = extraPrices.filter(p => p.price !== '')
+    const allEntries = [
+      { price: parseFloat(price), quantity: mainQty },
+      ...validExtras.map(p => ({ price: parseFloat(p.price), quantity: parseFloat(p.quantity) || mainQty }))
+    ]
+    const totalQuantity = allEntries.reduce((a, b) => a + b.quantity, 0)
+    const avgPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / totalQuantity
 
     const newTrade: any = {
       id: crypto.randomUUID(),
@@ -168,7 +172,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             placeholder="MES, MNQ..." className="input" />
         </Field>
 
-        {/* 進場價格 + 分倉按鈕 */}
+        {/* 進場價格 + 分倉 */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500">進場價格</label>
@@ -185,16 +189,22 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
           <input value={price} onChange={e => setPrice(e.target.value)}
             placeholder="0.00" type="number" step="0.01" className="input" />
 
-          {/* 分倉價格列表 */}
           {extraPrices.map((p, i) => (
             <div key={i} className="flex gap-1 mt-1.5">
               <input
-                value={p}
-                onChange={e => updateExtraPrice(i, e.target.value)}
-                placeholder={`分倉 ${i + 1}`}
+                value={p.price}
+                onChange={e => updateExtraPrice(i, 'price', e.target.value)}
+                placeholder={`分倉 ${i + 1} 價格`}
                 type="number"
                 step="0.01"
                 className="input flex-1"
+              />
+              <input
+                value={p.quantity}
+                onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
+                placeholder="口數"
+                type="number"
+                className="input w-14"
               />
               <button
                 type="button"
@@ -207,15 +217,21 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             </div>
           ))}
 
-          {/* 有分倉時顯示平均價格提示 */}
-          {extraPrices.filter(p => p !== '').length > 0 && price && (
+          {extraPrices.filter(p => p.price !== '').length > 0 && price && (
             <p className="text-xs text-[#d4a843] mt-1">
-              均價：{(
-                [parseFloat(price), ...extraPrices.filter(p => p !== '').map(Number)]
-                  .reduce((a, b) => a + b, 0) /
-                (1 + extraPrices.filter(p => p !== '').length)
-              ).toFixed(2)}
-              ／共 {(1 + extraPrices.filter(p => p !== '').length) * parseFloat(quantity || '1')} 口
+              均價：{(() => {
+                const mainQty = parseFloat(quantity) || 1
+                const entries = [
+                  { price: parseFloat(price), quantity: mainQty },
+                  ...extraPrices.filter(p => p.price !== '').map(p => ({
+                    price: parseFloat(p.price),
+                    quantity: parseFloat(p.quantity) || mainQty
+                  }))
+                ]
+                const total = entries.reduce((a, b) => a + b.quantity, 0)
+                const avg = entries.reduce((a, b) => a + b.price * b.quantity, 0) / total
+                return `${avg.toFixed(2)} ／共 ${total} 口`
+              })()}
             </p>
           )}
         </div>
