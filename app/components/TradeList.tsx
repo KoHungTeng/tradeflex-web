@@ -104,7 +104,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       {trades.length === 0 ? (
         <div className="text-center text-gray-600 py-20">尚無交易記錄</div>
       ) : (
-        <table className="text-sm border-collapse" style={{ tableLayout: 'fixed', width: 'max-content' }}>
+        <table className="text-sm border-collapse w-full" style={{ tableLayout: 'fixed' }}>
           <colgroup>
             {COLS.map(col => (
               <col key={col.key} style={{ width: widths[col.key] }} />
