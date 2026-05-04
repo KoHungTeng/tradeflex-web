@@ -251,25 +251,25 @@ export default function Home() {
                               <div>
                                 <p className="text-gray-500 mb-2">大時間框架指標</p>
                                 <div className="space-y-1">
-                                  {ct.big_dif != null && <div className="flex justify-between"><span className="text-gray-600">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
-                                  {ct.big_dea != null && <div className="flex justify-between"><span className="text-gray-600">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
-                                  {ct.big_hist != null && <div className="flex justify-between"><span className="text-gray-600">MACD柱</span><span className="text-white">{ct.big_hist}</span></div>}
-                                  {ct.big_rsi != null && <div className="flex justify-between"><span className="text-gray-600">RSI</span><span className="text-white">{ct.big_rsi}</span></div>}
-                                  {ct.big_k != null && <div className="flex justify-between"><span className="text-gray-600">KDJ K</span><span className="text-white">{ct.big_k}</span></div>}
-                                  {ct.big_d != null && <div className="flex justify-between"><span className="text-gray-600">KDJ D</span><span className="text-white">{ct.big_d}</span></div>}
-                                  {ct.big_j != null && <div className="flex justify-between"><span className="text-gray-600">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
+                                  {ct.big_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
+                                  {ct.big_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
+                                  {ct.big_hist != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.big_hist}</span></div>}
+                                  {ct.big_rsi != null && <div className="flex gap-3"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.big_rsi}</span></div>}
+                                  {ct.big_k != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.big_k}</span></div>}
+                                  {ct.big_d != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.big_d}</span></div>}
+                                  {ct.big_j != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
                                 </div>
                               </div>
                               <div>
                                 <p className="text-gray-500 mb-2">小時間框架指標</p>
                                 <div className="space-y-1">
-                                  {ct.small_dif != null && <div className="flex justify-between"><span className="text-gray-600">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
-                                  {ct.small_dea != null && <div className="flex justify-between"><span className="text-gray-600">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
-                                  {ct.small_hist != null && <div className="flex justify-between"><span className="text-gray-600">MACD柱</span><span className="text-white">{ct.small_hist}</span></div>}
-                                  {ct.small_rsi != null && <div className="flex justify-between"><span className="text-gray-600">RSI</span><span className="text-white">{ct.small_rsi}</span></div>}
-                                  {ct.small_k != null && <div className="flex justify-between"><span className="text-gray-600">KDJ K</span><span className="text-white">{ct.small_k}</span></div>}
-                                  {ct.small_d != null && <div className="flex justify-between"><span className="text-gray-600">KDJ D</span><span className="text-white">{ct.small_d}</span></div>}
-                                  {ct.small_j != null && <div className="flex justify-between"><span className="text-gray-600">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
+                                  {ct.small_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
+                                  {ct.small_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
+                                  {ct.small_hist != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.small_hist}</span></div>}
+                                  {ct.small_rsi != null && <div className="flex gap-3"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.small_rsi}</span></div>}
+                                  {ct.small_k != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.small_k}</span></div>}
+                                  {ct.small_d != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.small_d}</span></div>}
+                                  {ct.small_j != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
                                 </div>
                               </div>
                             </div>
