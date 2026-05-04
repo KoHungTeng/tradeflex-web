@@ -47,7 +47,7 @@ export default function StrategyAnalysis({ completed }: Props) {
             onClick={() => setSelected(s)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               selected === s
-                ? 'bg-amber-600 text-white'
+                ? 'bg-[#d4a843] text-white'
                 : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
             }`}
           >

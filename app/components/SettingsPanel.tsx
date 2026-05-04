@@ -175,7 +175,7 @@ export default function SettingsPanel() {
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === tab.key ? 'bg-amber-600 text-white' : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
+              activeTab === tab.key ? 'bg-[#d4a843] text-white' : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
             }`}
           >
             {tab.label}
@@ -217,7 +217,7 @@ export default function SettingsPanel() {
                 <input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" />
               </div>
             </div>
-            <button onClick={addSymbol} className="mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded-lg text-sm font-medium transition-colors">
+            <button onClick={addSymbol} className="mt-4 px-4 py-2 bg-[#d4a843] hover:bg-[#b8892e] rounded-lg text-sm font-medium transition-colors">
               新增標的
             </button>
           </div>
@@ -271,7 +271,7 @@ export default function SettingsPanel() {
                         <td className="py-3 px-4">{s.default_fee}</td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
-                            <button onClick={() => setEditingSymbol(s)} className="text-amber-400 hover:text-amber-300 text-xs px-2 py-1 rounded hover:bg-amber-950">編輯</button>
+                            <button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] hover:text-amber-300 text-xs px-2 py-1 rounded hover:bg-amber-950">編輯</button>
                             <button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
                           </div>
                         </td>
@@ -291,7 +291,7 @@ export default function SettingsPanel() {
             <h3 className="text-sm font-semibold text-gray-400 mb-4">新增類別</h3>
             <div className="flex gap-3">
               <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="類別名稱" className="input flex-1" />
-              <button onClick={addCategory} className="px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">新增</button>
+              <button onClick={addCategory} className="px-4 py-2 bg-[#d4a843] hover:bg-[#b8892e] rounded-lg text-sm font-medium transition-colors whitespace-nowrap">新增</button>
             </div>
           </div>
           <div className="bg-[#111111] rounded-xl p-4">
@@ -328,7 +328,7 @@ export default function SettingsPanel() {
                       onClick={() => toggleIndicator(ind)}
                       className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                         newStrategyIndicators.includes(ind)
-                          ? 'bg-amber-600 text-white'
+                          ? 'bg-[#d4a843] text-white'
                           : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
                       }`}
                     >
@@ -337,7 +337,7 @@ export default function SettingsPanel() {
                   ))}
                 </div>
               </div>
-              <button onClick={addStrategy} className="px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded-lg text-sm font-medium transition-colors w-fit">
+              <button onClick={addStrategy} className="px-4 py-2 bg-[#d4a843] hover:bg-[#b8892e] rounded-lg text-sm font-medium transition-colors w-fit">
                 新增策略
               </button>
             </div>
@@ -362,7 +362,7 @@ export default function SettingsPanel() {
                             onClick={() => toggleEditingIndicator(ind)}
                             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                               editingStrategy.indicators.includes(ind)
-                                ? 'bg-amber-600 text-white'
+                                ? 'bg-[#d4a843] text-white'
                                 : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
                             }`}
                           >
@@ -388,7 +388,7 @@ export default function SettingsPanel() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-amber-400 hover:text-amber-300 text-xs px-2 py-1 rounded hover:bg-amber-950">編輯</button>
+                        <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[#d4a843] hover:text-amber-300 text-xs px-2 py-1 rounded hover:bg-amber-950">編輯</button>
                         <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
                       </div>
                     </div>

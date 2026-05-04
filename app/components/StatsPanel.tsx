@@ -115,7 +115,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               onMouseUp={onMouseUp}
               className={`bg-[#111111] rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
                 card.empty ? 'opacity-20 cursor-default' : 'cursor-grab active:cursor-grabbing'
-              } ${isDragging ? 'ring-2 ring-amber-500 opacity-70 scale-95' : ''}`}
+              } ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
             >
               {!card.empty && (
                 <>
