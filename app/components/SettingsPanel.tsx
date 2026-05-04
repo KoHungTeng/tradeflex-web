@@ -108,14 +108,14 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
     const sellQueue: any[] = []
 
     orders.forEach(order => {
-      const price = parseFloat(order['成交值']) || parseFloat(order['限價']) || parseFloat(order['停損值']) || 0
+      const price = parseFloat(order['成交值']) || parseFloat(order['停損值']) || parseFloat(order['限價']) || 0
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
 
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損值']) || 0
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['停損值']) || parseFloat(open['限價']) || 0
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (openPrice - price) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
