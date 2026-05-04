@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 type Note = {
   id: string
@@ -13,8 +13,16 @@ export default function QuickNote() {
   const [notes, setNotes] = useState<Note[]>([])
   const [input, setInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { loadNotes() }, [])
+
+  // 每次筆記更新時捲到最底
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight
+    }
+  }, [notes])
 
   async function loadNotes() {
     const res = await fetch('/api/notes')
@@ -35,14 +43,15 @@ export default function QuickNote() {
     loadNotes()
   }
 
-async function deleteNote(id: string) {
-  setNotes(prev => prev.filter(n => n.id !== id))
-  await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
-}
+  async function deleteNote(id: string) {
+    setNotes(prev => prev.filter(n => n.id !== id))
+    await fetch(`/api/notes?id=${id}`, { method: 'DELETE' })
+  }
 
   return (
-    <div className="border-t border-[#222222] bg-[#111111] px-4 py-3">
-      <div className="flex gap-2 mb-2 items-center">
+    <div className="bg-[#111111] px-4 py-3" style={{ height: '120px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* 輸入列 */}
+      <div className="flex gap-2 items-center flex-shrink-0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -57,31 +66,38 @@ async function deleteNote(id: string) {
         <button
           onClick={addNote}
           disabled={submitting}
-          className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50"
+          className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50 flex-shrink-0"
         >
           新增
         </button>
       </div>
 
-      {notes.length > 0 && (
-        <div className="max-h-28 overflow-y-auto flex flex-col gap-1">
-          {notes.map(n => (
-            <div key={n.id} className="flex items-center justify-between bg-[#1a1a1a] rounded px-3 py-1.5 text-sm group">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-500 text-xs">•</span>
-                <span className="text-white">{n.text}</span>
-                <span className="text-gray-500 text-xs">{new Date(n.created_at).toLocaleString('zh-TW')}</span>
+      {/* 筆記清單 - 固定高度，內部滾動 */}
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto flex flex-col gap-1"
+        style={{ minHeight: 0 }}
+      >
+        {notes.length === 0 ? (
+          <p className="text-gray-600 text-xs px-1">尚無筆記</p>
+        ) : (
+          notes.map(n => (
+            <div key={n.id} className="flex items-center justify-between bg-[#1a1a1a] rounded px-3 py-1.5 text-sm group flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-gray-500 text-xs flex-shrink-0">•</span>
+                <span className="text-white truncate">{n.text}</span>
+                <span className="text-gray-500 text-xs flex-shrink-0">{new Date(n.created_at).toLocaleString('zh-TW')}</span>
               </div>
               <button
                 onClick={() => deleteNote(n.id)}
-                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-3"
+                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-3 flex-shrink-0"
               >
                 ✕
               </button>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }
