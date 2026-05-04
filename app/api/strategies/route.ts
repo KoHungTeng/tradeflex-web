@@ -36,3 +36,14 @@ export async function DELETE(req: Request) {
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ success: true })
 }
+export async function PATCH(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  const body = await req.json()
+  const { error } = await supabase
+    .from('strategies')
+    .update(body)
+    .eq('id', id)
+  if (error) return NextResponse.json({ error }, { status: 500 })
+  return NextResponse.json({ success: true })
+}

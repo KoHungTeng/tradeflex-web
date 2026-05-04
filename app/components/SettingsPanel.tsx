@@ -41,6 +41,7 @@ export default function SettingsPanel() {
   const [newStrategyName, setNewStrategyName] = useState('')
   const [newStrategyIndicators, setNewStrategyIndicators] = useState<string[]>([])
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
+  const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
 
   useEffect(() => {
     loadSymbols()
@@ -128,6 +129,17 @@ export default function SettingsPanel() {
     loadStrategies()
   }
 
+  async function updateStrategy() {
+    if (!editingStrategy) return
+    await fetch(`/api/strategies?id=${editingStrategy.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: editingStrategy.name, indicators: editingStrategy.indicators }),
+    })
+    setEditingStrategy(null)
+    loadStrategies()
+  }
+
   async function deleteStrategy(id: string) {
     setStrategies(prev => prev.filter(s => s.id !== id))
     await fetch(`/api/strategies?id=${id}`, { method: 'DELETE' })
@@ -137,6 +149,16 @@ export default function SettingsPanel() {
     setNewStrategyIndicators(prev =>
       prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]
     )
+  }
+
+  function toggleEditingIndicator(ind: string) {
+    if (!editingStrategy) return
+    setEditingStrategy({
+      ...editingStrategy,
+      indicators: editingStrategy.indicators.includes(ind)
+        ? editingStrategy.indicators.filter(i => i !== ind)
+        : [...editingStrategy.indicators, ind]
+    })
   }
 
   return (
@@ -320,21 +342,57 @@ export default function SettingsPanel() {
               </button>
             </div>
           </div>
+
           <div className="bg-gray-900 rounded-xl p-4">
             <div className="space-y-2">
               {strategies.map(s => (
-                <div key={s.id} className="flex items-center justify-between py-2 border-b border-gray-800">
-                  <div>
-                    <span className="text-sm">{s.name}</span>
-                    {s.indicators && s.indicators.length > 0 && (
-                      <div className="flex gap-1 mt-1">
-                        {s.indicators.map(ind => (
-                          <span key={ind} className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">{ind}</span>
+                <div key={s.id} className="border-b border-gray-800 py-3">
+                  {editingStrategy?.id === s.id ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={editingStrategy.name}
+                        onChange={e => setEditingStrategy({...editingStrategy, name: e.target.value})}
+                        className="input"
+                      />
+                      <div className="flex gap-2">
+                        {INDICATOR_OPTIONS.map(ind => (
+                          <button
+                            key={ind}
+                            type="button"
+                            onClick={() => toggleEditingIndicator(ind)}
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                              editingStrategy.indicators.includes(ind)
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                            }`}
+                          >
+                            {ind}
+                          </button>
                         ))}
                       </div>
-                    )}
-                  </div>
-                  <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
+                      <div className="flex gap-2">
+                        <button onClick={updateStrategy} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded hover:bg-green-950">儲存</button>
+                        <button onClick={() => setEditingStrategy(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded hover:bg-gray-700">取消</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm">{s.name}</span>
+                        {s.indicators && s.indicators.length > 0 && (
+                          <div className="flex gap-1 mt-1">
+                            {s.indicators.map(ind => (
+                              <span key={ind} className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">{ind}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-blue-400 hover:text-blue-300 text-xs px-2 py-1 rounded hover:bg-blue-950">編輯</button>
+                        <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               {strategies.length === 0 && <p className="text-gray-600 text-sm py-2">尚無策略</p>}
