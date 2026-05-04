@@ -44,10 +44,8 @@ function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'unknown
 
 // ── TradingView 格式轉換 ──────────────────────────────
 function parseTradingViewCSV(rows: any[]): any[] {
-  // 只保留已成交
   const filled = rows.filter(r => r['狀態'] === '已成交')
 
-  // 依商品分組
   const bySymbol: Record<string, any[]> = {}
   filled.forEach(r => {
     const sym = r['商品']
@@ -58,7 +56,6 @@ function parseTradingViewCSV(rows: any[]): any[] {
   const results: any[] = []
 
   Object.entries(bySymbol).forEach(([symbolKey, orders]) => {
-    // 清理商品名稱
     const cleanSymbol = symbolKey
       .replace('CME_MINI:', '')
       .replace('CME_MICRO:', '')
@@ -67,7 +64,6 @@ function parseTradingViewCSV(rows: any[]): any[] {
       .split(':')[0]
       .split('!')[0]
 
-    // 依時間排序
     orders.sort((a, b) =>
       new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
     )
@@ -76,16 +72,15 @@ function parseTradingViewCSV(rows: any[]): any[] {
     const sellQueue: any[] = []
 
     orders.forEach(order => {
-      // 成交價優先，沒有則用限價
-      const price = parseFloat(order['成交量']) || parseFloat(order['限價']) || 0
+      // 成交價優先，沒有則用限價或停損價
+      const price = parseFloat(order['成交價']) || parseFloat(order['限價']) || parseFloat(order['停損價']) || 0
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
 
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
-          // 平空
           const open = sellQueue.shift()
-          const openPrice = parseFloat(open['成交量']) || parseFloat(open['限價']) || 0
+          const openPrice = parseFloat(open['成交價']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
           const openQty = parseFloat(open['數量']) || 1
           const matchQty = Math.min(qty, openQty)
           results.push({
@@ -107,9 +102,8 @@ function parseTradingViewCSV(rows: any[]): any[] {
         }
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
-          // 平多
           const open = buyQueue.shift()
-          const openPrice = parseFloat(open['成交量']) || parseFloat(open['限價']) || 0
+          const openPrice = parseFloat(open['成交價']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
           const openQty = parseFloat(open['數量']) || 1
           const matchQty = Math.min(qty, openQty)
           results.push({
