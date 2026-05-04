@@ -166,7 +166,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         ))}
       </div>
 
-      <form onSubmit={submit} className="flex flex-col gap-3">
+      <form onSubmit={submit} autoComplete="off" className="flex flex-col gap-3">
         <Field label="標的">
           <input value={symbol} onChange={e => setSymbol(e.target.value)}
             placeholder="MES, MNQ..." className="input" />
@@ -190,32 +190,34 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             placeholder="0.00" type="number" step="0.01" className="input" />
 
           {extraPrices.map((p, i) => (
-            <div key={i} className="flex gap-1 mt-1.5">
-              <input
-                value={p.price}
-                onChange={e => updateExtraPrice(i, 'price', e.target.value)}
-                placeholder={`分倉 ${i + 1} 價格`}
-                type="number"
-                step="0.01"
-                className="input flex-1"
-              />
-              <input
-                value={p.quantity}
-                onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
-                placeholder="口數"
-                type="number"
-                className="input w-14"
-              />
-              <button
-                type="button"
-                onClick={() => removeExtraPrice(i)}
-                className="text-xs px-2 rounded transition-colors"
-                style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+  <div key={i} className="mt-1.5">
+    <div className="flex gap-1">
+      <input
+        value={p.price}
+        onChange={e => updateExtraPrice(i, 'price', e.target.value)}
+        placeholder="分倉價格"
+        type="number"
+        step="0.01"
+        className="input flex-1"
+      />
+      <button
+        type="button"
+        onClick={() => removeExtraPrice(i)}
+        className="text-xs px-2 rounded transition-colors flex-shrink-0"
+        style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+      >
+        ✕
+      </button>
+    </div>
+    <input
+      value={p.quantity}
+      onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
+      placeholder="口數"
+      type="number"
+      className="input w-full mt-1"
+    />
+  </div>
+))}
 
           {extraPrices.filter(p => p.price !== '').length > 0 && price && (
             <p className="text-xs text-[#d4a843] mt-1">
