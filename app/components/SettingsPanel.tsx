@@ -51,6 +51,21 @@ export default function SettingsPanel() {
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
   const { currency, symbol, setCurrency } = useCurrency()
+  const [initialCapital, setInitialCapital] = useState<string>('10000')
+
+useEffect(() => {
+  fetch('/api/capital').then(r => r.json()).then(data => {
+    setInitialCapital(String(data.amount || 10000))
+  })
+}, [])
+
+async function saveCapital() {
+  await fetch('/api/capital', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: parseFloat(initialCapital) }),
+  })
+}
 
   useEffect(() => {
     loadSymbols()
@@ -405,7 +420,27 @@ export default function SettingsPanel() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
+            <div className="rounded-xl p-4 mt-4" style={cardStyle}>
+        <h3 className="text-sm font-semibold text-gray-400 mb-4">初始資金</h3>
+        <p className="text-xs text-gray-500 mb-4">用於計算資金成長曲線</p>
+        <div className="flex gap-3">
+          <input
+            value={initialCapital}
+            onChange={e => setInitialCapital(e.target.value)}
+            type="number"
+            className="input flex-1"
+            placeholder="10000"
+          />
+          <button
+            onClick={saveCapital}
+            className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+            style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+          >
+            儲存
+          </button>
+        </div>
+      </div>
+      <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
           </div>
         </div>
       )}
