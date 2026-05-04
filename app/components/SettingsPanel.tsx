@@ -20,7 +20,10 @@ type Category = {
 type Strategy = {
   id: string
   name: string
+  indicators: string[]
 }
+
+const INDICATOR_OPTIONS = ['MACD', 'RSI', 'KDJ']
 
 export default function SettingsPanel() {
   const [symbols, setSymbols] = useState<Symbol[]>([])
@@ -36,6 +39,7 @@ export default function SettingsPanel() {
   const [newFee, setNewFee] = useState('0')
   const [newCategoryName, setNewCategoryName] = useState('')
   const [newStrategyName, setNewStrategyName] = useState('')
+  const [newStrategyIndicators, setNewStrategyIndicators] = useState<string[]>([])
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
 
   useEffect(() => {
@@ -117,15 +121,22 @@ export default function SettingsPanel() {
     await fetch('/api/strategies', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newStrategyName }),
+      body: JSON.stringify({ name: newStrategyName, indicators: newStrategyIndicators }),
     })
     setNewStrategyName('')
+    setNewStrategyIndicators([])
     loadStrategies()
   }
 
   async function deleteStrategy(id: string) {
     setStrategies(prev => prev.filter(s => s.id !== id))
     await fetch(`/api/strategies?id=${id}`, { method: 'DELETE' })
+  }
+
+  function toggleIndicator(ind: string) {
+    setNewStrategyIndicators(prev =>
+      prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]
+    )
   }
 
   return (
@@ -150,7 +161,6 @@ export default function SettingsPanel() {
         ))}
       </div>
 
-      {/* 標的設定 */}
       {activeTab === 'symbols' && (
         <div className="space-y-4">
           <div className="bg-gray-900 rounded-xl p-4">
@@ -253,7 +263,6 @@ export default function SettingsPanel() {
         </div>
       )}
 
-      {/* 類別設定 */}
       {activeTab === 'categories' && (
         <div className="space-y-4">
           <div className="bg-gray-900 rounded-xl p-4">
@@ -276,21 +285,55 @@ export default function SettingsPanel() {
         </div>
       )}
 
-      {/* 策略設定 */}
       {activeTab === 'strategies' && (
         <div className="space-y-4">
           <div className="bg-gray-900 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">新增策略</h3>
-            <div className="flex gap-3">
-              <input value={newStrategyName} onChange={e => setNewStrategyName(e.target.value)} placeholder="策略名稱，例如：60k CISD" className="input flex-1" />
-              <button onClick={addStrategy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">新增</button>
+            <div className="flex flex-col gap-3">
+              <input
+                value={newStrategyName}
+                onChange={e => setNewStrategyName(e.target.value)}
+                placeholder="策略名稱，例如：60k CISD"
+                className="input"
+              />
+              <div>
+                <p className="text-xs text-gray-500 mb-2">選擇此策略需要輸入的指標</p>
+                <div className="flex gap-2">
+                  {INDICATOR_OPTIONS.map(ind => (
+                    <button
+                      key={ind}
+                      type="button"
+                      onClick={() => toggleIndicator(ind)}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                        newStrategyIndicators.includes(ind)
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                      }`}
+                    >
+                      {ind}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={addStrategy} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors w-fit">
+                新增策略
+              </button>
             </div>
           </div>
           <div className="bg-gray-900 rounded-xl p-4">
             <div className="space-y-2">
               {strategies.map(s => (
                 <div key={s.id} className="flex items-center justify-between py-2 border-b border-gray-800">
-                  <span className="text-sm">{s.name}</span>
+                  <div>
+                    <span className="text-sm">{s.name}</span>
+                    {s.indicators && s.indicators.length > 0 && (
+                      <div className="flex gap-1 mt-1">
+                        {s.indicators.map(ind => (
+                          <span key={ind} className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded">{ind}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-950">刪除</button>
                 </div>
               ))}
