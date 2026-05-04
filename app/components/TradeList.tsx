@@ -1,7 +1,7 @@
 'use client'
 
 import { Trade } from '../page'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type Props = {
   trades: Trade[]
@@ -26,18 +26,36 @@ const COLS = [
 
 const DEFAULT_WIDTHS = Object.fromEntries(COLS.map(c => [c.key, c.defaultWidth]))
 
-function EditableCell({ value, tradeId, field, color, onSaved }: {
+function DropdownEditCell({ value, tradeId, field, color, onSaved, options, placeholder }: {
   value: string
   tradeId: string
   field: string
   color: string
   onSaved: () => void
+  options: string[]
+  placeholder?: string
 }) {
   const [editing, setEditing] = useState(false)
   const [val, setVal] = useState(value)
+  const [search, setSearch] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+
+  useEffect(() => {
+    if (!editing) return
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        save()
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [editing, val])
 
   async function save() {
     setEditing(false)
+    setSearch('')
     if (val === value) return
     await fetch(`/api/trades?id=${tradeId}`, {
       method: 'PATCH',
@@ -47,22 +65,56 @@ function EditableCell({ value, tradeId, field, color, onSaved }: {
     onSaved()
   }
 
+  function select(opt: string) {
+    if (field === 'remark') {
+      setVal(prev => prev ? `${prev} ${opt}` : opt)
+    } else {
+      setVal(opt)
+      setEditing(false)
+      setSearch('')
+      fetch(`/api/trades?id=${tradeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: opt }),
+      }).then(() => onSaved())
+    }
+  }
+
   if (editing) {
     return (
-      <input
-        autoFocus
-        value={val}
-        onChange={e => setVal(e.target.value)}
-        onBlur={save}
-        onKeyDown={e => { if (e.key === 'Enter') save() }}
-        className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
-      />
+      <div ref={ref} className="relative">
+        <input
+          autoFocus
+          value={field === 'remark' ? val : search}
+          onChange={e => {
+            if (field === 'remark') setVal(e.target.value)
+            else setSearch(e.target.value)
+          }}
+          onKeyDown={e => { if (e.key === 'Enter') save() }}
+          placeholder={placeholder}
+          className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+        />
+        {filtered.length > 0 && (
+          <div className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150 }}>
+            {filtered.map(opt => (
+              <div
+                key={opt}
+                onMouseDown={() => select(opt)}
+                className="px-3 py-1.5 text-xs cursor-pointer hover:bg-[#2a2a2a] text-gray-300"
+              >
+                {opt}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     )
   }
 
   return (
     <div
-      onClick={() => setEditing(true)}
+      onClick={() => { setEditing(true); setSearch('') }}
       className={`cursor-pointer flex items-center gap-1 group ${color}`}
     >
       {val || <span className="text-gray-600 group-hover:text-gray-400">+</span>}
@@ -75,32 +127,32 @@ function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } 
   if (!hasData) return null
   return (
     <div
-      className="fixed z-50 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg p-3 shadow-xl text-xs pointer-events-none"
-      style={{ left: pos.x + 10, top: pos.y + 10, minWidth: 320 }}
+      className="fixed z-50 rounded-lg p-3 shadow-xl text-xs pointer-events-none"
+      style={{ left: pos.x + 10, top: pos.y + 10, minWidth: 320, background: '#1a1a1a', border: '1px solid #2a2a2a' }}
     >
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p className="text-gray-400 font-semibold mb-2">大時間框架</p>
           <div className="space-y-1">
-            {t.big_dif != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD DIF</span><span className="text-white">{t.big_dif}</span></div>}
-            {t.big_dea != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD DEA</span><span className="text-white">{t.big_dea}</span></div>}
-            {t.big_hist != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD柱</span><span className="text-white">{t.big_hist}</span></div>}
-            {t.big_rsi != null && <div className="flex justify-between gap-4"><span className="text-gray-500">RSI</span><span className="text-white">{t.big_rsi}</span></div>}
-            {t.big_k != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ K</span><span className="text-white">{t.big_k}</span></div>}
-            {t.big_d != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ D</span><span className="text-white">{t.big_d}</span></div>}
-            {t.big_j != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ J</span><span className="text-white">{t.big_j}</span></div>}
+            {t.big_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{t.big_dif}</span></div>}
+            {t.big_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{t.big_dea}</span></div>}
+            {t.big_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{t.big_hist}</span></div>}
+            {t.big_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{t.big_rsi}</span></div>}
+            {t.big_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{t.big_k}</span></div>}
+            {t.big_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{t.big_d}</span></div>}
+            {t.big_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{t.big_j}</span></div>}
           </div>
         </div>
         <div>
-          <p className="text-gray-400 font-semibold mb-2">小時間框架</p>
+          <p className className="text-gray-400 font-semibold mb-2">小時間框架</p>
           <div className="space-y-1">
-            {t.small_dif != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD DIF</span><span className="text-white">{t.small_dif}</span></div>}
-            {t.small_dea != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD DEA</span><span className="text-white">{t.small_dea}</span></div>}
-            {t.small_hist != null && <div className="flex justify-between gap-4"><span className="text-gray-500">MACD柱</span><span className="text-white">{t.small_hist}</span></div>}
-            {t.small_rsi != null && <div className="flex justify-between gap-4"><span className="text-gray-500">RSI</span><span className="text-white">{t.small_rsi}</span></div>}
-            {t.small_k != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ K</span><span className="text-white">{t.small_k}</span></div>}
-            {t.small_d != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ D</span><span className="text-white">{t.small_d}</span></div>}
-            {t.small_j != null && <div className="flex justify-between gap-4"><span className="text-gray-500">KDJ J</span><span className="text-white">{t.small_j}</span></div>}
+            {t.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{t.small_dif}</span></div>}
+            {t.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{t.small_dea}</span></div>}
+            {t.small_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{t.small_hist}</span></div>}
+            {t.small_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{t.small_rsi}</span></div>}
+            {t.small_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{t.small_k}</span></div>}
+            {t.small_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{t.small_d}</span></div>}
+            {t.small_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{t.small_j}</span></div>}
           </div>
         </div>
       </div>
@@ -119,7 +171,18 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
 
   const [hoveredTrade, setHoveredTrade] = useState<Trade | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [strategies, setStrategies] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>([])
   const dragging = useRef<{ col: string; startX: number; startWidth: number; minWidth: number } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/strategies').then(r => r.json()).then(data => {
+      setStrategies(Array.isArray(data) ? data.map((s: any) => s.name) : [])
+    })
+    fetch('/api/tags').then(r => r.json()).then(data => {
+      setTags(Array.isArray(data) ? data.map((t: any) => `#${t.name}`) : [])
+    })
+  }, [])
 
   function onResizeStart(e: React.MouseEvent, col: typeof COLS[0]) {
     e.preventDefault()
@@ -210,7 +273,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   {col.key !== 'delete' && (
                     <div
                       onMouseDown={e => onResizeStart(e, col)}
-                      className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-amber-500 hover:opacity-50"
+                      className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-[#d4a843] hover:opacity-50"
                       style={{ zIndex: 10 }}
                     />
                   )}
@@ -235,20 +298,36 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.price}</td>
                 <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.quantity}</td>
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.fee || '--'}</td>
-               <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.tp || '--'}</td>
-<td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.sl || '--'}</td>
-<td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
-  {t.tp && t.sl && t.sl !== t.price ? (
-    <span className="text-[#d4a843] text-xs">
-      {Math.abs((t.tp - t.price) / (t.price - t.sl)).toFixed(2)}R
-    </span>
-  ) : '--'}
-</td>
-                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
-                  <EditableCell value={t.strategy || ''} tradeId={t.id} field="strategy" color="text-[#d4a843]" onSaved={onCompletedChanged} />
+                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.tp || '--'}</td>
+                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.sl || '--'}</td>
+                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
+                  {t.tp && t.sl && t.sl !== t.price ? (
+                    <span className="text-[#d4a843] text-xs">
+                      {Math.abs((t.tp - t.price) / (t.price - t.sl)).toFixed(2)}R
+                    </span>
+                  ) : '--'}
                 </td>
                 <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
-                  <EditableCell value={t.remark || ''} tradeId={t.id} field="remark" color="text-gray-400" onSaved={onCompletedChanged} />
+                  <DropdownEditCell
+                    value={t.strategy || ''}
+                    tradeId={t.id}
+                    field="strategy"
+                    color="text-[#d4a843]"
+                    onSaved={onCompletedChanged}
+                    options={strategies}
+                    placeholder="搜尋策略..."
+                  />
+                </td>
+                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
+                  <DropdownEditCell
+                    value={t.remark || ''}
+                    tradeId={t.id}
+                    field="remark"
+                    color="text-gray-400"
+                    onSaved={onCompletedChanged}
+                    options={tags}
+                    placeholder="輸入備注..."
+                  />
                 </td>
                 <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
                   {formatTime(t.trade_time)}
