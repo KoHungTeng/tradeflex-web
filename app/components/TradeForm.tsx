@@ -14,6 +14,15 @@ type Strategy = {
   indicators: string[]
 }
 
+type OpenTrade = {
+  id: string
+  symbol: string
+  action: string
+  price: number
+  quantity: number
+  trade_time: string
+}
+
 export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
@@ -27,6 +36,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [remark, setRemark] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [strategies, setStrategies] = useState<Strategy[]>([])
+  const [openTrades, setOpenTrades] = useState<OpenTrade[]>([])
 
   const [bigDIF, setBigDIF] = useState('')
   const [bigDEA, setBigDEA] = useState('')
@@ -45,12 +55,36 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [smallJ, setSmallJ] = useState('')
 
   const isOpen = action === '做多' || action === '做空'
+  const isClose = action === '平多' || action === '平空'
 
   useEffect(() => {
     fetch('/api/strategies').then(r => r.json()).then(data => {
       setStrategies(Array.isArray(data) ? data : [])
     })
   }, [])
+
+  // 當切換到平倉動作時，載入庫存
+  useEffect(() => {
+    if (isClose) {
+      fetch('/api/trades').then(r => r.json()).then(data => {
+        setOpenTrades(Array.isArray(data) ? data : [])
+      })
+    }
+  }, [isClose])
+
+  // 根據標的和動作過濾庫存
+  const relevantOpenTrades = openTrades.filter(t => {
+    if (!symbol) return false
+    const matchSymbol = t.symbol.toUpperCase() === symbol.toUpperCase()
+    if (action === '平多') return matchSymbol && t.action === '做多'
+    if (action === '平空') return matchSymbol && t.action === '做空'
+    return false
+  })
+
+  const totalOpenQty = relevantOpenTrades.reduce((sum, t) => sum + t.quantity, 0)
+  const avgOpenPrice = relevantOpenTrades.length > 0
+    ? relevantOpenTrades.reduce((sum, t) => sum + t.price * t.quantity, 0) / totalOpenQty
+    : 0
 
   const selectedStrategy = strategies.find(s => s.name === strategy)
   const requiredIndicators = selectedStrategy?.indicators || []
@@ -172,52 +206,96 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             placeholder="MES, MNQ..." className="input" />
         </Field>
 
+        {/* 平倉時顯示庫存 */}
+        {isClose && symbol && (
+          <div className="rounded-lg p-3" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
+            <p className="text-xs text-gray-500 mb-2">
+              {action === '平多' ? '📦 做多庫存' : '📦 做空庫存'}
+            </p>
+            {relevantOpenTrades.length === 0 ? (
+              <p className="text-xs text-gray-600">查無 {symbol.toUpperCase()} 的{action === '平多' ? '做多' : '做空'}倉位</p>
+            ) : (
+              <>
+                <div className="space-y-1.5 mb-2">
+                  {relevantOpenTrades.map((t, i) => (
+                    <div key={t.id} className="flex justify-between items-center text-xs">
+                      <span className="text-gray-400">
+                        #{i + 1} {new Date(t.trade_time).toLocaleDateString('zh-TW')}
+                      </span>
+                      <span className="text-white">
+                        {t.price} × {t.quantity}口
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-[#1a3a1a] pt-2 flex justify-between text-xs">
+                  <span className="text-gray-400">均價 / 總口數</span>
+                  <span className="text-green-400 font-semibold">
+                    {avgOpenPrice.toFixed(2)} / {totalOpenQty}口
+                  </span>
+                </div>
+                {/* 快速填入總口數 */}
+                <button
+                  type="button"
+                  onClick={() => setQuantity(String(totalOpenQty))}
+                  className="mt-2 w-full text-xs py-1 rounded transition-colors"
+                  style={{ background: '#1a3a1a', color: '#4ade80', border: '1px solid #2a4a2a' }}
+                >
+                  填入全部口數 ({totalOpenQty}口)
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* 進場價格 + 分倉 */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500">進場價格</label>
-            <button
-              type="button"
-              onClick={addExtraPrice}
-              className="text-xs px-1.5 py-0.5 rounded transition-colors"
-              style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
-              title="新增分倉價格"
-            >
-              ＋ 分倉
-            </button>
+            <label className="text-xs text-gray-500">{isClose ? '平倉價格' : '進場價格'}</label>
+            {isOpen && (
+              <button
+                type="button"
+                onClick={addExtraPrice}
+                className="text-xs px-1.5 py-0.5 rounded transition-colors"
+                style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
+                title="新增分倉價格"
+              >
+                ＋ 分倉
+              </button>
+            )}
           </div>
           <input value={price} onChange={e => setPrice(e.target.value)}
             placeholder="0.00" type="number" step="0.01" className="input" />
 
           {extraPrices.map((p, i) => (
-  <div key={i} className="mt-1.5">
-    <div className="flex gap-1">
-      <input
-        value={p.price}
-        onChange={e => updateExtraPrice(i, 'price', e.target.value)}
-        placeholder="分倉價格"
-        type="number"
-        step="0.01"
-        className="input flex-1"
-      />
-      <button
-        type="button"
-        onClick={() => removeExtraPrice(i)}
-        className="text-xs px-2 rounded transition-colors flex-shrink-0"
-        style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-      >
-        ✕
-      </button>
-    </div>
-    <input
-      value={p.quantity}
-      onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
-      placeholder="口數"
-      type="number"
-      className="input w-full mt-1"
-    />
-  </div>
-))}
+            <div key={i} className="mt-1.5">
+              <div className="flex gap-1">
+                <input
+                  value={p.price}
+                  onChange={e => updateExtraPrice(i, 'price', e.target.value)}
+                  placeholder="分倉價格"
+                  type="number"
+                  step="0.01"
+                  className="input flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExtraPrice(i)}
+                  className="text-xs px-2 rounded transition-colors flex-shrink-0"
+                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+                >
+                  ✕
+                </button>
+              </div>
+              <input
+                value={p.quantity}
+                onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
+                placeholder="口數"
+                type="number"
+                className="input w-full mt-1"
+              />
+            </div>
+          ))}
 
           {extraPrices.filter(p => p.price !== '').length > 0 && price && (
             <p className="text-xs text-[#d4a843] mt-1">
