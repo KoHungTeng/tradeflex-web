@@ -1,6 +1,7 @@
 'use client'
 
 import { CompletedTrade, Trade } from '../page'
+import { useCurrency } from '../CurrencyContext'
 import { useState, useRef } from 'react'
 
 type Props = {
@@ -24,6 +25,7 @@ type BlockItem = {
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
+  const { convert, symbol } = useCurrency()
   const totalPnL = completed.reduce((s, t) => s + t.pnl, 0)
   const wins = completed.filter(t => t.pnl > 0)
   const losses = completed.filter(t => t.pnl < 0)
@@ -200,9 +202,11 @@ export default function StatsPanel({ completed, trades }: Props) {
                           <div className="text-lg font-bold text-[#d4a843]">{card.custom}</div>
                         ) : (
                           <div className={`text-lg font-bold ${color}`}>
-                            {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
-                            {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
-                            {card.suffix}
+                            {card.isPrice ? (
+  <>{card.value > 0 ? '+' : ''}{convert(card.value)}</>
+) : (
+  <>{card.value.toFixed(card.suffix ? 1 : 0)}{card.suffix}</>
+)}
                           </div>
                         )}
                       </>
