@@ -35,15 +35,43 @@ type SettingsProps = {
   onImported?: () => void
 }
 
-// ── 格式偵測 ──────────────────────────────────────────
 function detectFormat(headers: string[]): 'tradeflex' | 'tradingview' | 'unknown' {
   if (headers.includes('平倉時間')) return 'tradeflex'
   if (headers.includes('商品') && headers.includes('Side')) return 'tradingview'
   return 'unknown'
 }
 
-// ── TradingView 格式轉換 ──────────────────────────────
-function parseTradingViewCSV(rows: any[]): any[] {
+function parseCSVLine(line: string): string[] {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (ch === '"') {
+      inQuotes = !inQuotes
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+    } else {
+      current += ch
+    }
+  }
+  result.push(current.trim())
+  return result
+}
+
+function parseCSVLines(lines: string[], headers: string[]) {
+  return lines.slice(1).map(line => {
+    const values = parseCSVLine(line)
+    const row: any = {}
+    headers.forEach((h, i) => {
+      row[h] = (values[i] || '').trim()
+    })
+    return row
+  })
+}
+
+function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
   const filled = rows.filter(r => r['狀態'] === '已成交')
 
   const bySymbol: Record<string, any[]> = {}
@@ -64,6 +92,12 @@ function parseTradingViewCSV(rows: any[]): any[] {
       .split(':')[0]
       .split('!')[0]
 
+    const symbolInfo = symbolsData.find(s =>
+      s.name.toUpperCase() === cleanSymbol.toUpperCase()
+    )
+    const tickSize = symbolInfo?.tick_size || 1
+    const tickValue = symbolInfo?.tick_value || 1
+
     orders.sort((a, b) =>
       new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
     )
@@ -72,17 +106,17 @@ function parseTradingViewCSV(rows: any[]): any[] {
     const sellQueue: any[] = []
 
     orders.forEach(order => {
-      // 成交價優先，沒有則用限價或停損價
-      const price = parseFloat(order['成交值']) || parseFloat(order['限價']) || parseFloat(order['停損價']) || 0
+      const price = parseFloat(order['成交值']) || parseFloat(order['限價']) || parseFloat(order['停損值']) || 0
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
 
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
-          const openQty = parseFloat(open['數量']) || 1
-          const matchQty = Math.min(qty, openQty)
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損值']) || 0
+          const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
+          const ticks = (openPrice - price) / tickSize
+          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
           results.push({
             symbol: cleanSymbol,
             direction: 'short',
@@ -91,7 +125,7 @@ function parseTradingViewCSV(rows: any[]): any[] {
             quantity: matchQty,
             open_fee: parseFloat(open['佣金']) || 0,
             close_fee: fee,
-            pnl: Math.round((openPrice - price) * matchQty * 100) / 100,
+            pnl,
             open_time: new Date(open['Placing time']).toISOString(),
             close_time: new Date(order['Placing time']).toISOString(),
             strategy: '',
@@ -103,9 +137,10 @@ function parseTradingViewCSV(rows: any[]): any[] {
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
-          const openQty = parseFloat(open['數量']) || 1
-          const matchQty = Math.min(qty, openQty)
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損值']) || 0
+          const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
+          const ticks = (price - openPrice) / tickSize
+          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
           results.push({
             symbol: cleanSymbol,
             direction: 'long',
@@ -114,7 +149,7 @@ function parseTradingViewCSV(rows: any[]): any[] {
             quantity: matchQty,
             open_fee: parseFloat(open['佣金']) || 0,
             close_fee: fee,
-            pnl: Math.round((price - openPrice) * matchQty * 100) / 100,
+            pnl,
             open_time: new Date(open['Placing time']).toISOString(),
             close_time: new Date(order['Placing time']).toISOString(),
             strategy: '',
@@ -317,7 +352,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     })
   }
 
-  // ── 匯出 CSV ──────────────────────────────────────────
   async function exportCSV() {
     const res = await fetch('/api/completed')
     const trades: any[] = await res.json()
@@ -364,37 +398,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     URL.revokeObjectURL(url)
   }
 
-  // ── 匯入 CSV ──────────────────────────────────────────
-  function parseCSVLine(line: string): string[] {
-  const result: string[] = []
-  let current = ''
-  let inQuotes = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (ch === '"') {
-      inQuotes = !inQuotes
-    } else if (ch === ',' && !inQuotes) {
-      result.push(current.trim())
-      current = ''
-    } else {
-      current += ch
-    }
-  }
-  result.push(current.trim())
-  return result
-}
-
-function parseCSVLines(lines: string[], headers: string[]) {
-  return lines.slice(1).map(line => {
-    const values = parseCSVLine(line)
-    const row: any = {}
-    headers.forEach((h, i) => {
-      row[h] = (values[i] || '').trim()
-    })
-    return row
-  })
-}
-
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -408,7 +411,7 @@ function parseCSVLines(lines: string[], headers: string[]) {
         setImportMessage('CSV 檔案內容不足，請確認格式正確')
         return
       }
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+      const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim())
       const format = detectFormat(headers)
 
       if (format === 'unknown') {
@@ -420,7 +423,7 @@ function parseCSVLines(lines: string[], headers: string[]) {
       const rawRows = parseCSVLines(lines, headers)
 
       if (format === 'tradingview') {
-        const converted = parseTradingViewCSV(rawRows)
+        const converted = parseTradingViewCSV(rawRows, symbols)
         setConvertedRows(converted)
         setImportPreview(converted.slice(0, 5))
         setImportMessage(`偵測到 TradingView 格式，共轉換 ${converted.length} 筆已完成交易，預覽前 5 筆`)
@@ -726,7 +729,6 @@ function parseCSVLines(lines: string[], headers: string[]) {
 
       {activeTab === 'data' && (
         <div className="space-y-6">
-          {/* 匯出 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯出交易記錄</h3>
             <p className="text-xs text-gray-600 mb-4">將已完成的交易匯出為 CSV 檔案，可用 Excel 開啟</p>
@@ -747,7 +749,6 @@ function parseCSVLines(lines: string[], headers: string[]) {
             <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>↓ 下載 CSV</button>
           </div>
 
-          {/* 匯入 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
             <p className="text-xs text-gray-600 mb-1">支援格式：</p>
