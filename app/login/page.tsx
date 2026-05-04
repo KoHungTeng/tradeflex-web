@@ -1,12 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,6 +10,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
-      else setMessage('註冊成功！請檢查信箱確認帳號。')
+      else setMessage('註冊成功！請檢查信箱確認帳號後再登入。')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError('帳號或密碼錯誤')
