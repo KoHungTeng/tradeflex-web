@@ -332,7 +332,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                     </span>
                   ) : '--'}
                 </td>
-                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
+                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
                   <DropdownEditCell
                     value={t.strategy || ''}
                     tradeId={t.id}
@@ -343,7 +343,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                     placeholder="搜尋策略..."
                   />
                 </td>
-                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
+                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
                   <DropdownEditCell
                     value={t.remark || ''}
                     tradeId={t.id}
