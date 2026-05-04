@@ -144,7 +144,7 @@ function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } 
           </div>
         </div>
         <div>
-          <p className className="text-gray-400 font-semibold mb-2">小時間框架</p>
+          <p className="text-gray-400 font-semibold mb-2">小時間框架</p>
           <div className="space-y-1">
             {t.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{t.small_dif}</span></div>}
             {t.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{t.small_dea}</span></div>}
