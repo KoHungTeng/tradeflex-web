@@ -73,14 +73,14 @@ function parseTradingViewCSV(rows: any[]): any[] {
 
     orders.forEach(order => {
       // 成交價優先，沒有則用限價或停損價
-      const price = parseFloat(order['成交價']) || parseFloat(order['限價']) || parseFloat(order['停損價']) || 0
+      const price = parseFloat(order['成交值']) || parseFloat(order['限價']) || parseFloat(order['停損價']) || 0
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
 
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
-          const openPrice = parseFloat(open['成交價']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
           const openQty = parseFloat(open['數量']) || 1
           const matchQty = Math.min(qty, openQty)
           results.push({
@@ -103,7 +103,7 @@ function parseTradingViewCSV(rows: any[]): any[] {
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
-          const openPrice = parseFloat(open['成交價']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損價']) || 0
           const openQty = parseFloat(open['數量']) || 1
           const matchQty = Math.min(qty, openQty)
           results.push({
