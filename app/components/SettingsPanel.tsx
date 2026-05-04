@@ -72,7 +72,11 @@ function parseCSVLines(lines: string[], headers: string[]) {
 }
 
 function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
+  console.log('🔍 symbols:', symbolsData.map(s => s.name))
+  console.log('🔍 total rows:', rows.length)
+
   const filled = rows.filter(r => r['狀態'] === '已成交')
+  console.log('🔍 已成交:', filled.length)
 
   const bySymbol: Record<string, any[]> = {}
   filled.forEach(r => {
@@ -93,12 +97,14 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
       .split('!')[0]
 
     const symbolInfo = symbolsData.find(s => {
-  const sName = s.name.toUpperCase().replace(/\d+$/, '')
-  const cName = cleanSymbol.toUpperCase().replace(/\d+$/, '')
-  return sName === cName || s.name.toUpperCase() === cleanSymbol.toUpperCase()
-})
+      const sName = s.name.toUpperCase().replace(/\d+$/, '')
+      const cName = cleanSymbol.toUpperCase().replace(/\d+$/, '')
+      return sName === cName || s.name.toUpperCase() === cleanSymbol.toUpperCase()
+    })
+
     const tickSize = symbolInfo?.tick_size || 1
     const tickValue = symbolInfo?.tick_value || 1
+    console.log(`🔍 ${cleanSymbol} → tickSize:${tickSize} tickValue:${tickValue}`)
 
     orders.sort((a, b) =>
       new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
@@ -139,7 +145,7 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
-          const openPrice = parseFloat(open['成交值']) || parseFloat(open['限價']) || parseFloat(open['停損值']) || 0
+          const openPrice = parseFloat(open['成交值']) || parseFloat(open['停損值']) || parseFloat(open['限價']) || 0
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (price - openPrice) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
@@ -164,6 +170,7 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
     })
   })
 
+  console.log('🔍 results:', results.length)
   return results
 }
 
