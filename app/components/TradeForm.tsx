@@ -37,6 +37,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [submitting, setSubmitting] = useState(false)
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [openTrades, setOpenTrades] = useState<OpenTrade[]>([])
+  const [useCustomTime, setUseCustomTime] = useState(false)
+  const [customTime, setCustomTime] = useState('')
 
   const [bigDIF, setBigDIF] = useState('')
   const [bigDEA, setBigDEA] = useState('')
@@ -63,7 +65,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     })
   }, [])
 
-  // 當切換到平倉動作時，載入庫存
   useEffect(() => {
     if (isClose) {
       fetch('/api/trades').then(r => r.json()).then(data => {
@@ -72,7 +73,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     }
   }, [isClose])
 
-  // 根據標的和動作過濾庫存
   const relevantOpenTrades = openTrades.filter(t => {
     if (!symbol) return false
     const matchSymbol = t.symbol.toUpperCase() === symbol.toUpperCase()
@@ -118,7 +118,13 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     if (!symbol || !price || submitting) return
     setSubmitting(true)
 
-    const trade_time = new Date().toISOString()
+    let trade_time: string
+    if (useCustomTime && customTime) {
+      trade_time = new Date(customTime).toISOString()
+    } else {
+      trade_time = new Date().toISOString()
+    }
+
     const mainQty = parseFloat(quantity) || 0
     const validExtras = extraPrices.filter(p => p.price !== '')
     const allEntries = [
@@ -147,6 +153,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     setFee('0'); setTp(''); setSl('')
     setStrategy(''); setRemark('')
     setExtraPrices([])
+    setUseCustomTime(false); setCustomTime('')
     setBigDIF(''); setBigDEA(''); setBigHist('')
     setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
     setSmallDIF(''); setSmallDEA(''); setSmallHist('')
@@ -206,7 +213,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             placeholder="MES, MNQ..." className="input" />
         </Field>
 
-        {/* 平倉時顯示庫存 */}
+        {/* 平倉庫存顯示 */}
         {isClose && symbol && (
           <div className="rounded-lg p-3" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
             <p className="text-xs text-gray-500 mb-2">
@@ -234,7 +241,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                     {avgOpenPrice.toFixed(2)} / {totalOpenQty}口
                   </span>
                 </div>
-                {/* 快速填入總口數 */}
                 <button
                   type="button"
                   onClick={() => setQuantity(String(totalOpenQty))}
@@ -248,7 +254,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
           </div>
         )}
 
-        {/* 進場價格 + 分倉 */}
+        {/* 價格 */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500">{isClose ? '平倉價格' : '進場價格'}</label>
@@ -258,7 +264,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 onClick={addExtraPrice}
                 className="text-xs px-1.5 py-0.5 rounded transition-colors"
                 style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
-                title="新增分倉價格"
               >
                 ＋ 分倉
               </button>
@@ -274,24 +279,20 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                   value={p.price}
                   onChange={e => updateExtraPrice(i, 'price', e.target.value)}
                   placeholder="分倉價格"
-                  type="number"
-                  step="0.01"
+                  type="number" step="0.01"
                   className="input flex-1"
                 />
                 <button
                   type="button"
                   onClick={() => removeExtraPrice(i)}
-                  className="text-xs px-2 rounded transition-colors flex-shrink-0"
+                  className="text-xs px-2 rounded flex-shrink-0"
                   style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-                >
-                  ✕
-                </button>
+                >✕</button>
               </div>
               <input
                 value={p.quantity}
                 onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
-                placeholder="口數"
-                type="number"
+                placeholder="口數" type="number"
                 className="input w-full mt-1"
               />
             </div>
@@ -339,6 +340,42 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             </Field>
           </div>
         )}
+
+        {/* 時間選擇 */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-500">時間</label>
+            <button
+              type="button"
+              onClick={() => {
+                setUseCustomTime(!useCustomTime)
+                if (!useCustomTime) {
+                  // 預設填入現在時間
+                  const now = new Date()
+                  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                  setCustomTime(local.toISOString().slice(0, 16))
+                }
+              }}
+              className="text-xs px-1.5 py-0.5 rounded transition-colors"
+              style={useCustomTime
+                ? { background: '#2a1a00', color: '#d4a843', border: '1px solid #3a2a00' }
+                : { background: '#1a1a1a', color: '#666', border: '1px solid #2a2a2a' }
+              }
+            >
+              {useCustomTime ? '自訂時間' : '現在時間'}
+            </button>
+          </div>
+          {useCustomTime ? (
+            <input
+              value={customTime}
+              onChange={e => setCustomTime(e.target.value)}
+              type="datetime-local"
+              className="input"
+            />
+          ) : (
+            <p className="text-xs text-gray-600 px-1">送出時自動記錄現在時間</p>
+          )}
+        </div>
 
         <Field label="策略">
           <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
