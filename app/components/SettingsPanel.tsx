@@ -106,9 +106,14 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
     const tickValue = symbolInfo?.tick_value || 1
     console.log(`🔍 ${cleanSymbol} → tickSize:${tickSize} tickValue:${tickValue}`)
 
-    orders.sort((a, b) =>
-      new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
-    )
+    orders.sort((a, b) => {
+  const timeDiff = new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
+  if (timeDiff !== 0) return timeDiff
+  // 同時間，買入排前面
+  if (a['Side'] === '買入' && b['Side'] === '賣出') return -1
+  if (a['Side'] === '賣出' && b['Side'] === '買入') return 1
+  return 0
+})
 
     const buyQueue: any[] = []
     const sellQueue: any[] = []
