@@ -31,7 +31,11 @@ type Tag = {
 
 const INDICATOR_OPTIONS = ['MACD', 'RSI', 'KDJ']
 
-export default function SettingsPanel() {
+type SettingsProps = {
+  onImported?: () => void
+}
+
+export default function SettingsPanel({ onImported }: SettingsProps) {
   const [symbols, setSymbols] = useState<Symbol[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
@@ -350,9 +354,10 @@ export default function SettingsPanel() {
       })
       const result = await res.json()
       if (res.ok) {
-        setImportStatus('done')
-        setImportMessage(`匯入完成：成功 ${result.count} 筆`)
-      } else {
+  setImportStatus('done')
+  setImportMessage(`匯入完成：成功 ${result.count} 筆`)
+  onImported?.()
+} else {
         setImportStatus('error')
         setImportMessage(`匯入失敗：${result.error}`)
       }
