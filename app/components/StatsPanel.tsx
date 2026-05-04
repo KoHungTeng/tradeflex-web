@@ -15,6 +15,7 @@ type CardItem = {
   isPrice?: boolean
   suffix?: string
   empty?: boolean
+  custom?: string
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
@@ -25,15 +26,45 @@ export default function StatsPanel({ completed, trades }: Props) {
   const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0
   const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : 0
 
-  const today = new Date().toDateString()
+  const today = new Date()
   const todayPnL = completed
-    .filter(t => new Date(t.close_time).toDateString() === today)
+    .filter(t => new Date(t.close_time).toDateString() === today.toDateString())
     .reduce((s, t) => s + t.pnl, 0)
 
-  const thisMonth = new Date().getMonth()
+  const thisMonth = today.getMonth()
   const monthPnL = completed
     .filter(t => new Date(t.close_time).getMonth() === thisMonth)
     .reduce((s, t) => s + t.pnl, 0)
+
+  // 本週盈虧
+  const startOfWeek = new Date(today)
+  startOfWeek.setDate(today.getDate() - today.getDay())
+  startOfWeek.setHours(0, 0, 0, 0)
+  const weekPnL = completed
+    .filter(t => new Date(t.close_time) >= startOfWeek)
+    .reduce((s, t) => s + t.pnl, 0)
+
+  // 平均持倉時間（分鐘）
+  const avgHoldMin = completed.length > 0
+    ? completed.reduce((s, t) => {
+        const diff = new Date(t.close_time).getTime() - new Date(t.open_time).getTime()
+        return s + diff / 60000
+      }, 0) / completed.length
+    : 0
+  const avgHoldDisplay = avgHoldMin < 60
+    ? `${avgHoldMin.toFixed(0)}m`
+    : avgHoldMin < 1440
+    ? `${(avgHoldMin / 60).toFixed(1)}h`
+    : `${(avgHoldMin / 1440).toFixed(1)}d`
+
+  // 盈虧比達成率（實際盈虧比 vs 目標1:2）
+  const tradesWithRR = completed.filter(t => {
+    const trade = trades.find(tr => tr.strategy === t.strategy)
+    return trade?.tp && trade?.sl
+  })
+  const rrAchieveRate = wins.length > 0 && losses.length > 0
+    ? Math.abs(avgWin / avgLoss)
+    : 0
 
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
   completed.forEach(t => {
@@ -61,12 +92,16 @@ export default function StatsPanel({ completed, trades }: Props) {
   const initialCards: CardItem[] = [
     { id: 'totalPnL', label: '總盈虧', value: totalPnL, isPrice: true },
     { id: 'todayPnL', label: '今日盈虧', value: todayPnL, isPrice: true },
+    { id: 'weekPnL', label: '本週盈虧', value: weekPnL, isPrice: true },
     { id: 'monthPnL', label: '本月盈虧', value: monthPnL, isPrice: true },
     { id: 'winRate', label: '勝率', value: winRate, suffix: '%' },
     { id: 'total', label: '總交易數', value: completed.length },
     { id: 'avgWin', label: '平均獲利', value: avgWin, isPrice: true },
     { id: 'avgLoss', label: '平均虧損', value: avgLoss, isPrice: true },
-    { id: 'empty', label: '', value: 0, empty: true },
+    { id: 'rrRate', label: '盈虧比', value: rrAchieveRate, custom: `${rrAchieveRate.toFixed(2)}R` },
+    { id: 'holdTime', label: '平均持倉', value: 0, custom: avgHoldDisplay },
+    { id: 'empty1', label: '', value: 0, empty: true },
+    { id: 'empty2', label: '', value: 0, empty: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
@@ -79,16 +114,16 @@ export default function StatsPanel({ completed, trades }: Props) {
   }
 
   function onMouseEnter(index: number) {
-  if (draggingIndex.current === null || draggingIndex.current === index) return
-  setCards(prev => {
-    const next = [...prev]
-    const temp = next[draggingIndex.current!]
-    next[draggingIndex.current!] = next[index]
-    next[index] = temp
-    draggingIndex.current = index
-    return next
-  })
-}
+    if (draggingIndex.current === null || draggingIndex.current === index) return
+    setCards(prev => {
+      const next = [...prev]
+      const temp = next[draggingIndex.current!]
+      next[draggingIndex.current!] = next[index]
+      next[index] = temp
+      draggingIndex.current = index
+      return next
+    })
+  }
 
   function onMouseUp() {
     draggingIndex.current = null
@@ -113,18 +148,23 @@ export default function StatsPanel({ completed, trades }: Props) {
               onMouseDown={() => !card.empty && onMouseDown(index, card.id)}
               onMouseEnter={() => onMouseEnter(index)}
               onMouseUp={onMouseUp}
-              className={`bg-[#111111] rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
-                card.empty ? 'opacity-20 cursor-default' : 'cursor-grab active:cursor-grabbing'
+              className={`rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
+                card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
               } ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
+              style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}
             >
               {!card.empty && (
                 <>
                   <div className="text-xs text-gray-500">{card.label}</div>
-                  <div className={`text-xl font-bold ${color}`}>
-                    {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
-                    {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
-                    {card.suffix}
-                  </div>
+                  {card.custom ? (
+                    <div className="text-xl font-bold text-[#d4a843]">{card.custom}</div>
+                  ) : (
+                    <div className={`text-xl font-bold ${color}`}>
+                      {card.isPrice && card.value !== 0 && isPos ? '+' : ''}
+                      {card.isPrice ? card.value.toFixed(0) : card.value.toFixed(card.suffix ? 1 : 0)}
+                      {card.suffix}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -132,7 +172,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         })}
       </div>
 
-      <div className="bg-[#111111] rounded-xl p-5 mb-4">
+      <div className="rounded-xl p-5 mb-4" style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
         <h3 className="text-sm font-semibold text-gray-400 mb-4">近 7 天盈虧</h3>
         <div className="flex items-end gap-2 h-32">
           {last7.map(d => {
@@ -150,7 +190,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       style={{ height: `${Math.max(height, 4)}%` }}
                     />
                   )}
-                  {d.pnl === 0 && <div className="w-full h-0.5 bg-[#222222] mt-auto" />}
+                  {d.pnl === 0 && <div className="w-full h-0.5 mt-auto" style={{ background: '#2a2a2a' }} />}
                 </div>
                 <span className="text-xs text-gray-500">{d.date}</span>
               </div>
@@ -160,7 +200,7 @@ export default function StatsPanel({ completed, trades }: Props) {
       </div>
 
       {Object.keys(strategyMap).length > 0 && (
-        <div className="bg-[#111111] rounded-xl p-5">
+        <div className="rounded-xl p-5" style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
           <h3 className="text-sm font-semibold text-gray-400 mb-4">策略勝率</h3>
           <div className="space-y-3">
             {Object.entries(strategyMap).map(([name, data]) => {
@@ -179,7 +219,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       </span>
                     </div>
                   </div>
-                  <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
                     <div
                       className={`h-full rounded-full ${rate >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
                       style={{ width: `${rate}%` }}
