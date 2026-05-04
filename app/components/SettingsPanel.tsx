@@ -365,16 +365,35 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   }
 
   // ── 匯入 CSV ──────────────────────────────────────────
-  function parseCSVLines(lines: string[], headers: string[]) {
-    return lines.slice(1).map(line => {
-      const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
-      const row: any = {}
-      headers.forEach((h, i) => {
-        row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
-      })
-      return row
-    })
+  function parseCSVLine(line: string): string[] {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (ch === '"') {
+      inQuotes = !inQuotes
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+    } else {
+      current += ch
+    }
   }
+  result.push(current.trim())
+  return result
+}
+
+function parseCSVLines(lines: string[], headers: string[]) {
+  return lines.slice(1).map(line => {
+    const values = parseCSVLine(line)
+    const row: any = {}
+    headers.forEach((h, i) => {
+      row[h] = (values[i] || '').trim()
+    })
+    return row
+  })
+}
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
