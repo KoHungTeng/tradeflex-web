@@ -149,8 +149,24 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.fee || '--'}</td>
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).tp || '--'}</td>
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).sl || '--'}</td>
-                <td className="py-2 px-3 text-blue-400 text-xs whitespace-nowrap overflow-hidden">{t.strategy || '--'}</td>
-                <td className="py-2 px-3 text-gray-400 text-xs whitespace-nowrap overflow-hidden">{t.remark || '--'}</td>
+                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
+  <EditableCell
+    value={t.strategy || ''}
+    tradeId={t.id}
+    field="strategy"
+    color="text-blue-400"
+    onSaved={onCompletedChanged}
+  />
+</td>
+<td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
+  <EditableCell
+    value={t.remark || ''}
+    tradeId={t.id}
+    field="remark"
+    color="text-gray-400"
+    onSaved={onCompletedChanged}
+  />
+</td>
                 <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
                   {formatTime(t.trade_time)}
                 </td>
@@ -203,4 +219,46 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       )}
     </div>
   )
-}
+function EditableCell({ value, tradeId, field, color, onSaved }: {
+  value: string
+  tradeId: string
+  field: string
+  color: string
+  onSaved: () => void
+}) {
+  const [editing, setEditing] = useState(false)
+  const [val, setVal] = useState(value)
+
+  async function save() {
+    setEditing(false)
+    if (val === value) return
+    await fetch(`/api/trades?id=${tradeId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: val }),
+    })
+    onSaved()
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={val}
+        onChange={e => setVal(e.target.value)}
+        onBlur={save}
+        onKeyDown={e => { if (e.key === 'Enter') save() }}
+        className="bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+      />
+    )
+  }
+
+  return (
+    <div
+      onClick={() => setEditing(true)}
+      className={`cursor-pointer flex items-center gap-1 group ${color}`}
+    >
+      {val || <span className="text-gray-600 group-hover:text-gray-400">+</span>}
+    </div>
+  )
+}}
