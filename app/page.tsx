@@ -117,13 +117,13 @@ export default function Home() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-gray-950 text-white text-lg">
+    <div className="flex items-center justify-center h-screen bg-black text-white text-lg">
       載入中...
     </div>
   )
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar
         page={page}
         setPage={setPage}
@@ -163,7 +163,7 @@ export default function Home() {
             <h2 className="text-lg font-semibold mb-4">歷史記錄</h2>
             <div className="space-y-2">
               {completed.map(ct => (
-                <div key={ct.id} className="bg-gray-900 rounded-lg p-4 flex items-center justify-between">
+                <div key={ct.id} className="bg-[#111111] rounded-lg p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
                       {ct.direction === 'long' ? '多' : '空'}

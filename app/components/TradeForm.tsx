@@ -114,7 +114,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   }
 
   return (
-    <div className="w-64 bg-gray-900 border-r border-gray-800 p-4 overflow-y-auto flex flex-col gap-3">
+    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 overflow-y-auto flex flex-col gap-3">
       <h2 className="text-sm font-semibold text-gray-400">新增交易</h2>
 
       <div className="grid grid-cols-4 gap-1">
@@ -127,7 +127,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 ? a === '做多' || a === '平多'
                   ? 'bg-green-600 text-white'
                   : 'bg-red-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
             }`}
           >
             {a}
@@ -272,7 +272,7 @@ function MiniField({ label, value, onChange }: {
         type="number"
         step="0.01"
         placeholder="--"
-        className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-white text-center"
+        className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-white text-center"
       />
     </div>
   )

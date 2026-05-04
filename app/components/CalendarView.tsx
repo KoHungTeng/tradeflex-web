@@ -86,7 +86,7 @@ async function deleteNote(id: string) {
   return (
     <div className="flex-1 overflow-auto p-6" onClick={() => { setSelectedDay(null); setNoteInput('') }}>
       <div className="flex items-center justify-between mb-6">
-        <button onClick={prevMonth} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">←</button>
+        <button onClick={prevMonth} className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors">←</button>
         <div className="text-center">
           <h2 className="text-xl font-bold">{year} 年 {monthNames[month]}</h2>
           <div className="flex gap-4 mt-1 text-sm justify-center">
@@ -99,7 +99,7 @@ async function deleteNote(id: string) {
             </span>
           </div>
         </div>
-        <button onClick={nextMonth} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">→</button>
+        <button onClick={nextMonth} className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors">→</button>
       </div>
 
       <div className="grid grid-cols-7 mb-2">
@@ -132,7 +132,7 @@ async function deleteNote(id: string) {
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''} ${
                   hasTrade
                     ? pnl > 0 ? 'bg-green-900/30 hover:bg-green-900/50' : 'bg-red-900/30 hover:bg-red-900/50'
-                    : 'bg-gray-900 hover:bg-gray-800'
+                    : 'bg-[#111111] hover:bg-[#1a1a1a]'
                 }`}
               >
                 <span className={`text-xs font-medium ${isToday ? 'text-amber-400' : 'text-gray-400'}`}>{day}</span>
@@ -149,7 +149,7 @@ async function deleteNote(id: string) {
               {isSelected && (
                 <div
                   onClick={e => e.stopPropagation()}
-                  className="mt-1 bg-gray-800 rounded-lg p-3"
+                  className="mt-1 bg-[#1a1a1a] rounded-lg p-3"
                 >
                   <p className="text-xs text-gray-400 mb-2">{year}/{month + 1}/{day} 備注</p>
                   {notes.map(n => (
@@ -165,7 +165,7 @@ async function deleteNote(id: string) {
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveNote() } }}
                       placeholder="輸入備注..."
                       autoFocus
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500"
+                      className="flex-1 bg-[#222222] border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500"
                     />
                     <button onClick={saveNote} disabled={saving} className="px-2 py-1 bg-amber-600 hover:bg-amber-700 rounded text-xs text-white disabled:opacity-50">儲存</button>
                   </div>

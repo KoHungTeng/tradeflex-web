@@ -41,14 +41,14 @@ async function deleteNote(id: string) {
 }
 
   return (
-    <div className="border-t border-gray-800 bg-gray-900 px-4 py-3">
+    <div className="border-t border-[#222222] bg-[#111111] px-4 py-3">
       <div className="flex gap-2 mb-2">
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNote() } }}
           placeholder="📝 隨手筆記，按 Enter 儲存..."
-          className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+          className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
         />
         <button
           onClick={addNote}
@@ -62,7 +62,7 @@ async function deleteNote(id: string) {
       {notes.length > 0 && (
         <div className="max-h-28 overflow-y-auto flex flex-col gap-1">
           {notes.map(n => (
-            <div key={n.id} className="flex items-center justify-between bg-gray-800 rounded px-3 py-1.5 text-sm group">
+            <div key={n.id} className="flex items-center justify-between bg-[#1a1a1a] rounded px-3 py-1.5 text-sm group">
               <div className="flex items-center gap-3">
                 <span className="text-gray-500 text-xs">•</span>
                 <span className="text-white">{n.text}</span>

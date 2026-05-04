@@ -48,7 +48,7 @@ export default function StrategyAnalysis({ completed }: Props) {
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               selected === s
                 ? 'bg-amber-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
             }`}
           >
             {s}
@@ -62,23 +62,23 @@ export default function StrategyAnalysis({ completed }: Props) {
         <div className="space-y-4">
           {/* 總覽 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-900 rounded-xl p-4">
+            <div className="bg-[#111111] rounded-xl p-4">
               <div className="text-xs text-gray-500 mb-1">總交易</div>
               <div className="text-2xl font-bold">{filtered.length} 筆</div>
             </div>
-            <div className="bg-gray-900 rounded-xl p-4">
+            <div className="bg-[#111111] rounded-xl p-4">
               <div className="text-xs text-gray-500 mb-1">勝率</div>
               <div className={`text-2xl font-bold ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                 {winRate.toFixed(1)}%
               </div>
             </div>
-            <div className="bg-gray-900 rounded-xl p-4">
+            <div className="bg-[#111111] rounded-xl p-4">
               <div className="text-xs text-gray-500 mb-1">總盈虧</div>
               <div className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(0)}
               </div>
             </div>
-            <div className="bg-gray-900 rounded-xl p-4">
+            <div className="bg-[#111111] rounded-xl p-4">
               <div className="text-xs text-gray-500 mb-1">{wins.length} 勝 / {losses.length} 敗</div>
               <div className="text-2xl font-bold">
                 <span className="text-green-400">+{avgWin.toFixed(0)}</span>
@@ -105,11 +105,11 @@ export default function StrategyAnalysis({ completed }: Props) {
           </div>
 
           {/* 交易記錄 */}
-          <div className="bg-gray-900 rounded-xl p-4">
+          <div className="bg-[#111111] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-gray-400 mb-3">交易明細</h3>
             <div className="space-y-2">
               {filtered.map(t => (
-                <div key={t.id} className="flex items-center justify-between py-2 border-b border-gray-800">
+                <div key={t.id} className="flex items-center justify-between py-2 border-b border-[#222222]">
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-0.5 rounded text-xs ${
                       t.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'

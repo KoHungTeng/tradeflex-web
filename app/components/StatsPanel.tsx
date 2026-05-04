@@ -113,7 +113,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               onMouseDown={() => !card.empty && onMouseDown(index, card.id)}
               onMouseEnter={() => onMouseEnter(index)}
               onMouseUp={onMouseUp}
-              className={`bg-gray-900 rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
+              className={`bg-[#111111] rounded-xl p-4 h-24 flex flex-col justify-between select-none transition-all ${
                 card.empty ? 'opacity-20 cursor-default' : 'cursor-grab active:cursor-grabbing'
               } ${isDragging ? 'ring-2 ring-amber-500 opacity-70 scale-95' : ''}`}
             >
@@ -132,7 +132,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         })}
       </div>
 
-      <div className="bg-gray-900 rounded-xl p-5 mb-4">
+      <div className="bg-[#111111] rounded-xl p-5 mb-4">
         <h3 className="text-sm font-semibold text-gray-400 mb-4">近 7 天盈虧</h3>
         <div className="flex items-end gap-2 h-32">
           {last7.map(d => {
@@ -150,7 +150,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       style={{ height: `${Math.max(height, 4)}%` }}
                     />
                   )}
-                  {d.pnl === 0 && <div className="w-full h-0.5 bg-gray-700 mt-auto" />}
+                  {d.pnl === 0 && <div className="w-full h-0.5 bg-[#222222] mt-auto" />}
                 </div>
                 <span className="text-xs text-gray-500">{d.date}</span>
               </div>
@@ -160,7 +160,7 @@ export default function StatsPanel({ completed, trades }: Props) {
       </div>
 
       {Object.keys(strategyMap).length > 0 && (
-        <div className="bg-gray-900 rounded-xl p-5">
+        <div className="bg-[#111111] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-gray-400 mb-4">策略勝率</h3>
           <div className="space-y-3">
             {Object.entries(strategyMap).map(([name, data]) => {
@@ -179,7 +179,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       </span>
                     </div>
                   </div>
-                  <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${rate >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
                       style={{ width: `${rate}%` }}

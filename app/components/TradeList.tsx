@@ -54,7 +54,7 @@ function EditableCell({ value, tradeId, field, color, onSaved }: {
         onChange={e => setVal(e.target.value)}
         onBlur={save}
         onKeyDown={e => { if (e.key === 'Enter') save() }}
-        className="bg-gray-700 border border-amber-500 rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+        className="bg-[#222222] border border-amber-500 rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
       />
     )
   }
@@ -74,7 +74,7 @@ function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } 
   if (!hasData) return null
   return (
     <div
-      className="fixed z-50 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-xl text-xs pointer-events-none"
+      className="fixed z-50 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg p-3 shadow-xl text-xs pointer-events-none"
       style={{ left: pos.x + 10, top: pos.y + 10, minWidth: 320 }}
     >
       <div className="grid grid-cols-2 gap-4">
@@ -199,7 +199,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
             ))}
           </colgroup>
           <thead>
-            <tr className="text-gray-500 border-b border-gray-800 text-left">
+            <tr className="text-gray-500 border-b border-[#222222] text-left">
               {COLS.map(col => (
                 <th
                   key={col.key}
@@ -221,7 +221,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
             {trades.map(t => (
               <tr
                 key={t.id}
-                className="border-b border-gray-800/50 hover:bg-gray-900/50"
+                className="border-b border-[#222222]/50 hover:bg-[#111111]/50"
                 onMouseEnter={() => setHoveredTrade(t)}
                 onMouseLeave={() => setHoveredTrade(null)}
               >
