@@ -50,7 +50,17 @@ export async function DELETE(request: NextRequest) {
   const symbol = searchParams.get('symbol')
   const action = searchParams.get('action')
   const portfolio_id = searchParams.get('portfolio_id')
-  if (!trade_time || !symbol || !action || !portfolio_id) return NextResponse.json({ error: 'missing params' }, { status: 400 })
+
+  // 沒有參數 = 清除全部
+  if (!trade_time && !symbol && !action && !portfolio_id) {
+    const { error } = await supabase.from('completed_trades').delete().eq('user_id', user.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  }
+
+  if (!trade_time || !symbol || !action || !portfolio_id) {
+    return NextResponse.json({ error: 'missing params' }, { status: 400 })
+  }
   const tradeTime = new Date(trade_time)
   const from = new Date(tradeTime.getTime() - 10000).toISOString()
   const to = new Date(tradeTime.getTime() + 10000).toISOString()

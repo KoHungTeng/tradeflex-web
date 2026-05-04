@@ -88,34 +88,25 @@ function getOrderPrice(order: any): number {
 
 function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
   const filled = rows.filter(r => r['狀態'] === '已成交')
-
   const bySymbol: Record<string, any[]> = {}
   filled.forEach(r => {
     const sym = r['商品']
     if (!bySymbol[sym]) bySymbol[sym] = []
     bySymbol[sym].push(r)
   })
-
   const results: any[] = []
-
   Object.entries(bySymbol).forEach(([symbolKey, orders]) => {
     const cleanSymbol = symbolKey
-      .replace('CME_MINI:', '')
-      .replace('CME_MICRO:', '')
-      .replace('BINANCE:', '')
-      .replace('BITUNIX:', '')
-      .split(':')[0]
-      .split('!')[0]
-
+      .replace('CME_MINI:', '').replace('CME_MICRO:', '')
+      .replace('BINANCE:', '').replace('BITUNIX:', '')
+      .split(':')[0].split('!')[0]
     const symbolInfo = symbolsData.find(s => {
       const sName = s.name.toUpperCase().replace(/\d+$/, '')
       const cName = cleanSymbol.toUpperCase().replace(/\d+$/, '')
       return sName === cName || s.name.toUpperCase() === cleanSymbol.toUpperCase()
     })
-
     const tickSize = symbolInfo?.tick_size || 1
     const tickValue = symbolInfo?.tick_value || 1
-
     orders.sort((a, b) => {
       const timeDiff = new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
       if (timeDiff !== 0) return timeDiff
@@ -123,51 +114,31 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
       if (a['Side'] === '賣出' && b['Side'] === '買入') return 1
       return 0
     })
-
     const buyQueue: any[] = []
     const sellQueue: any[] = []
-
     orders.forEach(order => {
       const price = getOrderPrice(order)
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
-
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
           const openPrice = getOrderPrice(open)
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
-          const ticks = (openPrice - price) / tickSize
-          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          results.push({
-            symbol: cleanSymbol, direction: 'short',
-            open_price: openPrice, close_price: price, quantity: matchQty,
-            open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl,
-            open_time: new Date(open['Placing time']).toISOString(),
-            close_time: new Date(order['Placing time']).toISOString(),
-            strategy: '', remark: '',
-          })
+          const pnl = Math.round((openPrice - price) / tickSize * tickValue * matchQty * 100) / 100
+          results.push({ symbol: cleanSymbol, direction: 'short', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl, open_time: new Date(open['Placing time']).toISOString(), close_time: new Date(order['Placing time']).toISOString(), strategy: '', remark: '' })
         } else { buyQueue.push(order) }
       } else if (order['Side'] === '賣出') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
           const openPrice = getOrderPrice(open)
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
-          const ticks = (price - openPrice) / tickSize
-          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          results.push({
-            symbol: cleanSymbol, direction: 'long',
-            open_price: openPrice, close_price: price, quantity: matchQty,
-            open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl,
-            open_time: new Date(open['Placing time']).toISOString(),
-            close_time: new Date(order['Placing time']).toISOString(),
-            strategy: '', remark: '',
-          })
+          const pnl = Math.round((price - openPrice) / tickSize * tickValue * matchQty * 100) / 100
+          results.push({ symbol: cleanSymbol, direction: 'long', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['佣金']) || 0, close_fee: fee, pnl, open_time: new Date(open['Placing time']).toISOString(), close_time: new Date(order['Placing time']).toISOString(), strategy: '', remark: '' })
         } else { sellQueue.push(order) }
       }
     })
   })
-
   return results
 }
 
@@ -179,12 +150,9 @@ function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
     if (!byContract[contract]) byContract[contract] = []
     byContract[contract].push(r)
   })
-
   const results: any[] = []
-
   Object.entries(byContract).forEach(([contract, fills]) => {
     const product = fills[0]['Product']?.trim() || contract
-
     const csvTickSize = parseFloat(fills[0]['_tickSize'])
     const symbolInfo = symbolsData.find(s => {
       const sName = s.name.toUpperCase().replace(/\d+$/, '')
@@ -193,56 +161,33 @@ function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
     })
     const tickSize = csvTickSize > 0 ? csvTickSize : (symbolInfo?.tick_size || 1)
     const tickValue = symbolInfo?.tick_value || 1
-
-    fills.sort((a, b) =>
-      new Date(a['_timestamp']).getTime() - new Date(b['_timestamp']).getTime()
-    )
-
+    fills.sort((a, b) => new Date(a['_timestamp']).getTime() - new Date(b['_timestamp']).getTime())
     const buyQueue: any[] = []
     const sellQueue: any[] = []
-
     fills.forEach(fill => {
       const side = (fill['B/S'] || '').trim()
       const price = parseFloat(fill['Price']) || 0
       const qty = parseFloat(fill['Quantity']) || 1
       const fee = parseFloat(fill['commission']) || 0
-
       if (side === 'Buy') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
           const openPrice = parseFloat(open['Price']) || 0
           const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
-          const ticks = (openPrice - price) / tickSize
-          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          results.push({
-            symbol: product, direction: 'short',
-            open_price: openPrice, close_price: price, quantity: matchQty,
-            open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl,
-            open_time: new Date(open['_timestamp']).toISOString(),
-            close_time: new Date(fill['_timestamp']).toISOString(),
-            strategy: '', remark: '',
-          })
+          const pnl = Math.round((openPrice - price) / tickSize * tickValue * matchQty * 100) / 100
+          results.push({ symbol: product, direction: 'short', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl, open_time: new Date(open['_timestamp']).toISOString(), close_time: new Date(fill['_timestamp']).toISOString(), strategy: '', remark: '' })
         } else { buyQueue.push(fill) }
       } else if (side === 'Sell') {
         if (buyQueue.length > 0) {
           const open = buyQueue.shift()
           const openPrice = parseFloat(open['Price']) || 0
           const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
-          const ticks = (price - openPrice) / tickSize
-          const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
-          results.push({
-            symbol: product, direction: 'long',
-            open_price: openPrice, close_price: price, quantity: matchQty,
-            open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl,
-            open_time: new Date(open['_timestamp']).toISOString(),
-            close_time: new Date(fill['_timestamp']).toISOString(),
-            strategy: '', remark: '',
-          })
+          const pnl = Math.round((price - openPrice) / tickSize * tickValue * matchQty * 100) / 100
+          results.push({ symbol: product, direction: 'long', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl, open_time: new Date(open['_timestamp']).toISOString(), close_time: new Date(fill['_timestamp']).toISOString(), strategy: '', remark: '' })
         } else { sellQueue.push(fill) }
       }
     })
   })
-
   return results
 }
 
@@ -277,6 +222,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [exportRange, setExportRange] = useState<'all' | 'custom'>('all')
   const [exportFrom, setExportFrom] = useState('')
   const [exportTo, setExportTo] = useState('')
+  const [clearStatus, setClearStatus] = useState<'idle' | 'confirm' | 'clearing' | 'done'>('idle')
 
   useEffect(() => {
     fetch('/api/capital').then(r => r.json()).then(data => {
@@ -436,7 +382,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   async function exportCSV() {
     const res = await fetch('/api/completed')
     const trades: any[] = await res.json()
-
     let filtered = trades
     if (exportRange === 'custom' && exportFrom) {
       filtered = filtered.filter(t => t.close_time >= exportFrom)
@@ -444,26 +389,18 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     if (exportRange === 'custom' && exportTo) {
       filtered = filtered.filter(t => t.close_time <= exportTo + 'T23:59:59')
     }
-
-    const headers = [
-      '平倉時間', '開倉時間', '標的', '方向', '開倉價', '平倉價',
-      '口數', '開倉手續費', '平倉手續費', '盈虧', '策略', '備註'
-    ]
-
+    const headers = ['平倉時間', '開倉時間', '標的', '方向', '開倉價', '平倉價', '口數', '開倉手續費', '平倉手續費', '盈虧', '策略', '備註']
     const rows = filtered.map(t => [
       t.close_time ? new Date(t.close_time).toLocaleString('zh-TW') : '',
       t.open_time ? new Date(t.open_time).toLocaleString('zh-TW') : '',
-      t.symbol,
-      t.direction === 'long' ? '做多' : '做空',
+      t.symbol, t.direction === 'long' ? '做多' : '做空',
       t.open_price, t.close_price, t.quantity,
       t.open_fee, t.close_fee, t.pnl,
       t.strategy || '', t.remark || '',
     ])
-
     const csvContent = [headers, ...rows]
       .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n')
-
     const bom = '\uFEFF'
     const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -472,6 +409,13 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     a.download = `tradeflex_${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  async function clearAllTrades() {
+    setClearStatus('clearing')
+    await fetch('/api/completed', { method: 'DELETE' })
+    await fetch('/api/trades', { method: 'DELETE' })
+    setClearStatus('done')
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -489,15 +433,12 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       }
       const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim())
       const format = detectFormat(headers)
-
       if (format === 'unknown') {
         setImportStatus('error')
         setImportMessage('不支援的 CSV 格式，目前支援：TradeFlex、TradingView、Tradovate 格式')
         return
       }
-
       const rawRows = parseCSVLines(lines, headers)
-
       if (format === 'tradingview') {
         const converted = parseTradingViewCSV(rawRows, symbols)
         setConvertedRows(converted)
@@ -513,7 +454,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         setImportPreview(rawRows.slice(0, 5))
         setImportMessage(`偵測到 TradeFlex 格式，共 ${rawRows.length} 筆資料，預覽前 5 筆`)
       }
-
       setImportFormat(format)
       setImportStatus('preview')
     }
@@ -523,7 +463,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   async function confirmImport() {
     if (convertedRows.length === 0) return
     setImportStatus('importing')
-
     const portfolioRes = await fetch('/api/portfolios')
     const portfolios = await portfolioRes.json()
     const portfolioId = portfolios[0]?.id
@@ -532,7 +471,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       setImportMessage('找不到投資組合，請先建立一個')
       return
     }
-
     const payload = convertedRows.map((row: any) => {
       if (importFormat === 'tradingview' || importFormat === 'tradovate') {
         return { ...row, portfolio_id: portfolioId }
@@ -553,7 +491,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
       }
     })
-
     try {
       const res = await fetch('/api/completed/bulk', {
         method: 'POST',
@@ -573,7 +510,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       setImportStatus('error')
       setImportMessage('匯入失敗，請稍後再試')
     }
-
     setImportPreview([])
     setConvertedRows([])
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -810,6 +746,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
       {activeTab === 'data' && (
         <div className="space-y-6">
+
+          {/* 匯出 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯出交易記錄</h3>
             <p className="text-xs text-gray-600 mb-4">將已完成的交易匯出為 CSV 檔案，可用 Excel 開啟</p>
@@ -830,6 +768,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>↓ 下載 CSV</button>
           </div>
 
+          {/* 匯入 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
             <p className="text-xs text-gray-600 mb-1">支援格式：</p>
@@ -898,6 +837,36 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               </div>
             )}
           </div>
+
+          {/* 清除資料 */}
+          <div className="rounded-xl p-4" style={{ background: 'linear-gradient(160deg, #1a0a0a 0%, #110808 100%)', border: '1px solid #3a1a1a' }}>
+            <h3 className="text-sm font-semibold text-red-400 mb-1">清除歷史記錄</h3>
+            <p className="text-xs text-gray-600 mb-4">清除後無法復原，建議先匯出備份再操作</p>
+            {clearStatus === 'idle' && (
+              <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}>
+                清除所有歷史記錄
+              </button>
+            )}
+            {clearStatus === 'confirm' && (
+              <div>
+                <p className="text-xs text-red-400 mb-3">確定要清除所有歷史記錄嗎？此操作無法復原！</p>
+                <div className="flex gap-3">
+                  <button onClick={clearAllTrades} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#7f1d1d', color: '#fca5a5' }}>確定清除</button>
+                  <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>取消</button>
+                </div>
+              </div>
+            )}
+            {clearStatus === 'clearing' && (
+              <p className="text-xs text-red-400">清除中...</p>
+            )}
+            {clearStatus === 'done' && (
+              <div>
+                <p className="text-xs text-green-400 mb-3">已清除所有歷史記錄</p>
+                <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>關閉</button>
+              </div>
+            )}
+          </div>
+
         </div>
       )}
     </div>

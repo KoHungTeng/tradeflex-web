@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 async function getSupabaseAndUser(request: Request) {
@@ -83,6 +82,14 @@ export async function DELETE(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+
+  // 沒有 id = 清除全部
+  if (!id) {
+    const { error } = await supabase.from('trades').delete().eq('user_id', user.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  }
+
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
   const { data: trade } = await supabase.from('trades').select('*').eq('id', id).eq('user_id', user.id).single()
   const { error } = await supabase.from('trades').delete().eq('id', id).eq('user_id', user.id)
