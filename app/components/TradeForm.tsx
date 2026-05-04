@@ -18,6 +18,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
   const [price, setPrice] = useState('')
+  const [extraPrices, setExtraPrices] = useState<string[]>([])
   const [quantity, setQuantity] = useState('1')
   const [fee, setFee] = useState('0')
   const [tp, setTp] = useState('')
@@ -59,11 +60,23 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
   const [tags, setTags] = useState<{id: string, name: string}[]>([])
 
-useEffect(() => {
-  fetch('/api/tags').then(r => r.json()).then(data => {
-    setTags(Array.isArray(data) ? data : [])
-  })
-}, [])
+  useEffect(() => {
+    fetch('/api/tags').then(r => r.json()).then(data => {
+      setTags(Array.isArray(data) ? data : [])
+    })
+  }, [])
+
+  function addExtraPrice() {
+    setExtraPrices(prev => [...prev, ''])
+  }
+
+  function updateExtraPrice(index: number, value: string) {
+    setExtraPrices(prev => prev.map((p, i) => i === index ? value : p))
+  }
+
+  function removeExtraPrice(index: number) {
+    setExtraPrices(prev => prev.filter((_, i) => i !== index))
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -71,14 +84,20 @@ useEffect(() => {
     setSubmitting(true)
 
     const trade_time = new Date().toISOString()
+
+    // 計算所有價格（主要價格 + 分倉價格）的平均
+    const allPrices = [parseFloat(price), ...extraPrices.filter(p => p !== '').map(p => parseFloat(p))]
+    const avgPrice = allPrices.reduce((a, b) => a + b, 0) / allPrices.length
+    const totalQuantity = parseFloat(quantity) * allPrices.length
+
     const newTrade: any = {
       id: crypto.randomUUID(),
       portfolio_id: activePortfolio,
       symbol: symbol.toUpperCase(),
       action,
-      price: parseFloat(price),
-      quantity: parseFloat(quantity),
-      fee: parseFloat(fee) * parseFloat(quantity),
+      price: Math.round(avgPrice * 100) / 100,
+      quantity: totalQuantity,
+      fee: parseFloat(fee) * totalQuantity,
       strategy,
       remark,
       trade_time,
@@ -89,6 +108,7 @@ useEffect(() => {
     setSymbol(''); setPrice(''); setQuantity('1')
     setFee('0'); setTp(''); setSl('')
     setStrategy(''); setRemark('')
+    setExtraPrices([])
     setBigDIF(''); setBigDEA(''); setBigHist('')
     setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
     setSmallDIF(''); setSmallDEA(''); setSmallHist('')
@@ -148,10 +168,57 @@ useEffect(() => {
             placeholder="MES, MNQ..." className="input" />
         </Field>
 
-        <Field label="價格">
+        {/* 進場價格 + 分倉按鈕 */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-gray-500">進場價格</label>
+            <button
+              type="button"
+              onClick={addExtraPrice}
+              className="text-xs px-1.5 py-0.5 rounded transition-colors"
+              style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
+              title="新增分倉價格"
+            >
+              ＋ 分倉
+            </button>
+          </div>
           <input value={price} onChange={e => setPrice(e.target.value)}
             placeholder="0.00" type="number" step="0.01" className="input" />
-        </Field>
+
+          {/* 分倉價格列表 */}
+          {extraPrices.map((p, i) => (
+            <div key={i} className="flex gap-1 mt-1.5">
+              <input
+                value={p}
+                onChange={e => updateExtraPrice(i, e.target.value)}
+                placeholder={`分倉 ${i + 1}`}
+                type="number"
+                step="0.01"
+                className="input flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => removeExtraPrice(i)}
+                className="text-xs px-2 rounded transition-colors"
+                style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+
+          {/* 有分倉時顯示平均價格提示 */}
+          {extraPrices.filter(p => p !== '').length > 0 && price && (
+            <p className="text-xs text-[#d4a843] mt-1">
+              均價：{(
+                [parseFloat(price), ...extraPrices.filter(p => p !== '').map(Number)]
+                  .reduce((a, b) => a + b, 0) /
+                (1 + extraPrices.filter(p => p !== '').length)
+              ).toFixed(2)}
+              ／共 {(1 + extraPrices.filter(p => p !== '').length) * parseFloat(quantity || '1')} 口
+            </p>
+          )}
+        </div>
 
         <div className="flex gap-2">
           <Field label="口數" className="flex-1">
@@ -187,24 +254,24 @@ useEffect(() => {
         </Field>
 
         <Field label="備註">
-  <input value={remark} onChange={e => setRemark(e.target.value)}
-    placeholder="選填" className="input mb-1" />
-  {tags.length > 0 && (
-    <div className="flex flex-wrap gap-1 mt-1">
-      {tags.map(t => (
-        <button
-          key={t.id}
-          type="button"
-          onClick={() => setRemark(prev => prev ? `${prev} #${t.name}` : `#${t.name}`)}
-          className="text-xs px-2 py-0.5 rounded-full transition-colors"
-          style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-        >
-          #{t.name}
-        </button>
-      ))}
-    </div>
-  )}
-</Field>
+          <input value={remark} onChange={e => setRemark(e.target.value)}
+            placeholder="選填" className="input mb-1" />
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {tags.map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setRemark(prev => prev ? `${prev} #${t.name}` : `#${t.name}`)}
+                  className="text-xs px-2 py-0.5 rounded-full transition-colors"
+                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+                >
+                  #{t.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </Field>
 
         {showIndicators && (
           <div className="space-y-3">
