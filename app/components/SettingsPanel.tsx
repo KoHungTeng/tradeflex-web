@@ -35,7 +35,7 @@ export default function SettingsPanel() {
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags'>('symbols')
+  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency'>('symbols')
 
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('期貨')
@@ -203,6 +203,7 @@ export default function SettingsPanel() {
           { key: 'categories', label: '類別設定' },
           { key: 'strategies', label: '策略設定' },
           { key: 'tags', label: '標籤設定' },
+          { key: 'currency', label: '幣值設定' },
         ].map(tab => (
           <button
             key={tab.key}
