@@ -272,7 +272,7 @@ function MiniField({ label, value, onChange }: {
         type="number"
         step="0.01"
         placeholder="--"
-        className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 text-white text-center"
+        className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-white text-center"
       />
     </div>
   )

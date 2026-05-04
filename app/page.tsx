@@ -171,7 +171,7 @@ export default function Home() {
                     <span className="font-semibold">{ct.symbol}</span>
                     <span className="text-gray-400 text-sm">{ct.open_price} → {ct.close_price}</span>
                     <span className="text-gray-400 text-sm">{ct.quantity} 口</span>
-                    {ct.strategy && <span className="text-blue-400 text-xs">{ct.strategy}</span>}
+                    {ct.strategy && <span className="text-amber-400 text-xs">{ct.strategy}</span>}
                   </div>
                   <div className="flex items-center gap-6">
                     <span className={`font-semibold ${ct.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>

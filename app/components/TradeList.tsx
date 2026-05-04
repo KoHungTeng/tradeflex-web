@@ -54,7 +54,7 @@ function EditableCell({ value, tradeId, field, color, onSaved }: {
         onChange={e => setVal(e.target.value)}
         onBlur={save}
         onKeyDown={e => { if (e.key === 'Enter') save() }}
-        className="bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+        className="bg-gray-700 border border-amber-500 rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
       />
     )
   }
@@ -209,7 +209,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   {col.key !== 'delete' && (
                     <div
                       onMouseDown={e => onResizeStart(e, col)}
-                      className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-blue-500 hover:opacity-50"
+                      className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-amber-500 hover:opacity-50"
                       style={{ zIndex: 10 }}
                     />
                   )}
@@ -237,7 +237,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).tp || '--'}</td>
                 <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{(t as any).sl || '--'}</td>
                 <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
-                  <EditableCell value={t.strategy || ''} tradeId={t.id} field="strategy" color="text-blue-400" onSaved={onCompletedChanged} />
+                  <EditableCell value={t.strategy || ''} tradeId={t.id} field="strategy" color="text-amber-400" onSaved={onCompletedChanged} />
                 </td>
                 <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
                   <EditableCell value={t.remark || ''} tradeId={t.id} field="remark" color="text-gray-400" onSaved={onCompletedChanged} />

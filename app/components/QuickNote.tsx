@@ -48,12 +48,12 @@ async function deleteNote(id: string) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNote() } }}
           placeholder="📝 隨手筆記，按 Enter 儲存..."
-          className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+          className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
         />
         <button
           onClick={addNote}
           disabled={submitting}
-          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white disabled:opacity-50"
+          className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 rounded text-xs text-white disabled:opacity-50"
         >
           新增
         </button>

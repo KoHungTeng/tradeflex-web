@@ -128,14 +128,14 @@ async function deleteNote(id: string) {
                   setNoteInput('')
                 }}
                 className={`rounded-lg p-2 min-h-16 flex flex-col cursor-pointer transition-colors ${
-                  isToday ? 'ring-2 ring-blue-500' : ''
+                  isToday ? 'ring-2 ring-amber-500' : ''
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''} ${
                   hasTrade
                     ? pnl > 0 ? 'bg-green-900/30 hover:bg-green-900/50' : 'bg-red-900/30 hover:bg-red-900/50'
                     : 'bg-gray-900 hover:bg-gray-800'
                 }`}
               >
-                <span className={`text-xs font-medium ${isToday ? 'text-blue-400' : 'text-gray-400'}`}>{day}</span>
+                <span className={`text-xs font-medium ${isToday ? 'text-amber-400' : 'text-gray-400'}`}>{day}</span>
                 {hasTrade && (
                   <span className={`text-xs font-semibold mt-1 ${pnl > 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {pnl > 0 ? '+' : ''}{pnl.toFixed(0)}
@@ -165,9 +165,9 @@ async function deleteNote(id: string) {
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveNote() } }}
                       placeholder="輸入備注..."
                       autoFocus
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500"
                     />
-                    <button onClick={saveNote} disabled={saving} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white disabled:opacity-50">儲存</button>
+                    <button onClick={saveNote} disabled={saving} className="px-2 py-1 bg-amber-600 hover:bg-amber-700 rounded text-xs text-white disabled:opacity-50">儲存</button>
                   </div>
                 </div>
               )}
