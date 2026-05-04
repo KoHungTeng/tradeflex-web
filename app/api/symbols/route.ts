@@ -1,49 +1,52 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+async function getSupabaseAndUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { get(name) { return cookieStore.get(name)?.value }, set() {}, remove() {} } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  return { supabase, user }
+}
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from('symbols')
-    .select('*')
-    .order('name')
+  const { supabase, user } = await getSupabaseAndUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data, error } = await supabase.from('symbols').select('*').eq('user_id', user.id).order('name')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
 
 export async function POST(request: NextRequest) {
+  const { supabase, user } = await getSupabaseAndUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await request.json()
-  const { data, error } = await supabase
-    .from('symbols')
-    .insert(body)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('symbols').insert({ ...body, user_id: user.id }).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
 
 export async function PUT(request: NextRequest) {
+  const { supabase, user } = await getSupabaseAndUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await request.json()
   const { id, ...rest } = body
-  const { data, error } = await supabase
-    .from('symbols')
-    .update(rest)
-    .eq('id', id)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('symbols').update(rest).eq('id', id).eq('user_id', user.id).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
 
 export async function DELETE(request: NextRequest) {
+  const { supabase, user } = await getSupabaseAndUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
-  const { error } = await supabase.from('symbols').delete().eq('id', id)
+  const { error } = await supabase.from('symbols').delete().eq('id', id).eq('user_id', user.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
