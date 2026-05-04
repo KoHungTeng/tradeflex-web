@@ -28,6 +28,8 @@ export type Trade = {
   strategy: string
   remark: string
   trade_time: string
+  tp?: number
+  sl?: number
   big_dif?: number
   big_dea?: number
   big_hist?: number
