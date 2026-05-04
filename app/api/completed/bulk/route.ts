@@ -32,10 +32,9 @@ export async function POST(request: NextRequest) {
 
   const payload = trades.map((t: any) => ({ ...t, user_id: user.id }))
 
-  const { error, count } = await supabase
-    .from('completed_trades')
-    .insert(payload)
-    .select('id', { count: 'exact', head: true })
+  const { error } = await supabase
+  .from('completed_trades')
+  .insert(payload)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ count: trades.length })
