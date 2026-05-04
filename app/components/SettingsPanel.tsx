@@ -83,7 +83,7 @@ function getOrderPrice(order: any): number {
   // 欄位錯位補救：掃描所有欄位找合理價格數字
   for (const val of Object.values(order)) {
     const n = parseFloat(String(val))
-    if (n > 1 && n < 9999999 && !isNaN(n)) return n
+    if (n > 100 && n < 9999999 && !isNaN(n)) return n
   }
   return 0
 }
