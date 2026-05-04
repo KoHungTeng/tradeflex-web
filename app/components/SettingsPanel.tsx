@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useCurrency } from '../CurrencyContext'
 
 type Symbol = {
   id: string
@@ -49,6 +50,7 @@ export default function SettingsPanel() {
   const [newTagName, setNewTagName] = useState('')
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
+  const { currency, symbol, setCurrency } = useCurrency()
 
   useEffect(() => {
     loadSymbols()
@@ -383,6 +385,30 @@ export default function SettingsPanel() {
           </div>
         </div>
       )}
-    </div>
+    {activeTab === 'currency' && (
+        <div className="space-y-4">
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">基準貨幣</h3>
+            <p className="text-xs text-gray-500 mb-4">選擇後所有金額顯示將自動換算</p>
+            <div className="flex gap-2 flex-wrap">
+              {['USD', 'TWD', 'EUR', 'JPY', 'CNY'].map(c => (
+                <button
+                  key={c}
+                  onClick={() => setCurrency(c)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={currency === c
+                    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                    : { background: '#1a1a1a', color: '#888' }
+                  }
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
+          </div>
+        </div>
+      )}
+      </div>
   )
 }
