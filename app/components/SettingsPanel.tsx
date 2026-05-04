@@ -92,9 +92,11 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
       .split(':')[0]
       .split('!')[0]
 
-    const symbolInfo = symbolsData.find(s =>
-      s.name.toUpperCase() === cleanSymbol.toUpperCase()
-    )
+    const symbolInfo = symbolsData.find(s => {
+  const sName = s.name.toUpperCase().replace(/\d+$/, '')
+  const cName = cleanSymbol.toUpperCase().replace(/\d+$/, '')
+  return sName === cName || s.name.toUpperCase() === cleanSymbol.toUpperCase()
+})
     const tickSize = symbolInfo?.tick_size || 1
     const tickValue = symbolInfo?.tick_value || 1
 
