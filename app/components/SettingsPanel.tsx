@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useCurrency } from '../CurrencyContext'
 
 type Symbol = {
@@ -36,7 +36,7 @@ export default function SettingsPanel() {
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency'>('symbols')
+  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency' | 'data'>('symbols')
 
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('期貨')
@@ -53,19 +53,28 @@ export default function SettingsPanel() {
   const { currency, symbol, setCurrency } = useCurrency()
   const [initialCapital, setInitialCapital] = useState<string>('10000')
 
-useEffect(() => {
-  fetch('/api/capital').then(r => r.json()).then(data => {
-    setInitialCapital(String(data.amount || 10000))
-  })
-}, [])
+  // 匯入匯出相關
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [importPreview, setImportPreview] = useState<any[]>([])
+  const [importStatus, setImportStatus] = useState<'idle' | 'preview' | 'importing' | 'done' | 'error'>('idle')
+  const [importMessage, setImportMessage] = useState('')
+  const [exportRange, setExportRange] = useState<'all' | 'custom'>('all')
+  const [exportFrom, setExportFrom] = useState('')
+  const [exportTo, setExportTo] = useState('')
 
-async function saveCapital() {
-  await fetch('/api/capital', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount: parseFloat(initialCapital) }),
-  })
-}
+  useEffect(() => {
+    fetch('/api/capital').then(r => r.json()).then(data => {
+      setInitialCapital(String(data.amount || 10000))
+    })
+  }, [])
+
+  async function saveCapital() {
+    await fetch('/api/capital', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: parseFloat(initialCapital) }),
+    })
+  }
 
   useEffect(() => {
     loadSymbols()
@@ -208,6 +217,156 @@ async function saveCapital() {
     })
   }
 
+  // ── 匯出 CSV ──────────────────────────────────────────
+  async function exportCSV() {
+    const res = await fetch('/api/completed')
+    const trades: any[] = await res.json()
+
+    let filtered = trades
+    if (exportRange === 'custom' && exportFrom) {
+      filtered = filtered.filter(t => t.close_time >= exportFrom)
+    }
+    if (exportRange === 'custom' && exportTo) {
+      filtered = filtered.filter(t => t.close_time <= exportTo + 'T23:59:59')
+    }
+
+    const headers = [
+      '平倉時間', '開倉時間', '標的', '方向', '開倉價', '平倉價',
+      '口數', '開倉手續費', '平倉手續費', '盈虧', '策略', '備註'
+    ]
+
+    const rows = filtered.map(t => [
+      t.close_time ? new Date(t.close_time).toLocaleString('zh-TW') : '',
+      t.open_time ? new Date(t.open_time).toLocaleString('zh-TW') : '',
+      t.symbol,
+      t.direction === 'long' ? '做多' : '做空',
+      t.open_price,
+      t.close_price,
+      t.quantity,
+      t.open_fee,
+      t.close_fee,
+      t.pnl,
+      t.strategy || '',
+      t.remark || '',
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const bom = '\uFEFF' // UTF-8 BOM，讓 Excel 正確顯示中文
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `tradeflex_${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // ── 匯入 CSV ──────────────────────────────────────────
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const text = event.target?.result as string
+      // 移除 BOM
+      const clean = text.replace(/^\uFEFF/, '')
+      const lines = clean.split('\n').filter(l => l.trim())
+      if (lines.length < 2) {
+        setImportStatus('error')
+        setImportMessage('CSV 檔案內容不足，請確認格式正確')
+        return
+      }
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+      const rows = lines.slice(1).map(line => {
+        const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
+        const row: any = {}
+        headers.forEach((h, i) => {
+          row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
+        })
+        return row
+      })
+      setImportPreview(rows.slice(0, 5)) // 預覽前5筆
+      setImportStatus('preview')
+      setImportMessage(`共 ${rows.length} 筆資料，預覽前 5 筆`)
+    }
+    reader.readAsText(file, 'utf-8')
+  }
+
+  async function confirmImport() {
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) return
+    setImportStatus('importing')
+
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      const text = event.target?.result as string
+      const clean = text.replace(/^\uFEFF/, '')
+      const lines = clean.split('\n').filter(l => l.trim())
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+      const rows = lines.slice(1).map(line => {
+        const values = line.match(/(".*?"|[^,]+)(?=,|$)/g) || []
+        const row: any = {}
+        headers.forEach((h, i) => {
+          row[h] = (values[i] || '').replace(/^"|"$/g, '').trim()
+        })
+        return row
+      })
+
+      let success = 0
+      let failed = 0
+
+      for (const row of rows) {
+        try {
+          // 取得第一個 portfolio
+          const portfolioRes = await fetch('/api/portfolios')
+          const portfolios = await portfolioRes.json()
+          const portfolioId = portfolios[0]?.id
+          if (!portfolioId) { failed++; continue }
+
+          const res = await fetch('/api/completed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              portfolio_id: portfolioId,
+              symbol: row['標的'] || '',
+              direction: row['方向'] === '做多' ? 'long' : 'short',
+              open_price: parseFloat(row['開倉價']) || 0,
+              close_price: parseFloat(row['平倉價']) || 0,
+              quantity: parseFloat(row['口數']) || 1,
+              open_fee: parseFloat(row['開倉手續費']) || 0,
+              close_fee: parseFloat(row['平倉手續費']) || 0,
+              pnl: parseFloat(row['盈虧']) || 0,
+              strategy: row['策略'] || '',
+              remark: row['備註'] || '',
+              open_time: row['開倉時間'] ? new Date(row['開倉時間']).toISOString() : new Date().toISOString(),
+              close_time: row['平倉時間'] ? new Date(row['平倉時間']).toISOString() : new Date().toISOString(),
+            }),
+          })
+          if (res.ok) success++
+          else failed++
+        } catch {
+          failed++
+        }
+      }
+
+      setImportStatus('done')
+      setImportMessage(`匯入完成：成功 ${success} 筆，失敗 ${failed} 筆`)
+      setImportPreview([])
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+    reader.readAsText(file, 'utf-8')
+  }
+
+  function resetImport() {
+    setImportStatus('idle')
+    setImportMessage('')
+    setImportPreview([])
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const cardStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }
 
   return (
@@ -221,6 +380,7 @@ async function saveCapital() {
           { key: 'strategies', label: '策略設定' },
           { key: 'tags', label: '標籤設定' },
           { key: 'currency', label: '幣值設定' },
+          { key: 'data', label: '資料管理' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -400,7 +560,8 @@ async function saveCapital() {
           </div>
         </div>
       )}
-    {activeTab === 'currency' && (
+
+      {activeTab === 'currency' && (
         <div className="space-y-4">
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4">基準貨幣</h3>
@@ -421,29 +582,173 @@ async function saveCapital() {
               ))}
             </div>
             <div className="rounded-xl p-4 mt-4" style={cardStyle}>
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">初始資金</h3>
-        <p className="text-xs text-gray-500 mb-4">用於計算資金成長曲線</p>
-        <div className="flex gap-3">
-          <input
-            value={initialCapital}
-            onChange={e => setInitialCapital(e.target.value)}
-            type="number"
-            className="input flex-1"
-            placeholder="10000"
-          />
-          <button
-            onClick={saveCapital}
-            className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-            style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
-          >
-            儲存
-          </button>
-        </div>
-      </div>
-      <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
+              <h3 className="text-sm font-semibold text-gray-400 mb-4">初始資金</h3>
+              <p className="text-xs text-gray-500 mb-4">用於計算資金成長曲線</p>
+              <div className="flex gap-3">
+                <input
+                  value={initialCapital}
+                  onChange={e => setInitialCapital(e.target.value)}
+                  type="number"
+                  className="input flex-1"
+                  placeholder="10000"
+                />
+                <button
+                  onClick={saveCapital}
+                  className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+                  style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+                >
+                  儲存
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
           </div>
         </div>
       )}
-      </div>
+
+      {activeTab === 'data' && (
+        <div className="space-y-6">
+
+          {/* 匯出 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1">匯出交易記錄</h3>
+            <p className="text-xs text-gray-600 mb-4">將已完成的交易匯出為 CSV 檔案，可用 Excel 開啟</p>
+
+            <div className="flex gap-3 mb-4">
+              <button
+                onClick={() => setExportRange('all')}
+                className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                style={exportRange === 'all'
+                  ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                  : { background: '#1a1a1a', color: '#888' }
+                }
+              >
+                全部資料
+              </button>
+              <button
+                onClick={() => setExportRange('custom')}
+                className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                style={exportRange === 'custom'
+                  ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                  : { background: '#1a1a1a', color: '#888' }
+                }
+              >
+                自訂日期
+              </button>
+            </div>
+
+            {exportRange === 'custom' && (
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1">
+                  <label className="text-xs text-gray-500 mb-1 block">開始日期</label>
+                  <input type="date" value={exportFrom} onChange={e => setExportFrom(e.target.value)} className="input" />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs text-gray-500 mb-1 block">結束日期</label>
+                  <input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" />
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={exportCSV}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+            >
+              ↓ 下載 CSV
+            </button>
+          </div>
+
+          {/* 匯入 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
+            <p className="text-xs text-gray-600 mb-4">支援從本系統匯出的 CSV 格式，匯入前請先備份資料</p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {importStatus === 'idle' && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
+              >
+                ↑ 選擇 CSV 檔案
+              </button>
+            )}
+
+            {importStatus === 'preview' && (
+              <div>
+                <p className="text-xs text-gray-400 mb-3">{importMessage}</p>
+                <div className="overflow-x-auto mb-4">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-gray-500 border-b border-[#2a2a2a]">
+                        {['平倉時間', '標的', '方向', '開倉價', '平倉價', '口數', '盈虧'].map(h => (
+                          <th key={h} className="py-2 px-2 text-left">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importPreview.map((row, i) => (
+                        <tr key={i} className="border-b border-[#1a1a1a]">
+                          <td className="py-1.5 px-2 text-gray-400">{row['平倉時間']}</td>
+                          <td className="py-1.5 px-2 font-semibold">{row['標的']}</td>
+                          <td className="py-1.5 px-2" style={{ color: row['方向'] === '做多' ? '#4ade80' : '#f87171' }}>{row['方向']}</td>
+                          <td className="py-1.5 px-2">{row['開倉價']}</td>
+                          <td className="py-1.5 px-2">{row['平倉價']}</td>
+                          <td className="py-1.5 px-2">{row['口數']}</td>
+                          <td className="py-1.5 px-2" style={{ color: parseFloat(row['盈虧']) >= 0 ? '#4ade80' : '#f87171' }}>{row['盈虧']}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={confirmImport}
+                    className="px-4 py-2 rounded-lg text-sm font-medium"
+                    style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+                  >
+                    確認匯入
+                  </button>
+                  <button
+                    onClick={resetImport}
+                    className="px-4 py-2 rounded-lg text-sm font-medium"
+                    style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {importStatus === 'importing' && (
+              <p className="text-xs text-[#d4a843]">匯入中，請稍候...</p>
+            )}
+
+            {(importStatus === 'done' || importStatus === 'error') && (
+              <div>
+                <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>
+                  {importMessage}
+                </p>
+                <button
+                  onClick={resetImport}
+                  className="px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+                >
+                  重新選擇
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
