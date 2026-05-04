@@ -104,16 +104,15 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
 
     const tickSize = symbolInfo?.tick_size || 1
     const tickValue = symbolInfo?.tick_value || 1
-    console.log(`🔍 ${cleanSymbol} → tickSize:${tickSize} tickValue:${tickValue}`)
+    console.log(`🔍 ${cleanSymbol} → tickSize:${tickSize} tickValue:${tickValue} orders:${orders.length}`)
 
     orders.sort((a, b) => {
-  const timeDiff = new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
-  if (timeDiff !== 0) return timeDiff
-  // 同時間，買入排前面
-  if (a['Side'] === '買入' && b['Side'] === '賣出') return -1
-  if (a['Side'] === '賣出' && b['Side'] === '買入') return 1
-  return 0
-})
+      const timeDiff = new Date(a['Placing time']).getTime() - new Date(b['Placing time']).getTime()
+      if (timeDiff !== 0) return timeDiff
+      if (a['Side'] === '買入' && b['Side'] === '賣出') return -1
+      if (a['Side'] === '賣出' && b['Side'] === '買入') return 1
+      return 0
+    })
 
     const buyQueue: any[] = []
     const sellQueue: any[] = []
@@ -123,6 +122,8 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
       const qty = parseFloat(order['數量']) || 1
       const fee = parseFloat(order['佣金']) || 0
 
+      console.log(`📌 ${order['Placing time']} ${order['Side']} price:${price} buyQ:${buyQueue.length} sellQ:${sellQueue.length}`)
+
       if (order['Side'] === '買入') {
         if (sellQueue.length > 0) {
           const open = sellQueue.shift()
@@ -130,6 +131,7 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (openPrice - price) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
+          console.log(`✅ 配對 short: ${openPrice}→${price} pnl:${pnl}`)
           results.push({
             symbol: cleanSymbol,
             direction: 'short',
@@ -145,6 +147,7 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
             remark: '',
           })
         } else {
+          console.log(`➕ 買入進 buyQueue`)
           buyQueue.push(order)
         }
       } else if (order['Side'] === '賣出') {
@@ -154,6 +157,7 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
           const matchQty = Math.min(qty, parseFloat(open['數量']) || 1)
           const ticks = (price - openPrice) / tickSize
           const pnl = Math.round(ticks * tickValue * matchQty * 100) / 100
+          console.log(`✅ 配對 long: ${openPrice}→${price} pnl:${pnl}`)
           results.push({
             symbol: cleanSymbol,
             direction: 'long',
@@ -169,10 +173,13 @@ function parseTradingViewCSV(rows: any[], symbolsData: Symbol[]): any[] {
             remark: '',
           })
         } else {
+          console.log(`➕ 賣出進 sellQueue`)
           sellQueue.push(order)
         }
       }
     })
+
+    console.log(`🔍 ${cleanSymbol} 剩餘未配對 buyQ:${buyQueue.length} sellQ:${sellQueue.length}`)
   })
 
   console.log('🔍 results:', results.length)
