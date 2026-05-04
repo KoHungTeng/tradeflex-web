@@ -150,7 +150,9 @@ function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
     if (!byContract[contract]) byContract[contract] = []
     byContract[contract].push(r)
   })
+
   const results: any[] = []
+
   Object.entries(byContract).forEach(([contract, fills]) => {
     const product = fills[0]['Product']?.trim() || contract
     const csvTickSize = parseFloat(fills[0]['_tickSize'])
@@ -161,33 +163,66 @@ function parseTradovateCSV(rows: any[], symbolsData: Symbol[]): any[] {
     })
     const tickSize = csvTickSize > 0 ? csvTickSize : (symbolInfo?.tick_size || 1)
     const tickValue = symbolInfo?.tick_value || 1
+
     fills.sort((a, b) => new Date(a['_timestamp']).getTime() - new Date(b['_timestamp']).getTime())
-    const buyQueue: any[] = []
-    const sellQueue: any[] = []
+
+    // 用累計持倉配對：持倉回到 0 = 一筆完整交易
+    let netPosition = 0  // 正數=多倉，負數=空倉
+    let currentFills: any[] = []
+
     fills.forEach(fill => {
       const side = (fill['B/S'] || '').trim()
-      const price = parseFloat(fill['Price']) || 0
       const qty = parseFloat(fill['Quantity']) || 1
-      const fee = parseFloat(fill['commission']) || 0
-      if (side === 'Buy') {
-        if (sellQueue.length > 0) {
-          const open = sellQueue.shift()
-          const openPrice = parseFloat(open['Price']) || 0
-          const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
-          const pnl = Math.round((openPrice - price) / tickSize * tickValue * matchQty * 100) / 100
-          results.push({ symbol: product, direction: 'short', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl, open_time: new Date(open['_timestamp']).toISOString(), close_time: new Date(fill['_timestamp']).toISOString(), strategy: '', remark: '' })
-        } else { buyQueue.push(fill) }
-      } else if (side === 'Sell') {
-        if (buyQueue.length > 0) {
-          const open = buyQueue.shift()
-          const openPrice = parseFloat(open['Price']) || 0
-          const matchQty = Math.min(qty, parseFloat(open['Quantity']) || 1)
-          const pnl = Math.round((price - openPrice) / tickSize * tickValue * matchQty * 100) / 100
-          results.push({ symbol: product, direction: 'long', open_price: openPrice, close_price: price, quantity: matchQty, open_fee: parseFloat(open['commission']) || 0, close_fee: fee, pnl, open_time: new Date(open['_timestamp']).toISOString(), close_time: new Date(fill['_timestamp']).toISOString(), strategy: '', remark: '' })
-        } else { sellQueue.push(fill) }
+      const delta = side === 'Buy' ? qty : -qty
+      netPosition += delta
+      currentFills.push(fill)
+
+      // 持倉回到 0 = 這批 fills 是一筆完整交易
+      if (netPosition === 0 && currentFills.length >= 2) {
+        const buyFills = currentFills.filter(f => f['B/S'].trim() === 'Buy')
+        const sellFills = currentFills.filter(f => f['B/S'].trim() === 'Sell')
+        const totalBuyQty = buyFills.reduce((s, f) => s + parseFloat(f['Quantity']), 0)
+        const totalSellQty = sellFills.reduce((s, f) => s + parseFloat(f['Quantity']), 0)
+
+        // 判斷方向：買多還是賣空
+        const direction = buyFills[0] && new Date(buyFills[0]['_timestamp']) < new Date(sellFills[0]['_timestamp'])
+          ? 'long' : 'short'
+
+        const openFills = direction === 'long' ? buyFills : sellFills
+        const closeFills = direction === 'long' ? sellFills : buyFills
+        const totalQty = direction === 'long' ? totalBuyQty : totalSellQty
+
+        // 加權平均開倉價
+        const openPrice = openFills.reduce((s, f) => s + parseFloat(f['Price']) * parseFloat(f['Quantity']), 0) / totalQty
+        // 加權平均平倉價
+        const closePrice = closeFills.reduce((s, f) => s + parseFloat(f['Price']) * parseFloat(f['Quantity']), 0) / totalQty
+
+        const ticks = direction === 'long'
+          ? (closePrice - openPrice) / tickSize
+          : (openPrice - closePrice) / tickSize
+        const totalFee = currentFills.reduce((s, f) => s + (parseFloat(f['commission']) || 0), 0)
+        const pnl = Math.round(ticks * tickValue * totalQty * 100) / 100
+
+        results.push({
+          symbol: product,
+          direction,
+          open_price: Math.round(openPrice * 100) / 100,
+          close_price: Math.round(closePrice * 100) / 100,
+          quantity: totalQty,
+          open_fee: Math.round(totalFee / 2 * 100) / 100,
+          close_fee: Math.round(totalFee / 2 * 100) / 100,
+          pnl,
+          open_time: new Date(openFills[0]['_timestamp']).toISOString(),
+          close_time: new Date(closeFills[closeFills.length - 1]['_timestamp']).toISOString(),
+          strategy: '',
+          remark: '',
+        })
+
+        currentFills = []
       }
     })
   })
+
   return results
 }
 
