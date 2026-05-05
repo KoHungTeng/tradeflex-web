@@ -109,12 +109,11 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
         />
         {showDropdown && filtered.length > 0 && (
-          <div
-  className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
-  style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
-  onWheel={e => e.stopPropagation()}
-  onTouchMove={e => e.stopPropagation()}
->
+  <div
+    className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+    style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
+    onWheel={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
+  >
             {filtered.map(opt => (
               <div
                 key={opt}
