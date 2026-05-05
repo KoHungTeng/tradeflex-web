@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '../LanguageContext'
 
 type Props = {
@@ -24,6 +24,239 @@ type OpenTrade = {
   trade_time: string
 }
 
+type SymbolInfo = {
+  id: string
+  name: string
+  category: string
+  tick_size: number
+  tick_value: number
+  currency: string
+  default_fee: number
+}
+
+function SearchDropdown({ options, value, onChange, placeholder }: {
+  options: string[]
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
+  const btnRef = useRef<HTMLDivElement>(null)
+  const dropRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+        setSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      const rect = btnRef.current!.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+      inputRef.current.focus()
+    }
+  }, [open])
+
+  return (
+    <div ref={btnRef} className="relative">
+      <div
+        onClick={() => setOpen(prev => !prev)}
+        className="input cursor-pointer flex items-center justify-between"
+        style={{ minHeight: 32 }}
+      >
+        <span className={value ? 'text-white' : 'text-gray-600'}>
+          {value || placeholder || '選填'}
+        </span>
+        <span className="text-gray-500 text-xs">▾</span>
+      </div>
+
+      {open && (
+        <div
+          ref={dropRef}
+          className="fixed z-50 rounded-lg shadow-xl"
+          style={{
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
+            background: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+          }}
+        >
+          <div className="p-2 border-b border-[#2a2a2a]">
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+              placeholder="搜尋..."
+              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+            />
+          </div>
+          <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+            {filtered.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-600">無符合結果</div>
+            ) : (
+              filtered.map(opt => (
+                <div
+                  key={opt}
+                  onMouseDown={e => {
+                    e.preventDefault()
+                    onChange(opt)
+                    setOpen(false)
+                    setSearch('')
+                  }}
+                  className="px-3 py-2 text-xs cursor-pointer hover:bg-[#2a2a2a]"
+                  style={{ color: value === opt ? '#d4a843' : '#ccc' }}
+                >
+                  {opt}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TagDropdown({ tags, value, onChange, placeholder }: {
+  tags: string[]
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
+  const btnRef = useRef<HTMLDivElement>(null)
+  const dropRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const filtered = tags.filter(t => t.toLowerCase().includes(search.toLowerCase()))
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+        setSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      const rect = btnRef.current!.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+      inputRef.current.focus()
+    }
+  }, [open])
+
+  function selectTag(tag: string) {
+    const current = value.trim()
+    if (current.includes(tag)) {
+      onChange(current.replace(tag, '').replace(/\s+/g, ' ').trim())
+    } else {
+      onChange(current ? `${current} ${tag}` : tag)
+    }
+  }
+
+  const selectedTags = value.split(' ').filter(w => w.startsWith('#'))
+
+  return (
+    <div ref={btnRef} className="relative">
+      <div
+        onClick={() => setOpen(prev => !prev)}
+        className="input cursor-pointer flex items-center justify-between"
+        style={{ minHeight: 32 }}
+      >
+        <span className={value ? 'text-white' : 'text-gray-600'} style={{ fontSize: 12 }}>
+          {value || placeholder || '選填'}
+        </span>
+        <span className="text-gray-500 text-xs">▾</span>
+      </div>
+
+      {open && (
+        <div
+          ref={dropRef}
+          className="fixed z-50 rounded-lg shadow-xl"
+          style={{
+            top: pos.top,
+            left: pos.left,
+            width: Math.max(pos.width, 160),
+            background: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+          }}
+        >
+          <div className="p-2 border-b border-[#2a2a2a]">
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+              placeholder="搜尋標籤..."
+              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+            />
+          </div>
+          <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+            {tags.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
+            ) : filtered.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-600">無符合結果</div>
+            ) : (
+              filtered.map(tag => (
+                <div
+                  key={tag}
+                  onMouseDown={e => { e.preventDefault(); selectTag(tag) }}
+                  className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
+                  style={{
+                    background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
+                    color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
+                  }}
+                >
+                  <span>{tag}</span>
+                  {selectedTags.includes(tag) && <span>✓</span>}
+                </div>
+              ))
+            )}
+          </div>
+          {value && (
+            <div className="p-2 border-t border-[#2a2a2a]">
+              <button
+                onMouseDown={e => { e.preventDefault(); onChange(''); setOpen(false) }}
+                className="w-full text-xs py-1 rounded"
+                style={{ background: '#2a1a1a', color: '#f87171' }}
+              >
+                清除
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
   const { t } = useLanguage()
   const [symbol, setSymbol] = useState('')
@@ -41,6 +274,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [openTrades, setOpenTrades] = useState<OpenTrade[]>([])
   const [useCustomTime, setUseCustomTime] = useState(false)
   const [customTime, setCustomTime] = useState('')
+  const [symbolList, setSymbolList] = useState<SymbolInfo[]>([])
+  const [tags, setTags] = useState<{id: string, name: string}[]>([])
 
   const [bigDIF, setBigDIF] = useState('')
   const [bigDEA, setBigDEA] = useState('')
@@ -49,7 +284,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [bigK, setBigK] = useState('')
   const [bigD, setBigD] = useState('')
   const [bigJ, setBigJ] = useState('')
-
   const [smallDIF, setSmallDIF] = useState('')
   const [smallDEA, setSmallDEA] = useState('')
   const [smallHist, setSmallHist] = useState('')
@@ -65,6 +299,12 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     fetch('/api/strategies').then(r => r.json()).then(data => {
       setStrategies(Array.isArray(data) ? data : [])
     })
+    fetch('/api/symbols').then(r => r.json()).then(data => {
+      setSymbolList(Array.isArray(data) ? data : [])
+    })
+    fetch('/api/tags').then(r => r.json()).then(data => {
+      setTags(Array.isArray(data) ? data : [])
+    })
   }, [])
 
   useEffect(() => {
@@ -74,6 +314,15 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
       })
     }
   }, [isClose])
+
+  // 選標的時自動帶入預設手續費
+  function handleSymbolChange(name: string) {
+    setSymbol(name)
+    const info = symbolList.find(s => s.name === name)
+    if (info && info.default_fee) {
+      setFee(String(info.default_fee))
+    }
+  }
 
   const relevantOpenTrades = openTrades.filter(t => {
     if (!symbol) return false
@@ -94,14 +343,6 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showRSI = requiredIndicators.includes('RSI')
   const showKDJ = requiredIndicators.includes('KDJ')
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
-
-  const [tags, setTags] = useState<{id: string, name: string}[]>([])
-
-  useEffect(() => {
-    fetch('/api/tags').then(r => r.json()).then(data => {
-      setTags(Array.isArray(data) ? data : [])
-    })
-  }, [])
 
   function addExtraPrice() {
     setExtraPrices(prev => [...prev, { price: '', quantity: quantity }])
@@ -191,7 +432,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const actionValues = ['做多', '做空', '平多', '平空']
 
   return (
-    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 overflow-y-auto flex flex-col gap-3" style={{ height: '100vh' }}>
+    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 flex flex-col gap-3" style={{ height: '100vh', overflowY: 'auto' }}>
       <h2 className="text-sm font-semibold text-gray-400">{t('newTrade')}</h2>
 
       <div className="grid grid-cols-4 gap-1">
@@ -212,21 +453,29 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         ))}
       </div>
 
-      <form onSubmit={submit} autoComplete="off" className="flex flex-col gap-3"
-  onKeyDown={e => {
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-      if ((e.target as HTMLElement).tagName !== 'BUTTON') {
-        e.preventDefault()
-      }
-    }
-  }}
->
+      <form
+        onSubmit={submit}
+        autoComplete="off"
+        className="flex flex-col gap-3"
+        onKeyDown={e => {
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+            if ((e.target as HTMLElement).tagName !== 'BUTTON') {
+              e.preventDefault()
+            }
+          }
+        }}
+      >
+        {/* 標的 */}
         <Field label={t('symbol')}>
-          <input value={symbol} onChange={e => setSymbol(e.target.value)}
-            placeholder="MES, MNQ..." className="input" />
+          <SearchDropdown
+            options={symbolList.map(s => s.name)}
+            value={symbol}
+            onChange={handleSymbolChange}
+            placeholder="選擇標的"
+          />
         </Field>
 
-        {/* 平倉庫存顯示 */}
+        {/* 平倉庫存 */}
         {isClose && symbol && (
           <div className="rounded-lg p-3" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
             <p className="text-xs text-gray-500 mb-2">
@@ -291,9 +540,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 <input
                   value={p.price}
                   onChange={e => updateExtraPrice(i, 'price', e.target.value)}
-                  placeholder="0.00"
-                  type="number" step="0.01"
-                  className="input flex-1"
+                  placeholder="0.00" type="number" step="0.01" className="input flex-1"
                 />
                 <button
                   type="button"
@@ -305,8 +552,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
               <input
                 value={p.quantity}
                 onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
-                placeholder={t('quantity')} type="number"
-                className="input w-full mt-1"
+                placeholder={t('quantity')} type="number" className="input w-full mt-1"
               />
             </div>
           ))}
@@ -354,7 +600,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
           </div>
         )}
 
-        {/* 時間選擇 */}
+        {/* 時間 */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-gray-500">{t('time')}</label>
@@ -378,47 +624,34 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             </button>
           </div>
           {useCustomTime ? (
-            <input
-              value={customTime}
-              onChange={e => setCustomTime(e.target.value)}
-              type="datetime-local"
-              className="input"
-            />
+            <input value={customTime} onChange={e => setCustomTime(e.target.value)}
+              type="datetime-local" className="input" />
           ) : (
             <p className="text-xs text-gray-600 px-1">{t('autoTime')}</p>
           )}
         </div>
 
+        {/* 策略 */}
         <Field label={t('strategyLabel')}>
           <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
-            <option value="">{t('noStrategy')}</option>
+            <option value="">-</option>
             {strategies.map(s => (
               <option key={s.id} value={s.name}>{s.name}</option>
             ))}
           </select>
         </Field>
 
+        {/* 備注 */}
         <Field label={t('remark')}>
-          <input value={remark} onChange={e => setRemark(e.target.value)}
-  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
-  placeholder="選填" className="input mb-1" />
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {tags.map(tag => (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() => setRemark(prev => prev ? `${prev} #${tag.name}` : `#${tag.name}`)}
-                  className="text-xs px-2 py-0.5 rounded-full transition-colors"
-                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
-                >
-                  #{tag.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <TagDropdown
+            tags={tags.map(tag => `#${tag.name}`)}
+            value={remark}
+            onChange={setRemark}
+            placeholder="選填"
+          />
         </Field>
 
+        {/* 指標 */}
         {showIndicators && (
           <div className="space-y-3">
             {showMACD && (
@@ -504,9 +737,7 @@ function MiniField({ label, value, onChange }: {
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
-        type="number"
-        step="0.01"
-        placeholder="--"
+        type="number" step="0.01" placeholder="--"
         className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-white text-center"
       />
     </div>
