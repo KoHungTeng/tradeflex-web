@@ -763,29 +763,38 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       )}
 
       {activeTab === 'tags' && (
-        <div className="space-y-4">
-          <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addTag')}</h3>
-            <div className="flex gap-3">
-              <input value={newTagName} onChange={e => setNewTagName(e.target.value)} placeholder={t('tagName')} className="input flex-1"
-                onKeyDown={e => { if (e.key === 'Enter') addTag() }}
-              />
-              <button onClick={addTag} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('add')}</button>
-            </div>
+  <div className="space-y-4">
+    <div className="rounded-xl p-4" style={cardStyle}>
+      <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addTag')}</h3>
+      <div className="flex gap-3">
+        <input
+          value={newTagName}
+          onChange={e => setNewTagName(e.target.value)}
+          placeholder={t('tagName')}
+          className="input flex-1"
+          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+        />
+        <button
+          type="button"
+          onClick={addTag}
+          className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+          style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+        >{t('add')}</button>
+      </div>
+    </div>
+    <div className="rounded-xl p-4" style={cardStyle}>
+      <div className="flex flex-wrap gap-2">
+        {tags.map(tag => (
+          <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+            <span className="text-gray-300">{tag.name}</span>
+            <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
           </div>
-          <div className="rounded-xl p-4" style={cardStyle}>
-            <div className="flex flex-wrap gap-2">
-              {tags.map(tag => (
-                <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                  <span className="text-gray-300">{tag.name}</span>
-                  <button onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-                </div>
-              ))}
-              {tags.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
-            </div>
-          </div>
-        </div>
-      )}
+        ))}
+        {tags.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
+      </div>
+    </div>
+  </div>
+)}
 
       {activeTab === 'currency' && (
         <div className="space-y-4">
