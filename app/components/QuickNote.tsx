@@ -59,7 +59,6 @@ export default function QuickNote() {
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNote() } }}
           placeholder={t('notePlaceholder')}
           className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#d4a843]"
         />
