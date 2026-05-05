@@ -28,7 +28,9 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   const [val, setVal] = useState(value)
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 })
   const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setVal(value) }, [value])
 
@@ -73,7 +75,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') {
-      if (e.nativeEvent.isComposing) return   // ← 加這一行
+      if (e.nativeEvent.isComposing) return
       setEditing(false)
       setShowDropdown(false)
       setSearch('')
@@ -96,6 +98,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
     return (
       <div ref={ref} className="relative">
         <input
+          ref={inputRef}
           autoFocus
           value={field === 'remark' ? val : search}
           onChange={e => {
@@ -103,18 +106,30 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
             else setSearch(e.target.value)
             setShowDropdown(true)
           }}
-          onFocus={() => setShowDropdown(true)}
+          onFocus={() => {
+            if (inputRef.current) {
+              const rect = inputRef.current.getBoundingClientRect()
+              setDropdownPos({ top: rect.bottom + 4, left: rect.left })
+            }
+            setShowDropdown(true)
+          }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
         />
         {showDropdown && filtered.length > 0 && (
-  <div
-  className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
-  style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
-  onWheel={e => e.stopPropagation()}
-  onPointerDown={e => e.stopPropagation()}
->
+          <div
+            className="fixed z-50 rounded-lg shadow-xl"
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid #2a2a2a',
+              minWidth: 150,
+              maxHeight: 160,
+              overflowY: 'auto',
+              top: dropdownPos.top,
+              left: dropdownPos.left,
+            }}
+          >
             {filtered.map(opt => (
               <div
                 key={opt}
