@@ -110,10 +110,11 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
         />
         {showDropdown && filtered.length > 0 && (
   <div
-    className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
-    style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
-    onWheel={e => { e.stopPropagation(); e.nativeEvent.stopImmediatePropagation() }}
-  >
+  className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+  style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
+  onWheel={e => e.stopPropagation()}
+  onPointerDown={e => e.stopPropagation()}
+>
             {filtered.map(opt => (
               <div
                 key={opt}
