@@ -51,6 +51,7 @@ export type CompletedTrade = {
   id: string
   portfolio_id: string
   symbol: string
+  remark?: string
   direction: string
   open_price: number
   close_price: number

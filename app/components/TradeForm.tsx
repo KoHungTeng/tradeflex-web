@@ -191,7 +191,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const actionValues = ['做多', '做空', '平多', '平空']
 
   return (
-    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 overflow-y-auto flex flex-col gap-3">
+    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 overflow-y-auto flex flex-col gap-3" style={{ height: '100vh' }}>
       <h2 className="text-sm font-semibold text-gray-400">{t('newTrade')}</h2>
 
       <div className="grid grid-cols-4 gap-1">
@@ -212,7 +212,15 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         ))}
       </div>
 
-      <form onSubmit={submit} autoComplete="off" className="flex flex-col gap-3">
+      <form onSubmit={submit} autoComplete="off" className="flex flex-col gap-3"
+  onKeyDown={e => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      if ((e.target as HTMLElement).tagName !== 'BUTTON') {
+        e.preventDefault()
+      }
+    }
+  }}
+>
         <Field label={t('symbol')}>
           <input value={symbol} onChange={e => setSymbol(e.target.value)}
             placeholder="MES, MNQ..." className="input" />
@@ -392,7 +400,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
         <Field label={t('remark')}>
           <input value={remark} onChange={e => setRemark(e.target.value)}
-            placeholder="選填" className="input mb-1" />
+  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
+  placeholder="選填" className="input mb-1" />
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
               {tags.map(tag => (
