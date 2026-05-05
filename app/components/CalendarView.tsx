@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
 
@@ -21,6 +21,7 @@ export default function CalendarView({ completed }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [noteInput, setNoteInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const isComposingRef = useRef(false)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -192,7 +193,9 @@ export default function CalendarView({ completed }: Props) {
                     <input
                       value={noteInput}
                       onChange={e => setNoteInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveNote() } }}
+                      onCompositionStart={() => { isComposingRef.current = true }}
+onCompositionEnd={() => { isComposingRef.current = false }}
+onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current) { e.preventDefault(); saveNote() } }}
                       placeholder={t('calendarNotePlaceholder')}
                       autoFocus
                       className="flex-1 bg-[#222222] border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
