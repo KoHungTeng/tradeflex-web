@@ -20,6 +20,7 @@ export default function StrategyAnalysis({ completed }: Props) {
   const { t } = useLanguage()
   const [selected, setSelected] = useState<string>('__all__')
   const [direction, setDirection] = useState<Direction>('all')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
 
   useEffect(() => {
@@ -28,19 +29,31 @@ export default function StrategyAnalysis({ completed }: Props) {
     })
   }, [])
 
+  // 從所有交易的 remark 抽出所有標籤
+  const allTags = Array.from(new Set(
+    completed.flatMap(trade =>
+      (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
+    )
+  )).sort()
+
   const strategyNames = ['__all__', ...Array.from(new Set(
     completed.map(t => t.strategy).filter(Boolean)
   ))]
 
-  // 先按策略篩選
+  // 三層篩選
   const byStrategy = selected === '__all__'
     ? completed
     : completed.filter(t => t.strategy === selected)
 
-  // 再按多/空篩選
-  const filtered = direction === 'all'
+  const byDirection = direction === 'all'
     ? byStrategy
     : byStrategy.filter(t => t.direction === direction)
+
+  const filtered = selectedTags.length === 0
+    ? byDirection
+    : byDirection.filter(t =>
+        selectedTags.every(tag => (t.remark || '').includes(tag))
+      )
 
   const wins = filtered.filter(t => t.pnl > 0)
   const losses = filtered.filter(t => t.pnl <= 0)
@@ -72,10 +85,19 @@ export default function StrategyAnalysis({ completed }: Props) {
     border: '1px solid #2a2a2a'
   }
 
-  const directionBtnStyle = (d: Direction) =>
-    direction === d
-      ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-      : { background: '#1a1a1a', color: '#888' }
+  const btnStyle = (active: boolean) => active
+    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+    : { background: '#1a1a1a', color: '#888' }
+
+  const tagBtnStyle = (active: boolean) => active
+    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+    : { background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }
+
+  function toggleTag(tag: string) {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    )
+  }
 
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -88,30 +110,53 @@ export default function StrategyAnalysis({ completed }: Props) {
             key={s}
             onClick={() => setSelected(s)}
             className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            style={selected === s
-              ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-              : { background: '#1a1a1a', color: '#888' }
-            }
+            style={btnStyle(selected === s)}
           >
             {s === '__all__' ? t('allStrategies') : s}
           </button>
         ))}
       </div>
 
-      {/* 多/空篩選 */}
-      <div className="flex gap-2 mb-6">
+      {/* 方向篩選 */}
+      <div className="flex gap-2 mb-3">
         {(['all', 'long', 'short'] as Direction[]).map(d => (
           <button
             key={d}
             onClick={() => setDirection(d)}
             className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            style={directionBtnStyle(d)}
+            style={btnStyle(direction === d)}
           >
             {d === 'all' ? t('allDirections') : d === 'long' ? t('directionLong') : t('directionShort')}
           </button>
         ))}
       </div>
 
+      {/* 標籤篩選（多選） */}
+      <div className="flex gap-2 flex-wrap mb-6">
+  {allTags.length === 0 && (
+    <span className="text-xs text-gray-600">尚無標籤</span>
+  )}
+          {allTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => toggleTag(tag)}
+              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+              style={tagBtnStyle(selectedTags.includes(tag))}
+            >
+              {tag}
+            </button>
+          ))}
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+              style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
+            >
+              清除標籤
+            </button>
+          )}
+        </div>
+      
       {filtered.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
       ) : (
@@ -119,26 +164,10 @@ export default function StrategyAnalysis({ completed }: Props) {
           {/* 總覽 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              {
-                label: t('totalTrades2'),
-                value: `${filtered.length} ${t('trades2')}`,
-                color: 'text-white'
-              },
-              {
-                label: t('winRate'),
-                value: `${winRate.toFixed(1)}%`,
-                color: winRate >= 50 ? 'text-green-400' : 'text-red-400'
-              },
-              {
-                label: t('totalPnl'),
-                value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`,
-                color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400'
-              },
-              {
-                label: t('avgHoldTime'),
-                value: avgHoldDisplay,
-                color: 'text-[#d4a843]'
-              },
+              { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
+              { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
+              { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
+              { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[#d4a843]' },
             ].map(item => (
               <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
                 <div className="text-xs text-gray-500 mb-1">{item.label}</div>
@@ -151,7 +180,7 @@ export default function StrategyAnalysis({ completed }: Props) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-xl p-4" style={cardStyle}>
               <div className="text-xs text-gray-500 mb-1">
-                {wins.length} {t('directionLong').includes('Long') ? 'W' : '勝'} / {losses.length} {t('directionLong').includes('Long') ? 'L' : '敗'}
+                {wins.length} 勝 / {losses.length} 敗
               </div>
               <div className="text-xl font-bold">
                 <span className="text-green-400">+{avgWin.toFixed(0)}</span>
@@ -185,20 +214,14 @@ export default function StrategyAnalysis({ completed }: Props) {
             />
           </div>
 
-          {/* 指標分佈（只在選擇特定策略時顯示） */}
+          {/* 指標分佈 */}
           {selected !== '__all__' && (showMACD || showRSI || showKDJ) && (
             <div className="rounded-xl p-5" style={cardStyle}>
               <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('indicatorDist')}</h3>
               <div className="space-y-4">
-                {showMACD && (
-                  <IndicatorCompare label="MACD DIF" wins={wins} losses={losses} field="big_dif" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />
-                )}
-                {showRSI && (
-                  <IndicatorCompare label="RSI" wins={wins} losses={losses} field="big_rsi" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />
-                )}
-                {showKDJ && (
-                  <IndicatorCompare label="KDJ K" wins={wins} losses={losses} field="big_k" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />
-                )}
+                {showMACD && <IndicatorCompare label="MACD DIF" wins={wins} losses={losses} field="big_dif" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
+                {showRSI && <IndicatorCompare label="RSI" wins={wins} losses={losses} field="big_rsi" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
+                {showKDJ && <IndicatorCompare label="KDJ K" wins={wins} losses={losses} field="big_k" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
               </div>
             </div>
           )}
@@ -217,7 +240,9 @@ export default function StrategyAnalysis({ completed }: Props) {
                     </span>
                     <span className="font-semibold text-sm">{trade.symbol}</span>
                     <span className="text-gray-400 text-xs">{trade.open_price} → {trade.close_price}</span>
-                    <span className="text-gray-500 text-xs">{avgHoldDisplay}</span>
+                    {trade.remark && (
+                      <span className="text-gray-500 text-xs">{trade.remark}</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-4">
                     <span className={`font-semibold text-sm ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -266,9 +291,7 @@ function IndicatorCard({ title, trades, color, bgColor, showMACD, showRSI, showK
       { label: 'MACD DEA', key: 'big_dea' as keyof CompletedTrade },
       { label: 'MACD 柱', key: 'big_hist' as keyof CompletedTrade },
     ] : []),
-    ...(showRSI ? [
-      { label: 'RSI (14)', key: 'big_rsi' as keyof CompletedTrade },
-    ] : []),
+    ...(showRSI ? [{ label: 'RSI (14)', key: 'big_rsi' as keyof CompletedTrade }] : []),
     ...(showKDJ ? [
       { label: 'KDJ K', key: 'big_k' as keyof CompletedTrade },
       { label: 'KDJ D', key: 'big_d' as keyof CompletedTrade },
