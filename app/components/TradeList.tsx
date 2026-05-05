@@ -108,10 +108,14 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           autoFocus
           value={field === 'remark' ? val : search}
           onChange={e => {
-            if (field === 'remark') setVal(e.target.value)
-            else setSearch(e.target.value)
-            setShowDropdown(true)
-          }}
+  if (field === 'remark') {
+    setVal(e.target.value)
+    setSearch(e.target.value.split(' ').pop() || '')
+  } else {
+    setSearch(e.target.value)
+  }
+  setShowDropdown(true)
+}}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
