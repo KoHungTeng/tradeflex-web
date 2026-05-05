@@ -22,6 +22,7 @@ export default function CalendarView({ completed }: Props) {
   const [noteInput, setNoteInput] = useState('')
   const [saving, setSaving] = useState(false)
   const isComposingRef = useRef(false)
+  const compositionEndTimeRef = useRef(0)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -194,8 +195,8 @@ export default function CalendarView({ completed }: Props) {
                       value={noteInput}
                       onChange={e => setNoteInput(e.target.value)}
                       onCompositionStart={() => { isComposingRef.current = true }}
-onCompositionEnd={() => { isComposingRef.current = false }}
-onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current) { e.preventDefault(); saveNote() } }}
+onCompositionEnd={() => { isComposingRef.current = false; compositionEndTimeRef.current = Date.now() }}
+onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
                       placeholder={t('calendarNotePlaceholder')}
                       autoFocus
                       className="flex-1 bg-[#222222] border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
