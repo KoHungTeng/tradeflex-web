@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { useLanguage } from '../LanguageContext'
 
 type Note = {
   id: string
@@ -10,6 +11,7 @@ type Note = {
 }
 
 export default function QuickNote() {
+  const { t } = useLanguage()
   const [notes, setNotes] = useState<Note[]>([])
   const [input, setInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -17,7 +19,6 @@ export default function QuickNote() {
 
   useEffect(() => { loadNotes() }, [])
 
-  // 每次筆記更新時捲到最底
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
@@ -50,7 +51,6 @@ export default function QuickNote() {
 
   return (
     <div className="bg-[#111111] px-4 py-3" style={{ height: '120px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {/* 輸入列 */}
       <div className="flex gap-2 items-center flex-shrink-0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -60,7 +60,7 @@ export default function QuickNote() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNote() } }}
-          placeholder="隨手筆記，按 Enter 儲存..."
+          placeholder={t('notePlaceholder')}
           className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#d4a843]"
         />
         <button
@@ -68,18 +68,17 @@ export default function QuickNote() {
           disabled={submitting}
           className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50 flex-shrink-0"
         >
-          新增
+          {t('noteAdd')}
         </button>
       </div>
 
-      {/* 筆記清單 - 固定高度，內部滾動 */}
       <div
         ref={listRef}
         className="flex-1 overflow-y-auto flex flex-col gap-1"
         style={{ minHeight: 0 }}
       >
         {notes.length === 0 ? (
-          <p className="text-gray-600 text-xs px-1">尚無筆記</p>
+          <p className="text-gray-600 text-xs px-1">{t('noNotes')}</p>
         ) : (
           notes.map(n => (
             <div key={n.id} className="flex items-center justify-between bg-[#1a1a1a] rounded px-3 py-1.5 text-sm group flex-shrink-0">
