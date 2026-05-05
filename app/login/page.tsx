@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { useLanguage } from '../LanguageContext'
 
 export default function LoginPage() {
+  const { t, language, setLanguage } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -34,12 +36,36 @@ export default function LoginPage() {
     setLoading(false)
   }
 
+  const LANGUAGES = [
+    { code: 'zh-TW', label: '繁中' },
+    { code: 'zh-CN', label: '简中' },
+    { code: 'en', label: 'EN' },
+    { code: 'ja', label: '日本語' },
+  ]
+
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
       <div className="w-full max-w-sm">
+        {/* 語言切換 */}
+        <div className="flex justify-center gap-2 mb-6">
+          {LANGUAGES.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => setLanguage(lang.code as any)}
+              className="px-3 py-1 rounded text-xs font-medium transition-colors"
+              style={language === lang.code
+                ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                : { background: '#1a1a1a', color: '#666' }
+              }
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+
         <div className="text-center mb-8">
           <div className="text-2xl font-bold mb-1" style={{ color: '#d4a843' }}>TradeFlex</div>
-          <div className="text-gray-500 text-sm">交易日誌系統</div>
+          <div className="text-gray-500 text-sm">Trading Journal</div>
         </div>
 
         <div className="rounded-xl p-6" style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>

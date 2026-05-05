@@ -2,6 +2,7 @@
 
 import { CompletedTrade, Trade } from '../page'
 import { useCurrency } from '../CurrencyContext'
+import { useLanguage } from '../LanguageContext'
 import { useState, useRef, useEffect } from 'react'
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 
 type CardItem = {
   id: string
-  label: string
+  labelKey: string
   value: number
   isPrice?: boolean
   suffix?: string
@@ -25,14 +26,16 @@ type BlockItem = {
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
-  const { convert, symbol } = useCurrency()
+  const { convert } = useCurrency()
+  const { t } = useLanguage()
   const [initialCapital, setInitialCapital] = useState(10000)
 
-useEffect(() => {
-  fetch('/api/capital').then(r => r.json()).then(data => {
-    setInitialCapital(data.amount || 10000)
-  })
-}, [])
+  useEffect(() => {
+    fetch('/api/capital').then(r => r.json()).then(data => {
+      setInitialCapital(data.amount || 10000)
+    })
+  }, [])
+
   const totalPnL = completed.reduce((s, t) => s + t.pnl, 0)
   const wins = completed.filter(t => t.pnl > 0)
   const losses = completed.filter(t => t.pnl < 0)
@@ -74,13 +77,13 @@ useEffect(() => {
     : 0
 
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
-  completed.forEach(t => {
-    const s = t.strategy || '無策略'
-    if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
-    strategyMap[s].total++
-    strategyMap[s].pnl += t.pnl
-    if (t.pnl > 0) strategyMap[s].wins++
-  })
+completed.forEach(trade => {
+  const s = trade.strategy || '—'
+  if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
+  strategyMap[s].total++
+  strategyMap[s].pnl += trade.pnl
+  if (trade.pnl > 0) strategyMap[s].wins++
+})
 
   const last7: { date: string; pnl: number }[] = []
   for (let i = 6; i >= 0; i--) {
@@ -94,46 +97,48 @@ useEffect(() => {
     last7.push({ date: label, pnl })
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
-  // 資金成長曲線
-const sortedTrades = [...completed].sort((a, b) => 
-  new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
-)
-const growthData: { date: string; capital: number }[] = []
-let capital = initialCapital
-growthData.push({ date: '起始', capital })
-sortedTrades.forEach(t => {
-  capital += t.pnl
-  growthData.push({
-    date: new Date(t.close_time).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
-    capital,
-  })
-})
-const maxCapital = Math.max(...growthData.map(d => d.capital))
-const minCapital = Math.min(...growthData.map(d => d.capital))
-const capitalRange = maxCapital - minCapital || 1
 
+  // 資金成長曲線
+  const sortedTrades = [...completed].sort((a, b) =>
+    new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
+  )
+  const growthData: { date: string; capital: number }[] = []
+  let capital = initialCapital
+  growthData.push({ date: t('initialCapitalLabel').replace('：', '').replace(': ', '').replace('：', ''), capital })
+  sortedTrades.forEach(trade => {
+    capital += trade.pnl
+    growthData.push({
+      date: new Date(trade.close_time).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
+      capital,
+    })
+  })
+  const maxCapital = Math.max(...growthData.map(d => d.capital))
+  const minCapital = Math.min(...growthData.map(d => d.capital))
+  const capitalRange = maxCapital - minCapital || 1
+
+  // 用 labelKey 儲存，render 時再 t()
   const initialCards: CardItem[] = [
-    { id: 'totalPnL', label: '總盈虧', value: totalPnL, isPrice: true },
-    { id: 'todayPnL', label: '今日盈虧', value: todayPnL, isPrice: true },
-    { id: 'weekPnL', label: '本週盈虧', value: weekPnL, isPrice: true },
-    { id: 'monthPnL', label: '本月盈虧', value: monthPnL, isPrice: true },
-    { id: 'winRate', label: '勝率', value: winRate, suffix: '%' },
-    { id: 'total', label: '總交易數', value: completed.length },
-    { id: 'avgWin', label: '平均獲利', value: avgWin, isPrice: true },
-    { id: 'avgLoss', label: '平均虧損', value: avgLoss, isPrice: true },
-    { id: 'rrRate', label: '盈虧比', value: rrAchieveRate, custom: `${rrAchieveRate.toFixed(2)}R` },
-    { id: 'holdTime', label: '平均持倉', value: 0, custom: avgHoldDisplay },
-    { id: 'empty1', label: '', value: 0, empty: true },
-    { id: 'empty2', label: '', value: 0, empty: true },
+    { id: 'totalPnL',  labelKey: 'totalPnl',    value: totalPnL,          isPrice: true },
+    { id: 'todayPnL',  labelKey: 'todayPnl',    value: todayPnL,          isPrice: true },
+    { id: 'weekPnL',   labelKey: 'weekPnl',     value: weekPnL,           isPrice: true },
+    { id: 'monthPnL',  labelKey: 'monthPnl',    value: monthPnL,          isPrice: true },
+    { id: 'winRate',   labelKey: 'winRate',     value: winRate,           suffix: '%' },
+    { id: 'total',     labelKey: 'totalTrades', value: completed.length },
+    { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
+    { id: 'avgLoss',   labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
+    { id: 'rrRate',    labelKey: 'profitFactor',value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
+    { id: 'holdTime',  labelKey: 'avgHoldTime', value: 0,                 custom: avgHoldDisplay },
+    { id: 'empty1',    labelKey: '',            value: 0,                 empty: true },
+    { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
   const [blocks, setBlocks] = useState<BlockItem[]>([
-  { id: 'cards', type: 'cards' },
-  { id: 'chart', type: 'chart' },
-  { id: 'growth', type: 'growth' },
-  { id: 'strategy', type: 'strategy' },
-])
+    { id: 'cards',    type: 'cards' },
+    { id: 'chart',    type: 'chart' },
+    { id: 'growth',   type: 'growth' },
+    { id: 'strategy', type: 'strategy' },
+  ])
 
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
   const draggingCardIndex = useRef<number | null>(null)
@@ -184,7 +189,10 @@ const capitalRange = maxCapital - minCapital || 1
     setDraggingBlockId(null)
   }
 
-  const blockStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }
+  const blockStyle = {
+    background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)',
+    border: '1px solid #2a2a2a',
+  }
 
   function renderBlock(block: BlockItem, index: number) {
     const isDragging = draggingBlockId === block.id
@@ -197,10 +205,11 @@ const capitalRange = maxCapital - minCapital || 1
         className={`rounded-xl select-none transition-all ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
         style={blockStyle}
       >
+        {/* 數據卡片 */}
         {block.type === 'cards' && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-gray-500 cursor-grab">⠿ 數據卡片</span>
+              <span className="text-xs text-gray-500 cursor-grab">⠿ {t('dataCards')}</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3" onMouseUp={onCardMouseUp}>
               {cards.map((card, ci) => {
@@ -222,16 +231,18 @@ const capitalRange = maxCapital - minCapital || 1
                   >
                     {!card.empty && (
                       <>
-                        <div className="text-xs text-gray-500">{card.label}</div>
+                        <div className="text-xs text-gray-500">
+                          {card.labelKey ? t(card.labelKey as any) : ''}
+                        </div>
                         {card.custom ? (
                           <div className="text-lg font-bold text-[#d4a843]">{card.custom}</div>
                         ) : (
                           <div className={`text-lg font-bold ${color}`}>
                             {card.isPrice ? (
-  <>{card.value > 0 ? '+' : ''}{convert(card.value)}</>
-) : (
-  <>{card.value.toFixed(card.suffix ? 1 : 0)}{card.suffix}</>
-)}
+                              <>{card.value > 0 ? '+' : ''}{convert(card.value)}</>
+                            ) : (
+                              <>{card.value.toFixed(card.suffix ? 1 : 0)}{card.suffix}</>
+                            )}
                           </div>
                         )}
                       </>
@@ -243,9 +254,10 @@ const capitalRange = maxCapital - minCapital || 1
           </div>
         )}
 
+        {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
           <div className="p-5 cursor-grab">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">近 7 天盈虧</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('recentPnl')}</h3>
             <div className="flex items-end gap-2 h-32">
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
@@ -262,7 +274,9 @@ const capitalRange = maxCapital - minCapital || 1
                           style={{ height: `${Math.max(height, 4)}%` }}
                         />
                       )}
-                      {d.pnl === 0 && <div className="w-full h-0.5 mt-auto" style={{ background: '#2a2a2a' }} />}
+                      {d.pnl === 0 && (
+                        <div className="w-full h-0.5 mt-auto" style={{ background: '#2a2a2a' }} />
+                      )}
                     </div>
                     <span className="text-xs text-gray-500">{d.date}</span>
                   </div>
@@ -272,62 +286,72 @@ const capitalRange = maxCapital - minCapital || 1
           </div>
         )}
 
+        {/* 資金成長曲線 */}
         {block.type === 'growth' && (
-  <div className="p-5 cursor-grab">
-    <h3 className="text-sm font-semibold text-gray-400 mb-1">資金成長曲線</h3>
-    <p className="text-xs text-gray-600 mb-4">初始資金：{convert(initialCapital)}</p>
-    {growthData.length <= 1 ? (
-      <div className="text-center text-gray-600 py-8">尚無已平倉交易</div>
-    ) : (
-      <div className="relative h-40">
-        <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#d4a843" stopOpacity="0.3"/>
-              <stop offset="100%" stopColor="#d4a843" stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-          <polyline
-            points={growthData.map((d, i) => {
-              const x = i * 40 + 20
-              const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
-              return `${x},${y}`
-            }).join(' ')}
-            fill="none"
-            stroke="#d4a843"
-            strokeWidth="2"
-          />
-          <polygon
-            points={[
-              ...growthData.map((d, i) => {
-                const x = i * 40 + 20
-                const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
-                return `${x},${y}`
-              }),
-              `${(growthData.length - 1) * 40 + 20},160`,
-              `20,160`,
-            ].join(' ')}
-            fill="url(#growthGrad)"
-          />
-        </svg>
-        <div className="flex justify-between mt-2">
-          {growthData.filter((_, i) => i === 0 || i === growthData.length - 1 || i % Math.ceil(growthData.length / 5) === 0).map((d, i) => (
-            <span key={i} className="text-xs text-gray-600">{d.date}</span>
-          ))}
-        </div>
-        <div className="absolute right-0 top-0 text-right">
-          <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
-          <div className="text-xs text-gray-600">
-            {capital >= initialCapital ? '+' : ''}{((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-)}
-{block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
           <div className="p-5 cursor-grab">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">策略勝率</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1">{t('growthCurve')}</h3>
+            <p className="text-xs text-gray-600 mb-4">{t('initialCapitalLabel')}{convert(initialCapital)}</p>
+            {growthData.length <= 1 ? (
+              <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
+            ) : (
+              <div className="relative h-40">
+                <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#d4a843" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#d4a843" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <polyline
+                    points={growthData.map((d, i) => {
+                      const x = i * 40 + 20
+                      const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
+                      return `${x},${y}`
+                    }).join(' ')}
+                    fill="none"
+                    stroke="#d4a843"
+                    strokeWidth="2"
+                  />
+                  <polygon
+                    points={[
+                      ...growthData.map((d, i) => {
+                        const x = i * 40 + 20
+                        const y = 160 - ((d.capital - minCapital) / capitalRange) * 140 - 10
+                        return `${x},${y}`
+                      }),
+                      `${(growthData.length - 1) * 40 + 20},160`,
+                      `20,160`,
+                    ].join(' ')}
+                    fill="url(#growthGrad)"
+                  />
+                </svg>
+                <div className="flex justify-between mt-2">
+                  {growthData
+                    .filter((_, i) =>
+                      i === 0 ||
+                      i === growthData.length - 1 ||
+                      i % Math.ceil(growthData.length / 5) === 0
+                    )
+                    .map((d, i) => (
+                      <span key={i} className="text-xs text-gray-600">{d.date}</span>
+                    ))}
+                </div>
+                <div className="absolute right-0 top-0 text-right">
+                  <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
+                  <div className="text-xs text-gray-600">
+                    {capital >= initialCapital ? '+' : ''}
+                    {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 策略勝率 */}
+        {block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
+          <div className="p-5 cursor-grab">
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('strategyWinRate')}</h3>
             <div className="space-y-3">
               {Object.entries(strategyMap).map(([name, data]) => {
                 const rate = data.wins / data.total * 100
@@ -339,7 +363,7 @@ const capitalRange = maxCapital - minCapital || 1
                         <span className={data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}>
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
                         </span>
-                        <span className="text-gray-400">{data.total} 筆</span>
+                        <span className="text-gray-400">{data.total} {t('tradesCount')}</span>
                         <span className={rate >= 50 ? 'text-green-400' : 'text-red-400'}>
                           {rate.toFixed(0)}%
                         </span>
@@ -367,14 +391,14 @@ const capitalRange = maxCapital - minCapital || 1
       onMouseUp={() => { onCardMouseUp(); onBlockMouseUp() }}
       onMouseLeave={() => { onCardMouseUp(); onBlockMouseUp() }}
     >
-      <h2 className="text-lg font-semibold mb-6">統計總覽</h2>
+      <h2 className="text-lg font-semibold mb-6">{t('statsOverview')}</h2>
 
       <div className="flex flex-col gap-4">
         {blocks.map((block, index) => renderBlock(block, index))}
       </div>
 
       {completed.length === 0 && (
-        <div className="text-center text-gray-600 py-20">尚無已平倉交易</div>
+        <div className="text-center text-gray-600 py-20">{t('noCompletedTrades')}</div>
       )}
     </div>
   )
