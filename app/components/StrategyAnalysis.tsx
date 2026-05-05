@@ -149,6 +149,7 @@ export default function StrategyAnalysis({ completed }: Props) {
   const [selected, setSelected] = useState<string>('__all__')
   const [direction, setDirection] = useState<Direction>('all')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('__all__')
   const [strategies, setStrategies] = useState<Strategy[]>([])
 
   useEffect(() => {
@@ -157,7 +158,10 @@ export default function StrategyAnalysis({ completed }: Props) {
     })
   }, [])
 
-  const allTags = Array.from(new Set(
+  const allSymbols = Array.from(new Set(
+  completed.map(t => t.symbol).filter(Boolean)
+)).sort()
+const allTags = Array.from(new Set(
     completed.flatMap(trade =>
       (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
     )
@@ -171,13 +175,17 @@ export default function StrategyAnalysis({ completed }: Props) {
     ? completed
     : completed.filter(t => t.strategy === selected)
 
-  const byDirection = direction === 'all'
-    ? byStrategy
-    : byStrategy.filter(t => t.direction === direction)
+const byDirection = direction === 'all'
+  ? byStrategy
+  : byStrategy.filter(t => t.direction === direction)
+
+const bySymbol = selectedSymbol === '__all__'
+  ? byDirection
+  : byDirection.filter(t => t.symbol === selectedSymbol)
 
   const filtered = selectedTags.length === 0
-    ? byDirection
-    : byDirection.filter(t =>
+  ? bySymbol
+  : bySymbol.filter(t =>
         selectedTags.every(tag => (t.remark || '').includes(tag))
       )
 
@@ -221,48 +229,65 @@ export default function StrategyAnalysis({ completed }: Props) {
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-4">{t('strategyAnalysis')}</h2>
 
-      {/* 篩選區塊 */}
-      <div className="rounded-xl p-4 mb-6 flex gap-6 items-end" style={cardStyle}>
-        {/* 策略 */}
-        <div>
-          <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
-          <select
-            value={selected}
-            onChange={e => setSelected(e.target.value)}
-            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
-          >
-            <option value="__all__">{t('allStrategies')}</option>
-            {strategyNames.filter(s => s !== '__all__').map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
+     {/* 篩選區塊 */}
+<div className="rounded-xl p-4 mb-6 flex gap-6 items-end" style={cardStyle}>
+  {/* 策略 */}
+  <div>
+    <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+    <select
+      value={selected}
+      onChange={e => setSelected(e.target.value)}
+      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+    >
+      <option value="__all__">{t('allStrategies')}</option>
+      {strategyNames.filter(s => s !== '__all__').map(s => (
+        <option key={s} value={s}>{s}</option>
+      ))}
+    </select>
+  </div>
 
-        {/* 多/空 */}
-        <div>
-          <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
-          <select
-            value={direction}
-            onChange={e => setDirection(e.target.value as Direction)}
-            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
-          >
-            <option value="all">{t('allDirections')}</option>
-            <option value="long">{t('directionLong')}</option>
-            <option value="short">{t('directionShort')}</option>
-          </select>
-        </div>
+  {/* 多/空 */}
+  <div>
+    <p className="text-xs text-gray-500 mb-2">
+      {t('directionLong')}/{t('directionShort')}
+    </p>
+    <select
+      value={direction}
+      onChange={e => setDirection(e.target.value as Direction)}
+      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+    >
+      <option value="all">{t('allDirections')}</option>
+      <option value="long">{t('directionLong')}</option>
+      <option value="short">{t('directionShort')}</option>
+    </select>
+  </div>
 
-        {/* 標籤 */}
-        <div>
-          <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
-          <TagDropdown
-            allTags={allTags}
-            selectedTags={selectedTags}
-            onToggle={toggleTag}
-            onClear={() => setSelectedTags([])}
-          />
-        </div>
-      </div>
+  {/* ✅ 商品 Symbol（補上這塊） */}
+  <div>
+    <p className="text-xs text-gray-500 mb-2">{t('symbol') || 'Symbol'}</p>
+    <select
+      value={selectedSymbol}
+      onChange={e => setSelectedSymbol(e.target.value)}
+      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+    >
+      <option value="__all__">{t('allStrategies') || '全部'}</option>
+      {allSymbols.map(s => (
+        <option key={s} value={s}>{s}</option>
+      ))}
+    </select>
+  </div>
+
+  {/* 標籤 */}
+  <div>
+    <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
+    <TagDropdown
+      allTags={allTags}
+      selectedTags={selectedTags}
+      onToggle={toggleTag}
+      onClear={() => setSelectedTags([])}
+    />
+  </div>
+</div>
 
       {filtered.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
