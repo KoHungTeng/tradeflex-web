@@ -33,6 +33,12 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setVal(value) }, [value])
+  useEffect(() => {
+  if (editing && inputRef.current) {
+    const rect = inputRef.current.getBoundingClientRect()
+    setDropdownPos({ top: rect.bottom + 4, left: rect.left })
+  }
+}, [editing])
 
   const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
 
@@ -106,13 +112,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
             else setSearch(e.target.value)
             setShowDropdown(true)
           }}
-          onFocus={() => {
-            if (inputRef.current) {
-              const rect = inputRef.current.getBoundingClientRect()
-              setDropdownPos({ top: rect.bottom + 4, left: rect.left })
-            }
-            setShowDropdown(true)
-          }}
+          onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
