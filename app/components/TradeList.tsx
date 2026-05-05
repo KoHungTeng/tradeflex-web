@@ -2,6 +2,7 @@
 
 import { Trade } from '../page'
 import { useState, useRef, useEffect } from 'react'
+import { useLanguage } from '../LanguageContext'
 
 type Props = {
   trades: Trade[]
@@ -9,22 +10,10 @@ type Props = {
   onCompletedChanged: () => void
 }
 
-const COLS = [
-  { key: 'action', label: '動作', minWidth: 60, defaultWidth: 80, align: 'left' },
-  { key: 'symbol', label: '標的', minWidth: 50, defaultWidth: 80, align: 'left' },
-  { key: 'price', label: '價格', minWidth: 60, defaultWidth: 90, align: 'right' },
-  { key: 'quantity', label: '口數', minWidth: 40, defaultWidth: 60, align: 'right' },
-  { key: 'fee', label: '手續費', minWidth: 55, defaultWidth: 80, align: 'right' },
-  { key: 'tp', label: 'TP', minWidth: 40, defaultWidth: 70, align: 'right' },
-  { key: 'sl', label: 'SL', minWidth: 40, defaultWidth: 70, align: 'right' },
-  { key: 'rr', label: 'R:R', minWidth: 40, defaultWidth: 60, align: 'right' },
-  { key: 'strategy', label: '策略', minWidth: 50, defaultWidth: 120, align: 'left' },
-  { key: 'remark', label: '備註', minWidth: 50, defaultWidth: 120, align: 'left' },
-  { key: 'time', label: '時間', minWidth: 130, defaultWidth: 150, align: 'left' },
-  { key: 'delete', label: '', minWidth: 30, defaultWidth: 40, align: 'left' },
-]
-
-const DEFAULT_WIDTHS = Object.fromEntries(COLS.map(c => [c.key, c.defaultWidth]))
+const DEFAULT_WIDTHS: Record<string, number> = {
+  action: 80, symbol: 80, price: 90, quantity: 60, fee: 80,
+  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 120, time: 150, delete: 40,
+}
 
 function DropdownEditCell({ value, tradeId, field, color, onSaved, options, placeholder }: {
   value: string
@@ -40,9 +29,8 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-  setVal(value)
-}, [value])
+
+  useEffect(() => { setVal(value) }, [value])
 
   const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
 
@@ -68,8 +56,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
 
   function select(opt: string) {
     if (field === 'remark') {
-      const newVal = val ? `${val} ${opt}` : opt
-      setVal(newVal)
+      setVal(val ? `${val} ${opt}` : opt)
       setSearch('')
     } else {
       setVal(opt)
@@ -86,6 +73,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') {
+      if (e.nativeEvent.isComposing) return   // ← 加這一行
       setEditing(false)
       setShowDropdown(false)
       setSearch('')
@@ -122,9 +110,11 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
         />
         {showDropdown && filtered.length > 0 && (
           <div
-            className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
-            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
-          >
+  className="absolute left-0 top-full mt-1 z-50 rounded-lg overflow-hidden shadow-xl"
+  style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', minWidth: 150, maxHeight: 160, overflowY: 'auto' }}
+  onWheel={e => e.stopPropagation()}
+  onTouchMove={e => e.stopPropagation()}
+>
             {filtered.map(opt => (
               <div
                 key={opt}
@@ -150,8 +140,13 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
   )
 }
 
-function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } }) {
-  const hasData = t.big_dif != null || t.big_rsi != null || t.small_dif != null || t.small_rsi != null
+function IndicatorTooltip({ trade, pos, higherTF, lowerTF }: {
+  trade: Trade
+  pos: { x: number; y: number }
+  higherTF: string
+  lowerTF: string
+}) {
+  const hasData = trade.big_dif != null || trade.big_rsi != null || trade.small_dif != null || trade.small_rsi != null
   if (!hasData) return null
   return (
     <div
@@ -160,27 +155,27 @@ function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } 
     >
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-gray-400 font-semibold mb-2">大時間框架</p>
+          <p className="text-gray-400 font-semibold mb-2">{higherTF}</p>
           <div className="space-y-1">
-            {t.big_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{t.big_dif}</span></div>}
-            {t.big_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{t.big_dea}</span></div>}
-            {t.big_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{t.big_hist}</span></div>}
-            {t.big_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{t.big_rsi}</span></div>}
-            {t.big_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{t.big_k}</span></div>}
-            {t.big_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{t.big_d}</span></div>}
-            {t.big_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{t.big_j}</span></div>}
+            {trade.big_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{trade.big_dif}</span></div>}
+            {trade.big_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{trade.big_dea}</span></div>}
+            {trade.big_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{trade.big_hist}</span></div>}
+            {trade.big_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{trade.big_rsi}</span></div>}
+            {trade.big_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{trade.big_k}</span></div>}
+            {trade.big_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{trade.big_d}</span></div>}
+            {trade.big_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{trade.big_j}</span></div>}
           </div>
         </div>
         <div>
-          <p className="text-gray-400 font-semibold mb-2">小時間框架</p>
+          <p className="text-gray-400 font-semibold mb-2">{lowerTF}</p>
           <div className="space-y-1">
-            {t.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{t.small_dif}</span></div>}
-            {t.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{t.small_dea}</span></div>}
-            {t.small_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{t.small_hist}</span></div>}
-            {t.small_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{t.small_rsi}</span></div>}
-            {t.small_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{t.small_k}</span></div>}
-            {t.small_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{t.small_d}</span></div>}
-            {t.small_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{t.small_j}</span></div>}
+            {trade.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{trade.small_dif}</span></div>}
+            {trade.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{trade.small_dea}</span></div>}
+            {trade.small_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{trade.small_hist}</span></div>}
+            {trade.small_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{trade.small_rsi}</span></div>}
+            {trade.small_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{trade.small_k}</span></div>}
+            {trade.small_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{trade.small_d}</span></div>}
+            {trade.small_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{trade.small_j}</span></div>}
           </div>
         </div>
       </div>
@@ -189,6 +184,24 @@ function IndicatorTooltip({ t, pos }: { t: Trade, pos: { x: number, y: number } 
 }
 
 export default function TradeList({ trades, onDeleted, onCompletedChanged }: Props) {
+  const { t } = useLanguage()
+
+  // 動態產生 COLS，label 從翻譯取
+  const COLS = [
+    { key: 'action',   label: t('colAction'),   minWidth: 60,  defaultWidth: 80,  align: 'left' },
+    { key: 'symbol',   label: t('colSymbol'),   minWidth: 50,  defaultWidth: 80,  align: 'left' },
+    { key: 'price',    label: t('colPrice'),    minWidth: 60,  defaultWidth: 90,  align: 'right' },
+    { key: 'quantity', label: t('colQty'),      minWidth: 40,  defaultWidth: 60,  align: 'right' },
+    { key: 'fee',      label: t('colFee'),      minWidth: 55,  defaultWidth: 80,  align: 'right' },
+    { key: 'tp',       label: 'TP',             minWidth: 40,  defaultWidth: 70,  align: 'right' },
+    { key: 'sl',       label: 'SL',             minWidth: 40,  defaultWidth: 70,  align: 'right' },
+    { key: 'rr',       label: 'R:R',            minWidth: 40,  defaultWidth: 60,  align: 'right' },
+    { key: 'strategy', label: t('colStrategy'), minWidth: 50,  defaultWidth: 120, align: 'left' },
+    { key: 'remark',   label: t('colRemark'),   minWidth: 50,  defaultWidth: 120, align: 'left' },
+    { key: 'time',     label: t('colTime'),     minWidth: 130, defaultWidth: 150, align: 'left' },
+    { key: 'delete',   label: '',               minWidth: 30,  defaultWidth: 40,  align: 'left' },
+  ]
+
   const [widths, setWidths] = useState<Record<string, number>>(() => {
     if (typeof window === 'undefined') return DEFAULT_WIDTHS
     try {
@@ -208,7 +221,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       setStrategies(Array.isArray(data) ? data.map((s: any) => s.name) : [])
     })
     fetch('/api/tags').then(r => r.json()).then(data => {
-      setTags(Array.isArray(data) ? data.map((t: any) => `#${t.name}`) : [])
+      setTags(Array.isArray(data) ? data.map((tag: any) => `#${tag.name}`) : [])
     })
   }, [])
 
@@ -220,7 +233,6 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       startWidth: widths[col.key],
       minWidth: col.minWidth,
     }
-
     function onMove(e: MouseEvent) {
       if (!dragging.current) return
       const diff = e.clientX - dragging.current.startX
@@ -231,19 +243,17 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
         return next
       })
     }
-
     function onUp() {
       dragging.current = null
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
-
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
   }
 
   async function deleteTrade(id: string) {
-    const trade = trades.find(t => t.id === id)
+    const trade = trades.find(tr => tr.id === id)
     onDeleted(id)
     await fetch(`/api/trades?id=${id}`, { method: 'DELETE' })
     if (trade) {
@@ -253,11 +263,12 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
     }
   }
 
-  const actionColor = (action: string) => {
-    if (action === '做多') return 'bg-green-900 text-green-400'
-    if (action === '做空') return 'bg-red-900 text-red-400'
-    if (action === '平多') return 'bg-green-800/50 text-green-500'
-    return 'bg-red-800/50 text-red-500'
+  // 動作標籤顏色：對應翻譯後的 action 字串
+  const actionMap: Record<string, { bg: string; label: string }> = {
+    '做多': { bg: 'bg-green-900 text-green-400',    label: t('actionLong') },
+    '做空': { bg: 'bg-red-900 text-red-400',        label: t('actionShort') },
+    '平多': { bg: 'bg-green-800/50 text-green-500', label: t('actionCloseLong') },
+    '平空': { bg: 'bg-red-800/50 text-red-500',     label: t('actionCloseShort') },
   }
 
   const formatTime = (time: string) => {
@@ -276,13 +287,20 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}
     >
       <h2 className="text-sm font-semibold text-gray-400 mb-4">
-        交易記錄（{trades.length} 筆）
+        {t('tradeListTitle')}（{trades.length} {t('tradesUnit')}）
       </h2>
 
-      {hoveredTrade && <IndicatorTooltip t={hoveredTrade} pos={mousePos} />}
+      {hoveredTrade && (
+        <IndicatorTooltip
+          trade={hoveredTrade}
+          pos={mousePos}
+          higherTF={t('higherTF')}
+          lowerTF={t('lowerTF')}
+        />
+      )}
 
       {trades.length === 0 ? (
-        <div className="text-center text-gray-600 py-20">尚無交易記錄</div>
+        <div className="text-center text-gray-600 py-20">{t('noTrades')}</div>
       ) : (
         <table className="text-sm border-collapse w-full" style={{ tableLayout: 'fixed' }}>
           <colgroup>
@@ -310,66 +328,67 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
             </tr>
           </thead>
           <tbody>
-            {trades.map(t => (
-              <tr
-                key={t.id}
-                className="border-b border-[#222222]/50 hover:bg-[#111111]/50"
-                onMouseEnter={() => setHoveredTrade(t)}
-                onMouseLeave={() => setHoveredTrade(null)}
-              >
-                <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${actionColor(t.action)}`}>
-                    {t.action}
-                  </span>
-                </td>
-                <td className="py-2 px-3 font-semibold whitespace-nowrap overflow-hidden">{t.symbol}</td>
-                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.price}</td>
-                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{t.quantity}</td>
-                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.fee || '--'}</td>
-                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.tp || '--'}</td>
-                <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{t.sl || '--'}</td>
-                <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
-                  {t.tp && t.sl && t.sl !== t.price ? (
-                    <span className="text-[#d4a843] text-xs">
-                      {Math.abs((t.tp - t.price) / (t.price - t.sl)).toFixed(2)}R
+            {trades.map(trade => {
+              const actionInfo = actionMap[trade.action] ?? { bg: 'bg-gray-800 text-gray-400', label: trade.action }
+              return (
+                <tr
+                  key={trade.id}
+                  className="border-b border-[#222222]/50 hover:bg-[#111111]/50"
+                  onMouseEnter={() => setHoveredTrade(trade)}
+                  onMouseLeave={() => setHoveredTrade(null)}
+                >
+                  <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${actionInfo.bg}`}>
+                      {actionInfo.label}
                     </span>
-                  ) : '--'}
-                </td>
-                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
-                  <DropdownEditCell
-                    value={t.strategy || ''}
-                    tradeId={t.id}
-                    field="strategy"
-                    color="text-[#d4a843]"
-                    onSaved={onCompletedChanged}
-                    options={strategies}
-                    placeholder="搜尋策略..."
-                  />
-                </td>
-                <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
-                  <DropdownEditCell
-                    value={t.remark || ''}
-                    tradeId={t.id}
-                    field="remark"
-                    color="text-gray-400"
-                    onSaved={onCompletedChanged}
-                    options={tags}
-                    placeholder="輸入備注..."
-                  />
-                </td>
-                <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
-                  {formatTime(t.trade_time)}
-                </td>
-                <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
-                  <button
-                    onClick={() => deleteTrade(t.id)}
-                    className="text-red-500 hover:text-red-400 text-sm px-1"
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-2 px-3 font-semibold whitespace-nowrap overflow-hidden">{trade.symbol}</td>
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{trade.price}</td>
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{trade.quantity}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.fee || '--'}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
+                    {trade.tp && trade.sl && trade.sl !== trade.price ? (
+                      <span className="text-[#d4a843] text-xs">
+                        {Math.abs((trade.tp - trade.price) / (trade.price - trade.sl)).toFixed(2)}R
+                      </span>
+                    ) : '--'}
+                  </td>
+                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
+                    <DropdownEditCell
+                      value={trade.strategy || ''}
+                      tradeId={trade.id}
+                      field="strategy"
+                      color="text-[#d4a843]"
+                      onSaved={onCompletedChanged}
+                      options={strategies}
+                      placeholder={t('searchStrategy')}
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
+                    <DropdownEditCell
+                      value={trade.remark || ''}
+                      tradeId={trade.id}
+                      field="remark"
+                      color="text-gray-400"
+                      onSaved={onCompletedChanged}
+                      options={tags}
+                      placeholder={t('inputRemark')}
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
+                    {formatTime(trade.trade_time)}
+                  </td>
+                  <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
+                    <button
+                      onClick={() => deleteTrade(trade.id)}
+                      className="text-red-500 hover:text-red-400 text-sm px-1"
+                    >✕</button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       )}
