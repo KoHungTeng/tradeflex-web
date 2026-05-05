@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useCurrency } from '../CurrencyContext'
+import { useLanguage } from '../LanguageContext'
 
 type Symbol = {
   id: string
@@ -265,7 +266,15 @@ function parseTradovateTVCSV(rows: any[], symbolsData: Symbol[]): any[] {
   return results
 }
 
+const LANGUAGES = [
+  { code: 'zh-TW', label: '繁中' },
+  { code: 'zh-CN', label: '简中' },
+  { code: 'en', label: 'EN' },
+  { code: 'ja', label: '日本語' },
+]
+
 export default function SettingsPanel({ onImported }: SettingsProps) {
+  const { t, language, setLanguage } = useLanguage()
   const [symbols, setSymbols] = useState<Symbol[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
@@ -451,12 +460,12 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     if (exportRange === 'custom' && exportFrom) filtered = filtered.filter(t => t.close_time >= exportFrom)
     if (exportRange === 'custom' && exportTo) filtered = filtered.filter(t => t.close_time <= exportTo + 'T23:59:59')
     const headers = ['平倉時間', '開倉時間', '標的', '方向', '開倉價', '平倉價', '口數', '開倉手續費', '平倉手續費', '盈虧', '策略', '備註']
-    const rows = filtered.map(t => [
-      t.close_time ? new Date(t.close_time).toLocaleString('zh-TW') : '',
-      t.open_time ? new Date(t.open_time).toLocaleString('zh-TW') : '',
-      t.symbol, t.direction === 'long' ? '做多' : '做空',
-      t.open_price, t.close_price, t.quantity, t.open_fee, t.close_fee, t.pnl,
-      t.strategy || '', t.remark || '',
+    const rows = filtered.map(tr => [
+      tr.close_time ? new Date(tr.close_time).toLocaleString('zh-TW') : '',
+      tr.open_time ? new Date(tr.open_time).toLocaleString('zh-TW') : '',
+      tr.symbol, tr.direction === 'long' ? '做多' : '做空',
+      tr.open_price, tr.close_price, tr.quantity, tr.open_fee, tr.close_fee, tr.pnl,
+      tr.strategy || '', tr.remark || '',
     ])
     const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -492,7 +501,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       const format = detectFormat(headers)
       if (format === 'unknown') {
         setImportStatus('error')
-        setImportMessage('不支援的 CSV 格式，目前支援：TradeFlex、TradingView、Tradovate 格式')
+        setImportMessage('不支援的 CSV 格式')
         return
       }
       const rawRows = parseCSVLines(lines, headers)
@@ -589,16 +598,16 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
   return (
     <div className="flex-1 overflow-auto p-6">
-      <h2 className="text-lg font-semibold mb-6">設定</h2>
+      <h2 className="text-lg font-semibold mb-6">{t('settingsTitle')}</h2>
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {[
-          { key: 'symbols', label: '標的設定' },
-          { key: 'categories', label: '類別設定' },
-          { key: 'strategies', label: '策略設定' },
-          { key: 'tags', label: '標籤設定' },
-          { key: 'currency', label: '幣值設定' },
-          { key: 'data', label: '資料管理' },
+          { key: 'symbols', label: t('symbolSettings') },
+          { key: 'categories', label: t('categorySettings') },
+          { key: 'strategies', label: t('strategySettings') },
+          { key: 'tags', label: t('tagSettings') },
+          { key: 'currency', label: t('currencySettings') },
+          { key: 'data', label: t('dataManagement') },
         ].map(tab => (
           <button
             key={tab.key}
@@ -617,20 +626,20 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       {activeTab === 'symbols' && (
         <div className="space-y-4">
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">新增標的</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addSymbol')}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div><label className="text-xs text-gray-500 mb-1 block">標的名稱</label><input value={newName} onChange={e => setNewName(e.target.value)} placeholder="MES" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">類別</label><select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="input">{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">貨幣</label><select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">Tick Size</label><input value={newTickSize} onChange={e => setNewTickSize(e.target.value)} type="number" step="0.01" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">Tick Value</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">預設手續費/口</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('symbolName')}</label><input value={newName} onChange={e => setNewName(e.target.value)} placeholder="MES" className="input" /></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('category')}</label><select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="input">{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('currency')}</label><select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('tickSize')}</label><input value={newTickSize} onChange={e => setNewTickSize(e.target.value)} type="number" step="0.01" className="input" /></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('tickValue')}</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
+              <div><label className="text-xs text-gray-500 mb-1 block">{t('defaultFee')}</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
             </div>
-            <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>新增標的</button>
+            <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
           </div>
           <div className="rounded-xl overflow-hidden" style={cardStyle}>
             <table className="w-full text-sm">
-              <thead><tr className="text-gray-500 border-b border-[#2a2a2a] text-left"><th className="py-3 px-4">標的</th><th className="py-3 px-4">類別</th><th className="py-3 px-4">Tick Size</th><th className="py-3 px-4">Tick Value</th><th className="py-3 px-4">貨幣</th><th className="py-3 px-4">手續費/口</th><th className="py-3 px-4"></th></tr></thead>
+              <thead><tr className="text-gray-500 border-b border-[#2a2a2a] text-left"><th className="py-3 px-4">{t('symbolName')}</th><th className="py-3 px-4">{t('category')}</th><th className="py-3 px-4">{t('tickSize')}</th><th className="py-3 px-4">{t('tickValue')}</th><th className="py-3 px-4">{t('currency')}</th><th className="py-3 px-4">{t('defaultFee')}</th><th className="py-3 px-4"></th></tr></thead>
               <tbody>
                 {symbols.map(s => (
                   <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[#1a1a1a]/30">
@@ -642,7 +651,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                         <td className="py-2 px-4"><input value={editingSymbol.tick_value} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_value: parseFloat(e.target.value)})} className="input w-24" /></td>
                         <td className="py-2 px-4"><select value={editingSymbol.currency} onChange={e => setEditingSymbol({...editingSymbol, currency: e.target.value})} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></td>
                         <td className="py-2 px-4"><input value={editingSymbol.default_fee} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value)})} className="input w-24" /></td>
-                        <td className="py-2 px-4"><div className="flex gap-2"><button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded">儲存</button><button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded">取消</button></div></td>
+                        <td className="py-2 px-4"><div className="flex gap-2"><button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded">{t('save')}</button><button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded">{t('cancel')}</button></div></td>
                       </>
                     ) : (
                       <>
@@ -652,7 +661,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                         <td className="py-3 px-4">{s.tick_value}</td>
                         <td className="py-3 px-4 text-gray-400">{s.currency}</td>
                         <td className="py-3 px-4">{s.default_fee}</td>
-                        <td className="py-3 px-4"><div className="flex gap-2"><button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] text-xs px-2 py-1 rounded">編輯</button><button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">刪除</button></div></td>
+                        <td className="py-3 px-4"><div className="flex gap-2"><button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button><button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button></div></td>
                       </>
                     )}
                   </tr>
@@ -666,17 +675,17 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       {activeTab === 'categories' && (
         <div className="space-y-4">
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">新增類別</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addCategory')}</h3>
             <div className="flex gap-3">
-              <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="類別名稱" className="input flex-1" />
-              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>新增</button>
+              <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder={t('categoryName')} className="input flex-1" />
+              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('add')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
             {categories.map(c => (
               <div key={c.id} className="flex items-center justify-between py-2 border-b border-[#2a2a2a]">
                 <span className="text-sm">{c.name}</span>
-                <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">刪除</button>
+                <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
               </div>
             ))}
           </div>
@@ -686,11 +695,11 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       {activeTab === 'strategies' && (
         <div className="space-y-4">
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">新增策略</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addStrategy')}</h3>
             <div className="flex flex-col gap-3">
-              <input value={newStrategyName} onChange={e => setNewStrategyName(e.target.value)} placeholder="策略名稱，例如：60k CISD" className="input" />
+              <input value={newStrategyName} onChange={e => setNewStrategyName(e.target.value)} placeholder={t('strategyName')} className="input" />
               <div>
-                <p className="text-xs text-gray-500 mb-2">選擇此策略需要輸入的指標</p>
+                <p className="text-xs text-gray-500 mb-2">{t('indicators')}</p>
                 <div className="flex gap-2">
                   {INDICATOR_OPTIONS.map(ind => (
                     <button key={ind} type="button" onClick={() => toggleIndicator(ind)}
@@ -703,7 +712,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   ))}
                 </div>
               </div>
-              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>新增策略</button>
+              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addStrategyBtn')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -724,8 +733,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={updateStrategy} className="text-green-400 text-xs px-2 py-1 rounded">儲存</button>
-                      <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs px-2 py-1 rounded">取消</button>
+                      <button onClick={updateStrategy} className="text-green-400 text-xs px-2 py-1 rounded">{t('save')}</button>
+                      <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs px-2 py-1 rounded">{t('cancel')}</button>
                     </div>
                   </div>
                 ) : (
@@ -741,14 +750,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[#d4a843] text-xs px-2 py-1 rounded">編輯</button>
-                      <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">刪除</button>
+                      <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button>
+                      <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
                     </div>
                   </div>
                 )}
               </div>
             ))}
-            {strategies.length === 0 && <p className="text-gray-600 text-sm py-2">尚無策略</p>}
+            {strategies.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
           </div>
         </div>
       )}
@@ -756,23 +765,23 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       {activeTab === 'tags' && (
         <div className="space-y-4">
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">新增標籤</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addTag')}</h3>
             <div className="flex gap-3">
-              <input value={newTagName} onChange={e => setNewTagName(e.target.value)} placeholder="標籤名稱，例如：趨勢交易、突破" className="input flex-1"
+              <input value={newTagName} onChange={e => setNewTagName(e.target.value)} placeholder={t('tagName')} className="input flex-1"
                 onKeyDown={e => { if (e.key === 'Enter') addTag() }}
               />
-              <button onClick={addTag} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>新增</button>
+              <button onClick={addTag} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('add')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
             <div className="flex flex-wrap gap-2">
-              {tags.map(t => (
-                <div key={t.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                  <span className="text-gray-300">{t.name}</span>
-                  <button onClick={() => deleteTag(t.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+              {tags.map(tag => (
+                <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+                  <span className="text-gray-300">{tag.name}</span>
+                  <button onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
                 </div>
               ))}
-              {tags.length === 0 && <p className="text-gray-600 text-sm py-2">尚無標籤</p>}
+              {tags.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
             </div>
           </div>
         </div>
@@ -780,9 +789,25 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
       {activeTab === 'currency' && (
         <div className="space-y-4">
+          {/* 語言設定 */}
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">基準貨幣</h3>
-            <p className="text-xs text-gray-500 mb-4">選擇後所有金額顯示將自動換算</p>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('languageSettings')}</h3>
+            <div className="flex gap-2 flex-wrap">
+              {LANGUAGES.map(lang => (
+                <button key={lang.code} onClick={() => setLanguage(lang.code as any)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  style={language === lang.code
+                    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                    : { background: '#1a1a1a', color: '#888' }
+                  }
+                >{lang.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('baseCurrency')}</h3>
+            <p className="text-xs text-gray-500 mb-4">{t('currencyDesc')}</p>
             <div className="flex gap-2 flex-wrap">
               {['USD', 'TWD', 'EUR', 'JPY', 'CNY'].map(c => (
                 <button key={c} onClick={() => setCurrency(c)} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -794,14 +819,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               ))}
             </div>
             <div className="rounded-xl p-4 mt-4" style={cardStyle}>
-              <h3 className="text-sm font-semibold text-gray-400 mb-4">初始資金</h3>
-              <p className="text-xs text-gray-500 mb-4">用於計算資金成長曲線</p>
+              <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('initialCapital')}</h3>
+              <p className="text-xs text-gray-500 mb-4">{t('capitalDesc')}</p>
               <div className="flex gap-3">
                 <input value={initialCapital} onChange={e => setInitialCapital(e.target.value)} type="number" className="input flex-1" placeholder="10000" />
-                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>儲存</button>
+                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('save')}</button>
               </div>
             </div>
-            <p className="text-xs text-gray-600 mt-4">目前：{currency} {symbol}</p>
+            <p className="text-xs text-gray-600 mt-4">{t('current')}{currency} {symbol}</p>
           </div>
         </div>
       )}
@@ -809,40 +834,40 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       {activeTab === 'data' && (
         <div className="space-y-6">
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-1">匯出交易記錄</h3>
-            <p className="text-xs text-gray-600 mb-4">將已完成的交易匯出為 CSV 檔案，可用 Excel 開啟</p>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1">{t('exportTrades')}</h3>
+            <p className="text-xs text-gray-600 mb-4">{t('exportDesc')}</p>
             <div className="flex gap-3 mb-4">
               <button onClick={() => setExportRange('all')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                 style={exportRange === 'all' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
-              >全部資料</button>
+              >{t('allData')}</button>
               <button onClick={() => setExportRange('custom')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                 style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
-              >自訂日期</button>
+              >{t('customDate')}</button>
             </div>
             {exportRange === 'custom' && (
               <div className="flex gap-3 mb-4">
-                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">開始日期</label><input type="date" value={exportFrom} onChange={e => setExportFrom(e.target.value)} className="input" /></div>
-                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">結束日期</label><input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" /></div>
+                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">{t('startDate')}</label><input type="date" value={exportFrom} onChange={e => setExportFrom(e.target.value)} className="input" /></div>
+                <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">{t('endDate')}</label><input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" /></div>
               </div>
             )}
-            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>↓ 下載 CSV</button>
+            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('downloadCSV')}</button>
           </div>
 
           <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-1">匯入交易記錄</h3>
-            <p className="text-xs text-gray-600 mb-1">支援格式：</p>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1">{t('importTrades')}</h3>
+            <p className="text-xs text-gray-600 mb-1">{t('supportedFormats')}</p>
             <ul className="text-xs text-gray-500 mb-4 list-disc list-inside space-y-0.5">
-              <li>TradeFlex 匯出格式</li>
-              <li>TradingView Paper Trading 歷史訂單</li>
-              <li>Tradovate Fills 成交記錄（直接匯出）</li>
-              <li>Tradovate 訂單記錄（TradingView 匯出）</li>
+              <li>TradeFlex</li>
+              <li>TradingView Paper Trading</li>
+              <li>Tradovate Fills（直接匯出）</li>
+              <li>Tradovate（TradingView 匯出）</li>
             </ul>
 
             <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
 
             {importStatus === 'idle' && (
               <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}>
-                ↑ 選擇 CSV 檔案
+                {t('selectCSV')}
               </button>
             )}
 
@@ -853,7 +878,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-gray-500 border-b border-[#2a2a2a]">
-                        {['平倉時間', '標的', '方向', '開倉價', '平倉價', '口數', '盈虧'].map(h => (
+                        {[t('closeTime'), t('symbol'), t('strategyLabel'), t('entryPrice'), t('closePrice'), t('quantity'), 'P&L'].map(h => (
                           <th key={h} className="py-2 px-2 text-left">{h}</th>
                         ))}
                       </tr>
@@ -866,7 +891,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                           </td>
                           <td className="py-1.5 px-2 font-semibold">{row.symbol || row['標的'] || ''}</td>
                           <td className="py-1.5 px-2" style={{ color: (row.direction === 'long' || row['方向'] === '做多') ? '#4ade80' : '#f87171' }}>
-                            {row.direction === 'long' ? '做多' : row.direction === 'short' ? '做空' : row['方向'] || ''}
+                            {row.direction === 'long' ? t('long') : row.direction === 'short' ? t('short') : row['方向'] || ''}
                           </td>
                           <td className="py-1.5 px-2">{row.open_price ?? row['開倉價'] ?? ''}</td>
                           <td className="py-1.5 px-2">{row.close_price ?? row['平倉價'] ?? ''}</td>
@@ -880,8 +905,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   </table>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>確認匯入</button>
-                  <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>取消</button>
+                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('confirmImport')}</button>
+                  <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
@@ -893,33 +918,33 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             {(importStatus === 'done' || importStatus === 'error') && (
               <div>
                 <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>{importMessage}</p>
-                <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>重新選擇</button>
+                <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('reimport')}</button>
               </div>
             )}
           </div>
 
           <div className="rounded-xl p-4" style={{ background: 'linear-gradient(160deg, #1a0a0a 0%, #110808 100%)', border: '1px solid #3a1a1a' }}>
-            <h3 className="text-sm font-semibold text-red-400 mb-1">清除歷史記錄</h3>
-            <p className="text-xs text-gray-600 mb-4">清除後無法復原，建議先匯出備份再操作</p>
+            <h3 className="text-sm font-semibold text-red-400 mb-1">{t('clearHistory')}</h3>
+            <p className="text-xs text-gray-600 mb-4">{t('clearDesc')}</p>
             {clearStatus === 'idle' && (
               <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}>
-                清除所有歷史記錄
+                {t('clearBtn')}
               </button>
             )}
             {clearStatus === 'confirm' && (
               <div>
-                <p className="text-xs text-red-400 mb-3">確定要清除所有歷史記錄嗎？此操作無法復原！</p>
+                <p className="text-xs text-red-400 mb-3">{t('clearConfirm')}</p>
                 <div className="flex gap-3">
-                  <button onClick={clearAllTrades} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#7f1d1d', color: '#fca5a5' }}>確定清除</button>
-                  <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>取消</button>
+                  <button onClick={clearAllTrades} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#7f1d1d', color: '#fca5a5' }}>{t('confirmClear')}</button>
+                  <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
-            {clearStatus === 'clearing' && <p className="text-xs text-red-400">清除中...</p>}
+            {clearStatus === 'clearing' && <p className="text-xs text-red-400">{t('clearing')}</p>}
             {clearStatus === 'done' && (
               <div>
-                <p className="text-xs text-green-400 mb-3">已清除所有歷史記錄</p>
-                <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>關閉</button>
+                <p className="text-xs text-green-400 mb-3">{t('cleared')}</p>
+                <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('close')}</button>
               </div>
             )}
           </div>
