@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLanguage } from '../LanguageContext'
 
 type Props = {
   activePortfolio: string
@@ -24,6 +25,7 @@ type OpenTrade = {
 }
 
 export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
+  const { t } = useLanguage()
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
   const [price, setPrice] = useState('')
@@ -185,12 +187,15 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     }).then(() => onCompletedChanged())
   }
 
+  const actionLabels = [t('long'), t('short'), t('closeLong'), t('closeShort')]
+  const actionValues = ['做多', '做空', '平多', '平空']
+
   return (
     <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 overflow-y-auto flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-gray-400">新增交易</h2>
+      <h2 className="text-sm font-semibold text-gray-400">{t('newTrade')}</h2>
 
       <div className="grid grid-cols-4 gap-1">
-        {['做多', '做空', '平多', '平空'].map(a => (
+        {actionValues.map((a, i) => (
           <button
             key={a}
             onClick={() => setAction(a)}
@@ -202,13 +207,13 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
             }`}
           >
-            {a}
+            {actionLabels[i]}
           </button>
         ))}
       </div>
 
       <form onSubmit={submit} autoComplete="off" className="flex flex-col gap-3">
-        <Field label="標的">
+        <Field label={t('symbol')}>
           <input value={symbol} onChange={e => setSymbol(e.target.value)}
             placeholder="MES, MNQ..." className="input" />
         </Field>
@@ -217,28 +222,28 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         {isClose && symbol && (
           <div className="rounded-lg p-3" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
             <p className="text-xs text-gray-500 mb-2">
-              {action === '平多' ? '📦 做多庫存' : '📦 做空庫存'}
+              {action === '平多' ? t('longInventory') : t('shortInventory')}
             </p>
             {relevantOpenTrades.length === 0 ? (
-              <p className="text-xs text-gray-600">查無 {symbol.toUpperCase()} 的{action === '平多' ? '做多' : '做空'}倉位</p>
+              <p className="text-xs text-gray-600">{t('noPosition')} {symbol.toUpperCase()} {t('position')}</p>
             ) : (
               <>
                 <div className="space-y-1.5 mb-2">
-                  {relevantOpenTrades.map((t, i) => (
-                    <div key={t.id} className="flex justify-between items-center text-xs">
+                  {relevantOpenTrades.map((t2, i) => (
+                    <div key={t2.id} className="flex justify-between items-center text-xs">
                       <span className="text-gray-400">
-                        #{i + 1} {new Date(t.trade_time).toLocaleDateString('zh-TW')}
+                        #{i + 1} {new Date(t2.trade_time).toLocaleDateString('zh-TW')}
                       </span>
                       <span className="text-white">
-                        {t.price} × {t.quantity}口
+                        {t2.price} × {t2.quantity}{t('lots')}
                       </span>
                     </div>
                   ))}
                 </div>
                 <div className="border-t border-[#1a3a1a] pt-2 flex justify-between text-xs">
-                  <span className="text-gray-400">均價 / 總口數</span>
+                  <span className="text-gray-400">{t('avgPriceQty')}</span>
                   <span className="text-green-400 font-semibold">
-                    {avgOpenPrice.toFixed(2)} / {totalOpenQty}口
+                    {avgOpenPrice.toFixed(2)} / {totalOpenQty}{t('lots')}
                   </span>
                 </div>
                 <button
@@ -247,7 +252,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                   className="mt-2 w-full text-xs py-1 rounded transition-colors"
                   style={{ background: '#1a3a1a', color: '#4ade80', border: '1px solid #2a4a2a' }}
                 >
-                  填入全部口數 ({totalOpenQty}口)
+                  {t('fillAllQty')} ({totalOpenQty}{t('lots')})
                 </button>
               </>
             )}
@@ -257,7 +262,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         {/* 價格 */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500">{isClose ? '平倉價格' : '進場價格'}</label>
+            <label className="text-xs text-gray-500">{isClose ? t('closePrice') : t('entryPrice')}</label>
             {isOpen && (
               <button
                 type="button"
@@ -265,7 +270,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 className="text-xs px-1.5 py-0.5 rounded transition-colors"
                 style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
               >
-                ＋ 分倉
+                {t('splitPosition')}
               </button>
             )}
           </div>
@@ -278,7 +283,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 <input
                   value={p.price}
                   onChange={e => updateExtraPrice(i, 'price', e.target.value)}
-                  placeholder="分倉價格"
+                  placeholder="0.00"
                   type="number" step="0.01"
                   className="input flex-1"
                 />
@@ -292,7 +297,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
               <input
                 value={p.quantity}
                 onChange={e => updateExtraPrice(i, 'quantity', e.target.value)}
-                placeholder="口數" type="number"
+                placeholder={t('quantity')} type="number"
                 className="input w-full mt-1"
               />
             </div>
@@ -300,7 +305,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
           {extraPrices.filter(p => p.price !== '').length > 0 && price && (
             <p className="text-xs text-[#d4a843] mt-1">
-              均價：{(() => {
+              {t('avgPrice')}：{(() => {
                 const mainQty = parseFloat(quantity) || 1
                 const entries = [
                   { price: parseFloat(price), quantity: mainQty },
@@ -311,18 +316,18 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 ]
                 const total = entries.reduce((a, b) => a + b.quantity, 0)
                 const avg = entries.reduce((a, b) => a + b.price * b.quantity, 0) / total
-                return `${avg.toFixed(2)} ／共 ${total} 口`
+                return `${avg.toFixed(2)} ／${t('totalQty')} ${total} ${t('lots')}`
               })()}
             </p>
           )}
         </div>
 
         <div className="flex gap-2">
-          <Field label="口數" className="flex-1">
+          <Field label={t('quantity')} className="flex-1">
             <input value={quantity} onChange={e => setQuantity(e.target.value)}
               type="number" className="input" />
           </Field>
-          <Field label="手續費/口" className="flex-1">
+          <Field label={t('fee')} className="flex-1">
             <input value={fee} onChange={e => setFee(e.target.value)}
               type="number" step="0.01" className="input" />
           </Field>
@@ -330,11 +335,11 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
         {isOpen && (
           <div className="flex gap-2">
-            <Field label="TP" className="flex-1">
+            <Field label={t('tp')} className="flex-1">
               <input value={tp} onChange={e => setTp(e.target.value)}
                 placeholder="選填" type="number" step="0.01" className="input" />
             </Field>
-            <Field label="SL" className="flex-1">
+            <Field label={t('sl')} className="flex-1">
               <input value={sl} onChange={e => setSl(e.target.value)}
                 placeholder="選填" type="number" step="0.01" className="input" />
             </Field>
@@ -344,13 +349,12 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         {/* 時間選擇 */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-gray-500">時間</label>
+            <label className="text-xs text-gray-500">{t('time')}</label>
             <button
               type="button"
               onClick={() => {
                 setUseCustomTime(!useCustomTime)
                 if (!useCustomTime) {
-                  // 預設填入現在時間
                   const now = new Date()
                   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
                   setCustomTime(local.toISOString().slice(0, 16))
@@ -362,7 +366,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
                 : { background: '#1a1a1a', color: '#666', border: '1px solid #2a2a2a' }
               }
             >
-              {useCustomTime ? '自訂時間' : '現在時間'}
+              {useCustomTime ? t('customTime') : t('currentTime')}
             </button>
           </div>
           {useCustomTime ? (
@@ -373,33 +377,33 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
               className="input"
             />
           ) : (
-            <p className="text-xs text-gray-600 px-1">送出時自動記錄現在時間</p>
+            <p className="text-xs text-gray-600 px-1">{t('autoTime')}</p>
           )}
         </div>
 
-        <Field label="策略">
+        <Field label={t('strategyLabel')}>
           <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
-            <option value="">-- 不選策略 --</option>
+            <option value="">{t('noStrategy')}</option>
             {strategies.map(s => (
               <option key={s.id} value={s.name}>{s.name}</option>
             ))}
           </select>
         </Field>
 
-        <Field label="備註">
+        <Field label={t('remark')}>
           <input value={remark} onChange={e => setRemark(e.target.value)}
             placeholder="選填" className="input mb-1" />
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
-              {tags.map(t => (
+              {tags.map(tag => (
                 <button
-                  key={t.id}
+                  key={tag.id}
                   type="button"
-                  onClick={() => setRemark(prev => prev ? `${prev} #${t.name}` : `#${t.name}`)}
+                  onClick={() => setRemark(prev => prev ? `${prev} #${tag.name}` : `#${tag.name}`)}
                   className="text-xs px-2 py-0.5 rounded-full transition-colors"
                   style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
                 >
-                  #{t.name}
+                  #{tag.name}
                 </button>
               ))}
             </div>
@@ -410,13 +414,13 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
           <div className="space-y-3">
             {showMACD && (
               <div>
-                <p className="text-xs text-gray-500 mb-2">MACD 大時間框架</p>
+                <p className="text-xs text-gray-500 mb-2">MACD {t('bigTimeframe')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   <MiniField label="DIF" value={bigDIF} onChange={setBigDIF} />
                   <MiniField label="DEA" value={bigDEA} onChange={setBigDEA} />
                   <MiniField label="柱" value={bigHist} onChange={setBigHist} />
                 </div>
-                <p className="text-xs text-gray-500 mb-2 mt-2">MACD 小時間框架</p>
+                <p className="text-xs text-gray-500 mb-2 mt-2">MACD {t('smallTimeframe')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   <MiniField label="DIF" value={smallDIF} onChange={setSmallDIF} />
                   <MiniField label="DEA" value={smallDEA} onChange={setSmallDEA} />
@@ -426,21 +430,21 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
             )}
             {showRSI && (
               <div>
-                <p className="text-xs text-gray-500 mb-2">RSI 大時間框架</p>
+                <p className="text-xs text-gray-500 mb-2">RSI {t('bigTimeframe')}</p>
                 <MiniField label="RSI(14)" value={bigRSI} onChange={setBigRSI} />
-                <p className="text-xs text-gray-500 mb-2 mt-2">RSI 小時間框架</p>
+                <p className="text-xs text-gray-500 mb-2 mt-2">RSI {t('smallTimeframe')}</p>
                 <MiniField label="RSI(14)" value={smallRSI} onChange={setSmallRSI} />
               </div>
             )}
             {showKDJ && (
               <div>
-                <p className="text-xs text-gray-500 mb-2">KDJ 大時間框架</p>
+                <p className="text-xs text-gray-500 mb-2">KDJ {t('bigTimeframe')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   <MiniField label="K" value={bigK} onChange={setBigK} />
                   <MiniField label="D" value={bigD} onChange={setBigD} />
                   <MiniField label="J" value={bigJ} onChange={setBigJ} />
                 </div>
-                <p className="text-xs text-gray-500 mb-2 mt-2">KDJ 小時間框架</p>
+                <p className="text-xs text-gray-500 mb-2 mt-2">KDJ {t('smallTimeframe')}</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   <MiniField label="K" value={smallK} onChange={setSmallK} />
                   <MiniField label="D" value={smallD} onChange={setSmallD} />
@@ -460,7 +464,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
               : 'bg-red-600 hover:bg-red-700'
           }`}
         >
-          {submitting ? '新增中...' : `確認${action}`}
+          {submitting ? t('submitting') : `${t('confirm')}${actionLabels[actionValues.indexOf(action)]}`}
         </button>
       </form>
     </div>
