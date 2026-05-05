@@ -9,6 +9,7 @@ import StrategyAnalysis from './components/StrategyAnalysis'
 import SettingsPanel from './components/SettingsPanel'
 import Sidebar from './components/Sidebar'
 import QuickNote from './components/QuickNote'
+import { useLanguage } from './LanguageContext'
 
 export type Portfolio = {
   id: string
@@ -77,6 +78,7 @@ export type CompletedTrade = {
 }
 
 export default function Home() {
+  const { t } = useLanguage()
   const [portfolios, setPortfolios] = useState<Portfolio[]>([])
   const [activePortfolio, setActivePortfolio] = useState<string>('')
   const [trades, setTrades] = useState<Trade[]>([])
@@ -189,7 +191,7 @@ export default function Home() {
         {page === 'settings' && (
           <div className="gold-border flex-1 overflow-hidden">
             <div className="gold-border-inner overflow-auto">
-              <SettingsPanel />
+              <SettingsPanel onImported={loadCompleted} />
             </div>
           </div>
         )}
@@ -198,9 +200,9 @@ export default function Home() {
           <div className="gold-border flex-1 overflow-hidden">
             <div className="gold-border-inner overflow-auto p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">歷史記錄</h2>
+                <h2 className="text-lg font-semibold">{t('historyTitle')}</h2>
                 <input
-                  placeholder="搜尋標的、策略..."
+                  placeholder={t('searchPlaceholder')}
                   className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#d4a843] w-48"
                   onChange={e => setHistorySearch(e.target.value)}
                 />
@@ -221,11 +223,11 @@ export default function Home() {
                       >
                         <div className="flex items-center gap-4">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
-                            {ct.direction === 'long' ? '多' : '空'}
+                            {ct.direction === 'long' ? t('long') : t('short')}
                           </span>
                           <span className="font-semibold">{ct.symbol}</span>
                           <span className="text-gray-400 text-sm">{ct.open_price} → {ct.close_price}</span>
-                          <span className="text-gray-400 text-sm">{ct.quantity} 口</span>
+                          <span className="text-gray-400 text-sm">{ct.quantity} {t('lots')}</span>
                           {ct.strategy && <span className="text-[#d4a843] text-xs">{ct.strategy}</span>}
                         </div>
                         <div className="flex items-center gap-6">
@@ -243,15 +245,15 @@ export default function Home() {
                         <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
                           style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                            <div><span className="text-gray-500 text-xs">開倉時間</span><p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p></div>
-                            <div><span className="text-gray-500 text-xs">平倉時間</span><p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p></div>
-                            <div><span className="text-gray-500 text-xs">開倉手續費</span><p className="text-white">{ct.open_fee}</p></div>
-                            <div><span className="text-gray-500 text-xs">平倉手續費</span><p className="text-white">{ct.close_fee}</p></div>
+                            <div><span className="text-gray-500 text-xs">{t('openTime')}</span><p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p></div>
+                            <div><span className="text-gray-500 text-xs">{t('closeTime')}</span><p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p></div>
+                            <div><span className="text-gray-500 text-xs">{t('openFee')}</span><p className="text-white">{ct.open_fee}</p></div>
+                            <div><span className="text-gray-500 text-xs">{t('closeFee')}</span><p className="text-white">{ct.close_fee}</p></div>
                           </div>
                           {(ct.big_dif != null || ct.big_rsi != null || ct.small_dif != null) && (
                             <div className="grid grid-cols-2 gap-4 text-xs">
                               <div>
-                                <p className="text-gray-500 mb-2">大時間框架指標</p>
+                                <p className="text-gray-500 mb-2">{t('bigTimeframe')}</p>
                                 <div className="space-y-1">
                                   {ct.big_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
                                   {ct.big_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
@@ -263,7 +265,7 @@ export default function Home() {
                                 </div>
                               </div>
                               <div>
-                                <p className="text-gray-500 mb-2">小時間框架指標</p>
+                                <p className="text-gray-500 mb-2">{t('smallTimeframe')}</p>
                                 <div className="space-y-1">
                                   {ct.small_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
                                   {ct.small_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
@@ -281,7 +283,7 @@ export default function Home() {
                     </div>
                   ))}
                 {completed.length === 0 && (
-                  <div className="text-center text-gray-600 py-20">尚無歷史記錄</div>
+                  <div className="text-center text-gray-600 py-20">{t('noHistory')}</div>
                 )}
               </div>
             </div>
