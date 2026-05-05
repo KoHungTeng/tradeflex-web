@@ -29,7 +29,6 @@ export default function StrategyAnalysis({ completed }: Props) {
     })
   }, [])
 
-  // 從所有交易的 remark 抽出所有標籤
   const allTags = Array.from(new Set(
     completed.flatMap(trade =>
       (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
@@ -40,7 +39,6 @@ export default function StrategyAnalysis({ completed }: Props) {
     completed.map(t => t.strategy).filter(Boolean)
   ))]
 
-  // 三層篩選
   const byStrategy = selected === '__all__'
     ? completed
     : completed.filter(t => t.strategy === selected)
@@ -85,6 +83,11 @@ export default function StrategyAnalysis({ completed }: Props) {
     border: '1px solid #2a2a2a'
   }
 
+  const filterStyle = {
+    background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)',
+    border: '1px solid #2a2a2a'
+  }
+
   const btnStyle = (active: boolean) => active
     ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
     : { background: '#1a1a1a', color: '#888' }
@@ -103,65 +106,77 @@ export default function StrategyAnalysis({ completed }: Props) {
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-4">{t('strategyAnalysis')}</h2>
 
-      {/* 策略篩選 */}
-      <div className="flex gap-2 flex-wrap mb-3">
-        {strategyNames.map(s => (
-          <button
-            key={s}
-            onClick={() => setSelected(s)}
-            className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            style={btnStyle(selected === s)}
-          >
-            {s === '__all__' ? t('allStrategies') : s}
-          </button>
-        ))}
-      </div>
-
-      {/* 方向篩選 */}
-      <div className="flex gap-2 mb-3">
-        {(['all', 'long', 'short'] as Direction[]).map(d => (
-          <button
-            key={d}
-            onClick={() => setDirection(d)}
-            className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            style={btnStyle(direction === d)}
-          >
-            {d === 'all' ? t('allDirections') : d === 'long' ? t('directionLong') : t('directionShort')}
-          </button>
-        ))}
-      </div>
-
-      {/* 標籤篩選（多選） */}
-      <div className="flex gap-2 flex-wrap mb-6">
-  {allTags.length === 0 && (
-    <span className="text-xs text-gray-600">尚無標籤</span>
-  )}
-          {allTags.map(tag => (
-            <button
-              key={tag}
-              onClick={() => toggleTag(tag)}
-              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-              style={tagBtnStyle(selectedTags.includes(tag))}
-            >
-              {tag}
-            </button>
-          ))}
-          {selectedTags.length > 0 && (
-            <button
-              onClick={() => setSelectedTags([])}
-              className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-              style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
-            >
-              清除標籤
-            </button>
-          )}
+      {/* 固定篩選區塊 */}
+      <div className="rounded-xl p-4 mb-6" style={filterStyle}>
+        {/* 策略篩選 */}
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+          <div className="flex gap-2 flex-wrap">
+            {strategyNames.map(s => (
+              <button
+                key={s}
+                onClick={() => setSelected(s)}
+                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={btnStyle(selected === s)}
+              >
+                {s === '__all__' ? t('allStrategies') : s}
+              </button>
+            ))}
+          </div>
         </div>
-      
+
+        {/* 方向篩選 */}
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
+          <div className="flex gap-2">
+            {(['all', 'long', 'short'] as Direction[]).map(d => (
+              <button
+                key={d}
+                onClick={() => setDirection(d)}
+                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={btnStyle(direction === d)}
+              >
+                {d === 'all' ? t('allDirections') : d === 'long' ? t('directionLong') : t('directionShort')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 標籤篩選 */}
+        <div>
+          <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
+          <div className="flex gap-2 flex-wrap">
+            {allTags.length === 0 ? (
+              <span className="text-xs text-gray-600">尚無標籤</span>
+            ) : (
+              allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+                  style={tagBtnStyle(selectedTags.includes(tag))}
+                >
+                  {tag}
+                </button>
+              ))
+            )}
+            {selectedTags.length > 0 && (
+              <button
+                onClick={() => setSelectedTags([])}
+                className="px-3 py-1 rounded-full text-xs font-medium"
+                style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
+              >
+                清除標籤
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {filtered.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
       ) : (
         <div className="space-y-4">
-          {/* 總覽 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
@@ -176,7 +191,6 @@ export default function StrategyAnalysis({ completed }: Props) {
             ))}
           </div>
 
-          {/* 勝/敗平均 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="rounded-xl p-4" style={cardStyle}>
               <div className="text-xs text-gray-500 mb-1">
@@ -190,7 +204,6 @@ export default function StrategyAnalysis({ completed }: Props) {
             </div>
           </div>
 
-          {/* 指標分析 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <IndicatorCard
               title={t('indicatorWin')}
@@ -214,7 +227,6 @@ export default function StrategyAnalysis({ completed }: Props) {
             />
           </div>
 
-          {/* 指標分佈 */}
           {selected !== '__all__' && (showMACD || showRSI || showKDJ) && (
             <div className="rounded-xl p-5" style={cardStyle}>
               <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('indicatorDist')}</h3>
@@ -226,7 +238,6 @@ export default function StrategyAnalysis({ completed }: Props) {
             </div>
           )}
 
-          {/* 交易明細 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
             <div className="space-y-2">
