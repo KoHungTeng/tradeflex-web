@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
 
@@ -15,6 +15,134 @@ type Strategy = {
 }
 
 type Direction = 'all' | 'long' | 'short'
+
+function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
+  allTags: string[]
+  selectedTags: string[]
+  onToggle: (tag: string) => void
+  onClear: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const dropRef = useRef<HTMLDivElement>(null)
+
+  const filtered = allTags.filter(t => t.toLowerCase().includes(search.toLowerCase()))
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+        setSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  function handleOpen() {
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.left })
+    }
+    setOpen(prev => !prev)
+  }
+
+  const label = selectedTags.length === 0
+    ? '全部'
+    : selectedTags.join(' ')
+
+  return (
+    <div className="relative">
+      <button
+        ref={btnRef}
+        onClick={handleOpen}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors"
+        style={{
+          background: selectedTags.length > 0
+            ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)'
+            : '#1a1a1a',
+          color: selectedTags.length > 0 ? '#000' : '#aaa',
+          border: '1px solid #2a2a2a',
+          maxWidth: 200,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <span className="truncate">{label}</span>
+        <span>▾</span>
+      </button>
+
+      {open && (
+        <div
+          ref={dropRef}
+          className="fixed z-50 rounded-lg shadow-xl"
+          style={{
+            top: pos.top,
+            left: pos.left,
+            background: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            width: 200,
+          }}
+        >
+          {/* 搜尋框 */}
+          <div className="p-2 border-b border-[#2a2a2a]">
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="搜尋標籤..."
+              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+            />
+          </div>
+
+          {/* 標籤列表 */}
+          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+            {allTags.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
+            ) : filtered.length === 0 ? (
+              <div className="px-3 py-2 text-xs text-gray-600">無符合結果</div>
+            ) : (
+              filtered.map(tag => (
+                <div
+                  key={tag}
+                  onMouseDown={e => { e.preventDefault(); onToggle(tag) }}
+                  className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
+                  style={{
+                    background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
+                    color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
+                  }}
+                >
+                  <span>{tag}</span>
+                  {selectedTags.includes(tag) && <span>✓</span>}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* 清除 */}
+          {selectedTags.length > 0 && (
+            <div className="p-2 border-t border-[#2a2a2a]">
+              <button
+                onMouseDown={e => { e.preventDefault(); onClear(); setOpen(false) }}
+                className="w-full text-xs py-1 rounded"
+                style={{ background: '#2a1a1a', color: '#f87171' }}
+              >
+                清除標籤
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function StrategyAnalysis({ completed }: Props) {
   const { t } = useLanguage()
@@ -83,19 +211,6 @@ export default function StrategyAnalysis({ completed }: Props) {
     border: '1px solid #2a2a2a'
   }
 
-  const filterStyle = {
-    background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)',
-    border: '1px solid #2a2a2a'
-  }
-
-  const btnStyle = (active: boolean) => active
-    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-    : { background: '#1a1a1a', color: '#888' }
-
-  const tagBtnStyle = (active: boolean) => active
-    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-    : { background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }
-
   function toggleTag(tag: string) {
     setSelectedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -106,70 +221,46 @@ export default function StrategyAnalysis({ completed }: Props) {
     <div className="flex-1 overflow-auto p-6">
       <h2 className="text-lg font-semibold mb-4">{t('strategyAnalysis')}</h2>
 
-      {/* 固定篩選區塊 */}
-      <div className="rounded-xl p-4 mb-6" style={filterStyle}>
-        {/* 策略篩選 */}
-        <div className="mb-3">
+      {/* 篩選區塊 */}
+      <div className="rounded-xl p-4 mb-6 flex gap-6 items-end" style={cardStyle}>
+        {/* 策略 */}
+        <div>
           <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
-          <div className="flex gap-2 flex-wrap">
-            {strategyNames.map(s => (
-              <button
-                key={s}
-                onClick={() => setSelected(s)}
-                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-                style={btnStyle(selected === s)}
-              >
-                {s === '__all__' ? t('allStrategies') : s}
-              </button>
+          <select
+            value={selected}
+            onChange={e => setSelected(e.target.value)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+          >
+            <option value="__all__">{t('allStrategies')}</option>
+            {strategyNames.filter(s => s !== '__all__').map(s => (
+              <option key={s} value={s}>{s}</option>
             ))}
-          </div>
+          </select>
         </div>
 
-        {/* 方向篩選 */}
-        <div className="mb-3">
+        {/* 多/空 */}
+        <div>
           <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
-          <div className="flex gap-2">
-            {(['all', 'long', 'short'] as Direction[]).map(d => (
-              <button
-                key={d}
-                onClick={() => setDirection(d)}
-                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-                style={btnStyle(direction === d)}
-              >
-                {d === 'all' ? t('allDirections') : d === 'long' ? t('directionLong') : t('directionShort')}
-              </button>
-            ))}
-          </div>
+          <select
+            value={direction}
+            onChange={e => setDirection(e.target.value as Direction)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+          >
+            <option value="all">{t('allDirections')}</option>
+            <option value="long">{t('directionLong')}</option>
+            <option value="short">{t('directionShort')}</option>
+          </select>
         </div>
 
-        {/* 標籤篩選 */}
+        {/* 標籤 */}
         <div>
           <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
-          <div className="flex gap-2 flex-wrap">
-            {allTags.length === 0 ? (
-              <span className="text-xs text-gray-600">尚無標籤</span>
-            ) : (
-              allTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
-                  style={tagBtnStyle(selectedTags.includes(tag))}
-                >
-                  {tag}
-                </button>
-              ))
-            )}
-            {selectedTags.length > 0 && (
-              <button
-                onClick={() => setSelectedTags([])}
-                className="px-3 py-1 rounded-full text-xs font-medium"
-                style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
-              >
-                清除標籤
-              </button>
-            )}
-          </div>
+          <TagDropdown
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onToggle={toggleTag}
+            onClear={() => setSelectedTags([])}
+          />
         </div>
       </div>
 
