@@ -195,6 +195,7 @@ const bySymbol = selectedSymbol === '__all__'
   const totalPnL = filtered.reduce((s, t) => s + t.pnl, 0)
   const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0
   const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : 0
+  const profitFactor = avgLoss !== 0 ? Math.abs(avgWin / avgLoss) : 0
 
   const avgHoldMin = filtered.length > 0
     ? filtered.reduce((s, t) => {
@@ -299,6 +300,7 @@ const bySymbol = selectedSymbol === '__all__'
               { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
               { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
               { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[#d4a843]' },
+{ label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[#d4a843]' },
             ].map(item => (
               <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
                 <div className="text-xs text-gray-500 mb-1">{item.label}</div>
@@ -307,7 +309,7 @@ const bySymbol = selectedSymbol === '__all__'
             ))}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="rounded-xl p-4" style={cardStyle}>
               <div className="text-xs text-gray-500 mb-1">
                 {wins.length} 勝 / {losses.length} 敗
