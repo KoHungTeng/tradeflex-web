@@ -224,20 +224,34 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
             ) : filtered.length === 0 ? (
               <div className="px-3 py-2 text-xs text-gray-600">無符合結果</div>
             ) : (
-              filtered.map(tag => (
-                <div
-                  key={tag}
-                  onMouseDown={e => { e.preventDefault(); selectTag(tag) }}
-                  className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
-                  style={{
-                    background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
-                    color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
-                  }}
-                >
-                  <span>{tag}</span>
-                  {selectedTags.includes(tag) && <span>✓</span>}
-                </div>
-              ))
+              (() => {
+  const groups: Record<string, string[]> = {}
+  filtered.forEach(tag => {
+    const rawName = tag.startsWith('#') ? tag.slice(1) : tag
+    const prefix = rawName.includes('-') ? rawName.split('-')[0] : '其他'
+    if (!groups[prefix]) groups[prefix] = []
+    groups[prefix].push(tag)
+  })
+  return Object.entries(groups).map(([prefix, groupTags]) => (
+    <div key={prefix}>
+      <div className="px-3 py-1 text-xs text-gray-500 bg-[#111]">{prefix}</div>
+      {groupTags.map(tag => (
+        <div
+          key={tag}
+          onMouseDown={e => { e.preventDefault(); selectTag(tag) }}
+          className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
+          style={{
+            background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
+            color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
+          }}
+        >
+          <span>{tag}</span>
+          {selectedTags.includes(tag) && <span>✓</span>}
+        </div>
+      ))}
+    </div>
+  ))
+})()
             )}
           </div>
           {value && (
