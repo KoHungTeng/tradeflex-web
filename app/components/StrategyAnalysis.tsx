@@ -53,9 +53,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
     setOpen(prev => !prev)
   }
 
-  const label = selectedTags.length === 0
-    ? '全部'
-    : selectedTags.join(' ')
+  const label = selectedTags.length === 0 ? '全部' : selectedTags.join(' ')
 
   return (
     <div className="relative">
@@ -91,7 +89,6 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
             width: 200,
           }}
         >
-          {/* 搜尋框 */}
           <div className="p-2 border-b border-[#2a2a2a]">
             <input
               autoFocus
@@ -101,8 +98,6 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
               className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
             />
           </div>
-
-          {/* 標籤列表 */}
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {allTags.length === 0 ? (
               <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
@@ -110,37 +105,35 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
               <div className="px-3 py-2 text-xs text-gray-600">無符合結果</div>
             ) : (
               (() => {
-  const groups: Record<string, string[]> = {}
-  filtered.forEach(tag => {
-    const rawName = tag.startsWith('#') ? tag.slice(1) : tag
-    const prefix = rawName.includes(' ') ? rawName.split(' ')[0] : rawName
-    if (!groups[prefix]) groups[prefix] = []
-    groups[prefix].push(tag)
-  })
-  return Object.entries(groups).map(([prefix, groupTags]) => (
-    <div key={prefix}>
-      <div className="px-3 py-1 text-xs text-gray-500 bg-[#111]">{prefix}</div>
-      {groupTags.map(tag => (
-        <div
-          key={tag}
-          onMouseDown={e => { e.preventDefault(); onToggle(tag) }}
-          className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
-          style={{
-            background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
-            color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
-          }}
-        >
-          <span>{tag}</span>
-          {selectedTags.includes(tag) && <span>✓</span>}
-        </div>
-      ))}
-    </div>
-  ))
-})()
+                const groups: Record<string, string[]> = {}
+                filtered.forEach(tag => {
+                  const rawName = tag.startsWith('#') ? tag.slice(1) : tag
+                  const prefix = rawName.includes(' ') ? rawName.split(' ')[0] : rawName
+                  if (!groups[prefix]) groups[prefix] = []
+                  groups[prefix].push(tag)
+                })
+                return Object.entries(groups).map(([prefix, groupTags]) => (
+                  <div key={prefix}>
+                    <div className="px-3 py-1 text-xs text-gray-500 bg-[#111]">{prefix}</div>
+                    {groupTags.map(tag => (
+                      <div
+                        key={tag}
+                        onMouseDown={e => { e.preventDefault(); onToggle(tag) }}
+                        className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
+                        style={{
+                          background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
+                          color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
+                        }}
+                      >
+                        <span>{tag}</span>
+                        {selectedTags.includes(tag) && <span>✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                ))
+              })()
             )}
           </div>
-
-          {/* 清除 */}
           {selectedTags.length > 0 && (
             <div className="p-2 border-t border-[#2a2a2a]">
               <button
@@ -173,9 +166,10 @@ export default function StrategyAnalysis({ completed }: Props) {
   }, [])
 
   const allSymbols = Array.from(new Set(
-  completed.map(t => t.symbol).filter(Boolean)
-)).sort()
-const allTags = Array.from(new Set(
+    completed.map(t => t.symbol).filter(Boolean)
+  )).sort()
+
+  const allTags = Array.from(new Set(
     completed.flatMap(trade =>
       (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
     )
@@ -189,17 +183,17 @@ const allTags = Array.from(new Set(
     ? completed
     : completed.filter(t => t.strategy === selected)
 
-const byDirection = direction === 'all'
-  ? byStrategy
-  : byStrategy.filter(t => t.direction === direction)
+  const byDirection = direction === 'all'
+    ? byStrategy
+    : byStrategy.filter(t => t.direction === direction)
 
-const bySymbol = selectedSymbol === '__all__'
-  ? byDirection
-  : byDirection.filter(t => t.symbol === selectedSymbol)
+  const bySymbol = selectedSymbol === '__all__'
+    ? byDirection
+    : byDirection.filter(t => t.symbol === selectedSymbol)
 
   const filtered = selectedTags.length === 0
-  ? bySymbol
-  : bySymbol.filter(t =>
+    ? bySymbol
+    : bySymbol.filter(t =>
         selectedTags.every(tag => (t.remark || '').includes(tag))
       )
 
@@ -243,87 +237,83 @@ const bySymbol = selectedSymbol === '__all__'
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="flex items-center justify-between mb-4">
-  <h2 className="text-lg font-semibold">{t('strategyAnalysis')}</h2>
-  <button
-    onClick={() => window.print()}
-    className="no-print px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
-    style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
-  >
-    ↓ 輸出 PDF
-  </button>
-</div>
+        <h2 className="text-lg font-semibold">{t('strategyAnalysis')}</h2>
+        <button
+          onClick={() => window.print()}
+          className="no-print px-4 py-1.5 rounded-lg text-sm font-medium"
+          style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+        >
+          ↓ 輸出 PDF
+        </button>
+      </div>
 
-     {/* 篩選區塊 */}
-<div className="rounded-xl p-4 mb-6 flex gap-6 items-end" style={cardStyle}>
-  {/* 策略 */}
-  <div>
-    <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
-    <select
-      value={selected}
-      onChange={e => setSelected(e.target.value)}
-      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
-    >
-      <option value="__all__">{t('allStrategies')}</option>
-      {strategyNames.filter(s => s !== '__all__').map(s => (
-        <option key={s} value={s}>{s}</option>
-      ))}
-    </select>
-  </div>
+      {/* 篩選區塊 */}
+      <div className="rounded-xl p-4 mb-6 flex gap-6 items-end flex-wrap" style={cardStyle}>
+        <div>
+          <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+          <select
+            value={selected}
+            onChange={e => setSelected(e.target.value)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+          >
+            <option value="__all__">{t('allStrategies')}</option>
+            {strategyNames.filter(s => s !== '__all__').map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
 
-  {/* 多/空 */}
-  <div>
-    <p className="text-xs text-gray-500 mb-2">
-      {t('directionLong')}/{t('directionShort')}
-    </p>
-    <select
-      value={direction}
-      onChange={e => setDirection(e.target.value as Direction)}
-      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
-    >
-      <option value="all">{t('allDirections')}</option>
-      <option value="long">{t('directionLong')}</option>
-      <option value="short">{t('directionShort')}</option>
-    </select>
-  </div>
+        <div>
+          <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
+          <select
+            value={direction}
+            onChange={e => setDirection(e.target.value as Direction)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+          >
+            <option value="all">{t('allDirections')}</option>
+            <option value="long">{t('directionLong')}</option>
+            <option value="short">{t('directionShort')}</option>
+          </select>
+        </div>
 
-  {/* ✅ 商品 Symbol（補上這塊） */}
-  <div>
-    <p className="text-xs text-gray-500 mb-2">{t('symbol') || 'Symbol'}</p>
-    <select
-      value={selectedSymbol}
-      onChange={e => setSelectedSymbol(e.target.value)}
-      className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
-    >
-      <option value="__all__">{t('allStrategies') || '全部'}</option>
-      {allSymbols.map(s => (
-        <option key={s} value={s}>{s}</option>
-      ))}
-    </select>
-  </div>
+        <div>
+          <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
+          <TagDropdown
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onToggle={toggleTag}
+            onClear={() => setSelectedTags([])}
+          />
+        </div>
 
-  {/* 標籤 */}
-  <div>
-    <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
-    <TagDropdown
-      allTags={allTags}
-      selectedTags={selectedTags}
-      onToggle={toggleTag}
-      onClear={() => setSelectedTags([])}
-    />
-  </div>
-</div>
+        <div>
+          <p className="text-xs text-gray-500 mb-2">{t('symbol')}</p>
+          <select
+            value={selectedSymbol}
+            onChange={e => setSelectedSymbol(e.target.value)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+          >
+            <option value="__all__">{t('allStrategies')}</option>
+            {allSymbols.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {filtered.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          {/* 總覽卡片 6格 */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
               { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
               { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
               { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[#d4a843]' },
-{ label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[#d4a843]' },
+              { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[#d4a843]' },
+              { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-white' },
             ].map(item => (
               <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
                 <div className="text-xs text-gray-500 mb-1">{item.label}</div>
@@ -332,17 +322,7 @@ const bySymbol = selectedSymbol === '__all__'
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl p-4" style={cardStyle}>
-              <div className="text-xs text-gray-500 mb-1">{wins.length} 勝 / {losses.length} 敗</div>
-              <div className="text-xl font-bold">
-                <span className="text-green-400">+{avgWin.toFixed(0)}</span>
-                <span className="text-gray-500"> / </span>
-                <span className="text-red-400">{avgLoss.toFixed(0)}</span>
-              </div>
-            </div>
-          </div>
-
+          {/* 指標分析 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <IndicatorCard
               title={t('indicatorWin')}
