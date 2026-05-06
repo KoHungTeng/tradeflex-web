@@ -151,7 +151,7 @@ export default function Home() {
 
           {page === 'trade' && (
             <div className="flex flex-1 overflow-hidden gap-2">
-              <div className="gold-border flex-shrink-0 no-print" style={{ height: 'calc(100vh - 136px)' }}>
+              <div className="gold-border flex-shrink-0 no-print" style={{ alignSelf: 'stretch' }}>
   <div className="gold-border-inner overflow-y-auto" style={{ height: '100%', borderRadius: '11px' }}>
                   <TradeForm
                     activePortfolio={activePortfolio}
