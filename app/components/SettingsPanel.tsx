@@ -803,15 +803,31 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       </div>
     </div>
     <div className="rounded-xl p-4" style={cardStyle}>
-      <div className="flex flex-wrap gap-2">
-        {tags.map(tag => (
-          <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-            <span className="text-gray-300">{tag.name}</span>
-            <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-          </div>
-        ))}
-        {tags.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
+      <div className="space-y-3">
+  {tags.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
+  {(() => {
+    // 按 - 前綴分組
+    const groups: Record<string, Tag[]> = {}
+    tags.forEach(tag => {
+      const prefix = tag.name.includes(' ') ? tag.name.split(' ')[0] : tag.name
+      if (!groups[prefix]) groups[prefix] = []
+      groups[prefix].push(tag)
+    })
+    return Object.entries(groups).map(([prefix, groupTags]) => (
+      <div key={prefix}>
+        <p className="text-xs text-gray-500 mb-2">{prefix}</p>
+        <div className="flex flex-wrap gap-2">
+          {groupTags.map(tag => (
+            <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+              <span className="text-gray-300">#{tag.name}</span>
+              <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+            </div>
+          ))}
+        </div>
       </div>
+    ))
+  })()}
+</div>
     </div>
   </div>
 )}
