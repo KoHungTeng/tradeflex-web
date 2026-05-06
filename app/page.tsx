@@ -130,7 +130,7 @@ export default function Home() {
   return (
     <div className="flex h-screen text-white overflow-hidden p-2 gap-2 print:block print:h-auto print:overflow-visible" style={{ background: '#0a0a0a' }}>
       <div className="gold-border flex-shrink-0 no-print">
-  <div className="gold-border-inner">
+  <div className="gold-border-inner overflow-y-auto">
     <Sidebar
             page={page}
             setPage={setPage}
