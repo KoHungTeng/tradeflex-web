@@ -128,10 +128,10 @@ export default function Home() {
   )
 
   return (
-    <div className="flex h-screen text-white overflow-hidden p-2 gap-2" style={{ background: '#0a0a0a' }}>
-      <div className="gold-border flex-shrink-0">
-        <div className="gold-border-inner">
-          <Sidebar
+    <div className="flex h-screen text-white overflow-hidden p-2 gap-2 print:block print:h-auto print:overflow-visible" style={{ background: '#0a0a0a' }}>
+      <div className="gold-border flex-shrink-0 no-print">
+  <div className="gold-border-inner">
+    <Sidebar
             page={page}
             setPage={setPage}
             portfolios={portfolios}
@@ -144,9 +144,9 @@ export default function Home() {
       <div className="flex-1 flex flex-col overflow-hidden gap-2">
         {page === 'trade' && (
           <div className="flex flex-1 overflow-hidden gap-2">
-            <div className="gold-border flex-shrink-0">
-              <div className="gold-border-inner">
-                <TradeForm
+            <div className="gold-border flex-shrink-0 no-print">
+  <div className="gold-border-inner">
+    <TradeForm
                   activePortfolio={activePortfolio}
                   onAdded={optimisticAddTrade}
                   onCompletedChanged={loadCompleted}
@@ -291,9 +291,9 @@ export default function Home() {
           </div>
         )}
 
-        <div className="gold-border flex-shrink-0">
-          <div className="gold-border-inner">
-            <QuickNote />
+        <div className="gold-border flex-shrink-0 no-print">
+  <div className="gold-border-inner">
+    <QuickNote />
           </div>
         </div>
       </div>

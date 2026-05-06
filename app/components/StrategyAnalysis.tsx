@@ -242,7 +242,16 @@ const bySymbol = selectedSymbol === '__all__'
 
   return (
     <div className="flex-1 overflow-auto p-6">
-      <h2 className="text-lg font-semibold mb-4">{t('strategyAnalysis')}</h2>
+      <div className="flex items-center justify-between mb-4">
+  <h2 className="text-lg font-semibold">{t('strategyAnalysis')}</h2>
+  <button
+    onClick={() => window.print()}
+    className="no-print px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
+    style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+  >
+    ↓ 輸出 PDF
+  </button>
+</div>
 
      {/* 篩選區塊 */}
 <div className="rounded-xl p-4 mb-6 flex gap-6 items-end" style={cardStyle}>
