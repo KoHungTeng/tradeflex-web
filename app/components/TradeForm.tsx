@@ -305,6 +305,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const [smallK, setSmallK] = useState('')
   const [smallD, setSmallD] = useState('')
   const [smallJ, setSmallJ] = useState('')
+  const formRef = useRef<HTMLDivElement>(null)
 
   const isOpen = action === '做多' || action === '做空'
   const isClose = action === '平多' || action === '平空'
@@ -415,8 +416,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
     setSmallDIF(''); setSmallDEA(''); setSmallHist('')
     setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
-    const formEl = document.querySelector('.trade-form-scroll')
-if (formEl) formEl.scrollTop = 0
+    if (formRef.current) formRef.current.scrollTop = 0
     setSubmitting(false)
 
     fetch('/api/trades', {
@@ -448,7 +448,7 @@ if (formEl) formEl.scrollTop = 0
   const actionValues = ['做多', '做空', '平多', '平空']
 
   return (
-    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 flex flex-col gap-3 trade-form-scroll" style={{ height: '100vh', overflowY: 'auto' }}>
+    <div ref={formRef} className="w-64 bg-[#111111] border-r border-[#222222] p-4 flex flex-col gap-3" style={{ minHeight: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
       <h2 className="text-sm font-semibold text-gray-400">{t('newTrade')}</h2>
 
       <div className="grid grid-cols-4 gap-1">
