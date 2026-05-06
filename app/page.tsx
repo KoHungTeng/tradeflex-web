@@ -86,8 +86,12 @@ export default function Home() {
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
   const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
   const [loading, setLoading] = useState(true)
-  const [historySearch, setHistorySearch] = useState('')
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
+  const [historySymbol, setHistorySymbol] = useState<string>('__all__')
+  const [historyStrategy, setHistoryStrategy] = useState<string>('__all__')
+  const [historyDirection, setHistoryDirection] = useState<string>('all')
+  const [historyDateFrom, setHistoryDateFrom] = useState<string>('')
+  const [historyDateTo, setHistoryDateTo] = useState<string>('')
 
   useEffect(() => { loadPortfolios() }, [])
   useEffect(() => { if (activePortfolio) { loadTrades(); loadCompleted() } }, [activePortfolio])
@@ -127,10 +131,11 @@ export default function Home() {
     </div>
   )
 
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+
   return (
     <div className="flex flex-col h-screen text-white overflow-hidden p-2 gap-2" style={{ background: '#0a0a0a' }}>
 
-      {/* 上方主區域 */}
       <div className="flex flex-1 overflow-hidden gap-2">
 
         {/* 側邊欄 */}
@@ -152,7 +157,7 @@ export default function Home() {
           {page === 'trade' && (
             <div className="flex flex-1 overflow-hidden gap-2">
               <div className="gold-border flex-shrink-0 no-print" style={{ alignSelf: 'stretch' }}>
-  <div className="gold-border-inner overflow-y-auto" style={{ height: '100%', borderRadius: '11px' }}>
+                <div className="gold-border-inner overflow-y-auto" style={{ height: '100%', borderRadius: '11px' }}>
                   <TradeForm
                     activePortfolio={activePortfolio}
                     onAdded={optimisticAddTrade}
@@ -207,20 +212,65 @@ export default function Home() {
           {page === 'history' && (
             <div className="gold-border flex-1 overflow-hidden">
               <div className="gold-border-inner overflow-auto p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">{t('historyTitle')}</h2>
-                  <input
-                    placeholder={t('searchPlaceholder')}
-                    className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#d4a843] w-48"
-                    onChange={e => setHistorySearch(e.target.value)}
-                  />
+                <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
+
+                {/* 篩選區塊 */}
+                <div className="rounded-xl p-4 mb-4 flex gap-4 flex-wrap items-end"
+                  style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">{t('symbol')}</p>
+                    <select value={historySymbol} onChange={e => setHistorySymbol(e.target.value)} className={selectStyle}>
+                      <option value="__all__">{t('allStrategies')}</option>
+                      {Array.from(new Set(completed.map(ct => ct.symbol))).sort().map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+                    <select value={historyStrategy} onChange={e => setHistoryStrategy(e.target.value)} className={selectStyle}>
+                      <option value="__all__">{t('allStrategies')}</option>
+                      {Array.from(new Set(completed.map(ct => ct.strategy).filter(Boolean))).sort().map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
+                    <select value={historyDirection} onChange={e => setHistoryDirection(e.target.value)} className={selectStyle}>
+                      <option value="all">{t('allDirections')}</option>
+                      <option value="long">{t('directionLong')}</option>
+                      <option value="short">{t('directionShort')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">{t('startDate')}</p>
+                    <input type="date" value={historyDateFrom} onChange={e => setHistoryDateFrom(e.target.value)} className={selectStyle} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">{t('endDate')}</p>
+                    <input type="date" value={historyDateTo} onChange={e => setHistoryDateTo(e.target.value)} className={selectStyle} />
+                  </div>
+                  {(historySymbol !== '__all__' || historyStrategy !== '__all__' || historyDirection !== 'all' || historyDateFrom || historyDateTo) && (
+                    <button
+                      onClick={() => { setHistorySymbol('__all__'); setHistoryStrategy('__all__'); setHistoryDirection('all'); setHistoryDateFrom(''); setHistoryDateTo('') }}
+                      className="px-3 py-1.5 rounded-lg text-xs"
+                      style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
+                    >
+                      清除篩選
+                    </button>
+                  )}
                 </div>
+
                 <div className="space-y-2">
                   {completed
                     .filter(ct => {
-                      if (!historySearch) return true
-                      const q = historySearch.toLowerCase()
-                      return ct.symbol.toLowerCase().includes(q) || (ct.strategy || '').toLowerCase().includes(q)
+                      if (historySymbol !== '__all__' && ct.symbol !== historySymbol) return false
+                      if (historyStrategy !== '__all__' && ct.strategy !== historyStrategy) return false
+                      if (historyDirection !== 'all' && ct.direction !== historyDirection) return false
+                      if (historyDateFrom && ct.close_time < historyDateFrom) return false
+                      if (historyDateTo && ct.close_time > historyDateTo + 'T23:59:59') return false
+                      return true
                     })
                     .map(ct => (
                       <div key={ct.id}>
