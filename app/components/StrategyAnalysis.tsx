@@ -317,7 +317,7 @@ const bySymbol = selectedSymbol === '__all__'
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
               { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
@@ -332,14 +332,12 @@ const bySymbol = selectedSymbol === '__all__'
             ))}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="rounded-xl p-4" style={cardStyle}>
-              <div className="text-xs text-gray-500 mb-1">
-                {wins.length} 勝 / {losses.length} 敗
-              </div>
+              <div className="text-xs text-gray-500 mb-1">{wins.length} 勝 / {losses.length} 敗</div>
               <div className="text-xl font-bold">
                 <span className="text-green-400">+{avgWin.toFixed(0)}</span>
-                <span className="text-gray-500 text-lg"> / </span>
+                <span className="text-gray-500"> / </span>
                 <span className="text-red-400">{avgLoss.toFixed(0)}</span>
               </div>
             </div>
