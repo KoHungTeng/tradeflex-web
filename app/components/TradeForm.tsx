@@ -228,7 +228,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
   const groups: Record<string, string[]> = {}
   filtered.forEach(tag => {
     const rawName = tag.startsWith('#') ? tag.slice(1) : tag
-    const prefix = rawName.includes('-') ? rawName.split('-')[0] : '其他'
+    const prefix = rawName.includes(' ') ? rawName.split(' ')[0] : rawName
     if (!groups[prefix]) groups[prefix] = []
     groups[prefix].push(tag)
   })
@@ -415,6 +415,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     setBigRSI(''); setBigK(''); setBigD(''); setBigJ('')
     setSmallDIF(''); setSmallDEA(''); setSmallHist('')
     setSmallRSI(''); setSmallK(''); setSmallD(''); setSmallJ('')
+    const formEl = document.querySelector('.trade-form-scroll')
+if (formEl) formEl.scrollTop = 0
     setSubmitting(false)
 
     fetch('/api/trades', {
@@ -446,7 +448,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const actionValues = ['做多', '做空', '平多', '平空']
 
   return (
-    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 flex flex-col gap-3" style={{ height: '100vh', overflowY: 'auto' }}>
+    <div className="w-64 bg-[#111111] border-r border-[#222222] p-4 flex flex-col gap-3 trade-form-scroll" style={{ height: '100vh', overflowY: 'auto' }}>
       <h2 className="text-sm font-semibold text-gray-400">{t('newTrade')}</h2>
 
       <div className="grid grid-cols-4 gap-1">
