@@ -73,9 +73,19 @@ body {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color: #000 !important;
-    background: #fff !important;
-    border-color: #ccc !important;
   }
-  body { background: #fff !important; }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .flex-1 {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  p, h1, h2, h3, span, div, td, th {
+    color: #000 !important;
+  }
+  [style*="background"] {
+    background: #f5f5f5 !important;
+  }
 }
