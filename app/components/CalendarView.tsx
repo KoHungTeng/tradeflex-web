@@ -154,10 +154,10 @@ export default function CalendarView({ completed }: Props) {
                   isToday ? 'ring-2 ring-[#d4a843]' : ''
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''} ${
                   hasTrade
-                    ? pnl > 0
-                      ? 'bg-green-900/30 hover:bg-green-900/50'
-                      : 'bg-red-900/30 hover:bg-red-900/50'
-                    : 'bg-[#111111] hover:bg-[#1a1a1a]'
+  ? pnl > 0
+    ? 'bg-green-800/50 hover:bg-green-800/70'
+    : 'bg-red-800/50 hover:bg-red-800/70'
+  : 'bg-[#1a1a1a] hover:bg-[#222222]'
                 }`}
               >
                 <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : 'text-gray-400'}`}>
