@@ -317,7 +317,7 @@ const bySymbol = selectedSymbol === '__all__'
         <div className="text-center text-gray-600 py-20">{t('noStrategyTrades')}</div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {[
               { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
               { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
@@ -332,7 +332,7 @@ const bySymbol = selectedSymbol === '__all__'
             ))}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="rounded-xl p-4" style={cardStyle}>
               <div className="text-xs text-gray-500 mb-1">{wins.length} 勝 / {losses.length} 敗</div>
               <div className="text-xl font-bold">
