@@ -144,8 +144,8 @@ export default function Home() {
       <div className="flex-1 flex flex-col overflow-hidden gap-2">
         {page === 'trade' && (
           <div className="flex flex-1 overflow-hidden gap-2">
-            <div className="gold-border flex-shrink-0 no-print">
-  <div className="gold-border-inner">
+            <div className="gold-border flex-shrink-0 no-print" style={{ height: 'calc(100vh - 136px)', overflowY: 'auto' }}>
+  <div className="gold-border-inner h-full">
     <TradeForm
                   activePortfolio={activePortfolio}
                   onAdded={optimisticAddTrade}
