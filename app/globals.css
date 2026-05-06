@@ -54,18 +54,41 @@ body {
   height: 100%;
 }
 @media print {
-  /* 隱藏不需要列印的元素 */
-  .no-print {
-    display: none !important;
-  }
-  /* 列印時背景色要顯示 */
+  .no-print { display: none !important; }
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  /* 隱藏側邊欄、筆記區 */
-  nav, aside, .sidebar {
-    display: none !important;
+  body {
+    background: #fff !important;
+  }
+  .flex-1 {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .gold-border,
+  .gold-border-inner {
+    overflow: visible !important;
+    height: auto !important;
+    border: none !important;
+  }
+  h1, h2, h3, h4, p, span, div, td, th, label {
+    color: #000 !important;
+  }
+  [class*="bg-"] {
+    background: #f5f5f5 !important;
+  }
+  [class*="text-green"] {
+    color: #166534 !important;
+  }
+  [class*="text-red"] {
+    color: #991b1b !important;
+  }
+  [class*="text-gray"] {
+    color: #555 !important;
+  }
+  [class*="text-white"] {
+    color: #000 !important;
   }
 }
 @media print {
