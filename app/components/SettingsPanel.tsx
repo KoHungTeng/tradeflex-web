@@ -624,53 +624,73 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       </div>
 
       {activeTab === 'symbols' && (
-        <div className="space-y-4">
-          <div className="rounded-xl p-4" style={cardStyle}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addSymbol')}</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('symbolName')}</label><input value={newName} onChange={e => setNewName(e.target.value)} placeholder="MES" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('category')}</label><select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="input">{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('currency')}</label><select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('tickSize')}</label><input value={newTickSize} onChange={e => setNewTickSize(e.target.value)} type="number" step="0.01" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('tickValue')}</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
-              <div><label className="text-xs text-gray-500 mb-1 block">{t('defaultFee')}</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
-            </div>
-            <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
-          </div>
-          <div className="rounded-xl overflow-hidden" style={cardStyle}>
-            <table className="w-full text-sm">
-              <thead><tr className="text-gray-500 border-b border-[#2a2a2a] text-left"><th className="py-3 px-4">{t('symbolName')}</th><th className="py-3 px-4">{t('category')}</th><th className="py-3 px-4">{t('tickSize')}</th><th className="py-3 px-4">{t('tickValue')}</th><th className="py-3 px-4">{t('currency')}</th><th className="py-3 px-4">{t('defaultFee')}</th><th className="py-3 px-4"></th></tr></thead>
-              <tbody>
-                {symbols.map(s => (
-                  <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[#1a1a1a]/30">
-                    {editingSymbol?.id === s.id ? (
-                      <>
-                        <td className="py-2 px-4"><input value={editingSymbol.name} onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})} className="input w-24" /></td>
-                        <td className="py-2 px-4"><select value={editingSymbol.category} onChange={e => setEditingSymbol({...editingSymbol, category: e.target.value})} className="input">{categories.map(c => <option key={c.id}>{c.name}</option>)}</select></td>
-                        <td className="py-2 px-4"><input value={editingSymbol.tick_size} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_size: parseFloat(e.target.value)})} className="input w-24" /></td>
-                        <td className="py-2 px-4"><input value={editingSymbol.tick_value} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_value: parseFloat(e.target.value)})} className="input w-24" /></td>
-                        <td className="py-2 px-4"><select value={editingSymbol.currency} onChange={e => setEditingSymbol({...editingSymbol, currency: e.target.value})} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></td>
-                        <td className="py-2 px-4"><input value={editingSymbol.default_fee} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value)})} className="input w-24" /></td>
-                        <td className="py-2 px-4"><div className="flex gap-2"><button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded">{t('save')}</button><button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded">{t('cancel')}</button></div></td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="py-3 px-4 font-semibold">{s.name}</td>
-                        <td className="py-3 px-4 text-gray-400">{s.category}</td>
-                        <td className="py-3 px-4">{s.tick_size}</td>
-                        <td className="py-3 px-4">{s.tick_value}</td>
-                        <td className="py-3 px-4 text-gray-400">{s.currency}</td>
-                        <td className="py-3 px-4">{s.default_fee}</td>
-                        <td className="py-3 px-4"><div className="flex gap-2"><button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button><button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button></div></td>
-                      </>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+  <div className="space-y-4">
+    <div className="rounded-xl p-4" style={cardStyle}>
+      <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addSymbol')}</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('symbolName')}</label><input value={newName} onChange={e => setNewName(e.target.value)} placeholder="MES" className="input" /></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('category')}</label><select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="input">{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('currency')}</label><select value={newCurrency} onChange={e => setNewCurrency(e.target.value)} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('tickSize')}</label><input value={newTickSize} onChange={e => setNewTickSize(e.target.value)} type="number" step="0.01" className="input" /></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('tickValue')}</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t('defaultFee')}</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
+      </div>
+      <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
+    </div>
+    <div className="rounded-xl overflow-hidden" style={cardStyle}>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-gray-500 border-b border-[#2a2a2a] text-left">
+            <th className="py-3 px-4">{t('symbolName')}</th>
+            <th className="py-3 px-4">{t('category')}</th>
+            <th className="py-3 px-4">{t('tickSize')}</th>
+            <th className="py-3 px-4">{t('tickValue')}</th>
+            <th className="py-3 px-4">{t('currency')}</th>
+            <th className="py-3 px-4">{t('defaultFee')}</th>
+            <th className="py-3 px-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {symbols.map(s => (
+            <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[#1a1a1a]/30">
+              {editingSymbol?.id === s.id ? (
+                <>
+                  <td className="py-2 px-4"><input value={editingSymbol.name} onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})} className="input w-24" /></td>
+                  <td className="py-2 px-4"><select value={editingSymbol.category} onChange={e => setEditingSymbol({...editingSymbol, category: e.target.value})} className="input">{categories.map(c => <option key={c.id}>{c.name}</option>)}</select></td>
+                  <td className="py-2 px-4"><input value={editingSymbol.tick_size} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_size: parseFloat(e.target.value) || 0})} className="input w-24" /></td>
+                  <td className="py-2 px-4"><input value={editingSymbol.tick_value} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, tick_value: parseFloat(e.target.value) || 0})} className="input w-24" /></td>
+                  <td className="py-2 px-4"><select value={editingSymbol.currency} onChange={e => setEditingSymbol({...editingSymbol, currency: e.target.value})} className="input"><option>USD</option><option>TWD</option><option>USDT</option></select></td>
+                  <td className="py-2 px-4"><input value={editingSymbol.default_fee} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value) || 0})} className="input w-24" /></td>
+                  <td className="py-2 px-4">
+                    <div className="flex gap-2">
+                      <button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded">{t('save')}</button>
+                      <button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded">{t('cancel')}</button>
+                    </div>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td className="py-3 px-4 font-semibold">{s.name}</td>
+                  <td className="py-3 px-4 text-gray-400">{s.category}</td>
+                  <td className="py-3 px-4">{s.tick_size}</td>
+                  <td className="py-3 px-4">{s.tick_value}</td>
+                  <td className="py-3 px-4 text-gray-400">{s.currency}</td>
+                  <td className="py-3 px-4">{s.default_fee}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button>
+                      <button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
+                    </div>
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
 
       {activeTab === 'categories' && (
         <div className="space-y-4">
