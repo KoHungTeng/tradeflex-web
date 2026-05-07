@@ -606,17 +606,52 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         </div>
 
         {isOpen && (
-          <div className="flex gap-2">
-            <Field label={t('tp')} className="flex-1">
-              <input value={tp} onChange={e => setTp(e.target.value)}
-                placeholder="選填" type="number" step="0.01" className="input" />
-            </Field>
-            <Field label={t('sl')} className="flex-1">
-              <input value={sl} onChange={e => setSl(e.target.value)}
-                placeholder="選填" type="number" step="0.01" className="input" />
-            </Field>
+  <>
+    <div className="flex gap-2">
+      <Field label={t('tp')} className="flex-1">
+        <input value={tp} onChange={e => setTp(e.target.value)}
+          placeholder="選填" type="number" step="0.01" className="input" />
+      </Field>
+      <Field label={t('sl')} className="flex-1">
+        <input value={sl} onChange={e => setSl(e.target.value)}
+          placeholder="選填" type="number" step="0.01" className="input" />
+      </Field>
+    </div>
+    {price && tp && sl && (
+      (() => {
+        const symbolInfo = symbolList.find(s => s.name === symbol)
+        const tickSize = symbolInfo?.tick_size || 1
+        const tickValue = symbolInfo?.tick_value || 1
+        const qty = parseFloat(quantity) || 1
+        const entryPrice = parseFloat(price)
+        const tpPrice = parseFloat(tp)
+        const slPrice = parseFloat(sl)
+        const isLong = action === '做多'
+        const profitTicks = isLong ? (tpPrice - entryPrice) / tickSize : (entryPrice - tpPrice) / tickSize
+        const lossTicks = isLong ? (entryPrice - slPrice) / tickSize : (slPrice - entryPrice) / tickSize
+        const profitAmt = profitTicks * tickValue * qty
+        const lossAmt = lossTicks * tickValue * qty
+        const rr = lossTicks !== 0 ? profitTicks / lossTicks : 0
+        return (
+          <div className="rounded-lg p-3 space-y-1.5" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">預估獲利</span>
+              <span className="text-green-400 font-semibold">+{profitAmt.toFixed(0)}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-500">預估虧損</span>
+              <span className="text-red-400 font-semibold">-{lossAmt.toFixed(0)}</span>
+            </div>
+            <div className="flex justify-between text-xs border-t border-[#1a3a1a] pt-1.5">
+              <span className="text-gray-500">盈虧比</span>
+              <span className="text-[#d4a843] font-semibold">{rr.toFixed(2)}R</span>
+            </div>
           </div>
-        )}
+        )
+      })()
+    )}
+  </>
+)}
 
         {/* 時間 */}
         <div>
