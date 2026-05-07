@@ -59,12 +59,26 @@ body {
   .no-print { display: none !important; }
 
   body, html {
-    background: #0a0a0a !important;
-    height: auto !important;
-    overflow: visible !important;
+    background: #fff !important;
   }
 
-  * {
+  body * {
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .gold-border::before {
+    display: none !important;
+  }
+
+  .gold-border-inner {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .flex-1 {
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
