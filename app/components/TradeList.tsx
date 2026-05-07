@@ -374,7 +374,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       </span>
                     ) : '--'}
                   </td>
-                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
+                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
                     <DropdownEditCell
                       value={trade.strategy || ''}
                       tradeId={trade.id}
