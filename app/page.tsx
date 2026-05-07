@@ -165,8 +165,8 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="gold-border flex-1">
-                <div className="gold-border-inner overflow-hidden">
+              <div className="gold-border flex-1 min-h-0">
+  <div className="gold-border-inner overflow-auto h-full">
                   <TradeList
                     trades={trades}
                     onDeleted={optimisticDeleteTrade}
@@ -178,40 +178,40 @@ export default function Home() {
           )}
 
           {page === 'stats' && (
-  <div className="gold-border flex-1">
-    <div className="gold-border-inner overflow-auto">
+  <div className="gold-border flex-1 min-h-0">
+    <div className="gold-border-inner overflow-auto h-full">
                 <StatsPanel completed={completed} trades={trades} />
               </div>
             </div>
           )}
 
           {page === 'calendar' && (
-            <div className="gold-border flex-1">
-              <div className="gold-border-inner overflow-auto">
+            <div className="gold-border flex-1 min-h-0">
+  <div className="gold-border-inner overflow-auto h-full">
                 <CalendarView completed={completed} />
               </div>
             </div>
           )}
 
           {page === 'strategy' && (
-            <div className="gold-border flex-1">
-              <div className="gold-border-inner overflow-auto">
+            <div className="gold-border flex-1 min-h-0">
+  <div className="gold-border-inner overflow-auto h-full">
                 <StrategyAnalysis completed={completed} />
               </div>
             </div>
           )}
 
           {page === 'settings' && (
-            <div className="gold-border flex-1">
-              <div className="gold-border-inner overflow-auto">
+            <div className="gold-border flex-1 min-h-0">
+  <div className="gold-border-inner overflow-auto h-full">
                 <SettingsPanel onImported={loadCompleted} />
               </div>
             </div>
           )}
 
           {page === 'history' && (
-            <div className="gold-border flex-1">
-              <div className="gold-border-inner overflow-auto p-6">
+            <div className="gold-border flex-1 min-h-0">
+  <div className="gold-border-inner overflow-auto h-full">
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
                 {/* 篩選區塊 */}
