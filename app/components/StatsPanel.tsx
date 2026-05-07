@@ -22,7 +22,7 @@ type CardItem = {
 
 type BlockItem = {
   id: string
-  type: 'cards' | 'chart' | 'strategy' | 'growth'
+  type: 'cards' | 'chart' | 'strategy' | 'growth' | 'pie'
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
@@ -77,13 +77,13 @@ export default function StatsPanel({ completed, trades }: Props) {
     : 0
 
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
-completed.forEach(trade => {
-  const s = trade.strategy || '—'
-  if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
-  strategyMap[s].total++
-  strategyMap[s].pnl += trade.pnl
-  if (trade.pnl > 0) strategyMap[s].wins++
-})
+  completed.forEach(trade => {
+    const s = trade.strategy || '—'
+    if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
+    strategyMap[s].total++
+    strategyMap[s].pnl += trade.pnl
+    if (trade.pnl > 0) strategyMap[s].wins++
+  })
 
   const last7: { date: string; pnl: number }[] = []
   for (let i = 6; i >= 0; i--) {
@@ -98,7 +98,6 @@ completed.forEach(trade => {
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
 
-  // 資金成長曲線
   const sortedTrades = [...completed].sort((a, b) =>
     new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
   )
@@ -116,7 +115,6 @@ completed.forEach(trade => {
   const minCapital = Math.min(...growthData.map(d => d.capital))
   const capitalRange = maxCapital - minCapital || 1
 
-  // 用 labelKey 儲存，render 時再 t()
   const initialCards: CardItem[] = [
     { id: 'totalPnL',  labelKey: 'totalPnl',    value: totalPnL,          isPrice: true },
     { id: 'todayPnL',  labelKey: 'todayPnl',    value: todayPnL,          isPrice: true },
@@ -138,6 +136,7 @@ completed.forEach(trade => {
     { id: 'chart',    type: 'chart' },
     { id: 'growth',   type: 'growth' },
     { id: 'strategy', type: 'strategy' },
+    { id: 'pie',      type: 'pie' },
   ])
 
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
@@ -193,6 +192,8 @@ completed.forEach(trade => {
     background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)',
     border: '1px solid #2a2a2a',
   }
+
+  const PIE_COLORS = ['#d4a843', '#4ade80', '#f87171', '#60a5fa', '#c084fc', '#fb923c', '#34d399']
 
   function renderBlock(block: BlockItem, index: number) {
     const isDragging = draggingBlockId === block.id
@@ -381,6 +382,66 @@ completed.forEach(trade => {
             </div>
           </div>
         )}
+
+        {/* 各策略交易佔比圓餅圖 */}
+        {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
+          <div className="p-5 cursor-grab">
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">各策略交易佔比</h3>
+            <div className="flex items-center gap-6">
+              <svg width="160" height="160" viewBox="0 0 160 160">
+                {(() => {
+                  const total = Object.values(strategyMap).reduce((s, d) => s + d.total, 0)
+                  let angle = -90
+                  return Object.entries(strategyMap).map(([name, data], i) => {
+                    const pct = data.total / total
+                    const startAngle = angle
+                    const endAngle = angle + pct * 360
+                    angle = endAngle
+                    const r = 70
+                    const cx = 80
+                    const cy = 80
+                    const x1 = cx + r * Math.cos((startAngle * Math.PI) / 180)
+                    const y1 = cy + r * Math.sin((startAngle * Math.PI) / 180)
+                    const x2 = cx + r * Math.cos((endAngle * Math.PI) / 180)
+                    const y2 = cy + r * Math.sin((endAngle * Math.PI) / 180)
+                    const largeArc = pct > 0.5 ? 1 : 0
+                    return (
+                      <path
+                        key={name}
+                        d={`M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} Z`}
+                        fill={PIE_COLORS[i % PIE_COLORS.length]}
+                        opacity={0.85}
+                        stroke="#0f0f0f"
+                        strokeWidth="2"
+                      />
+                    )
+                  })
+                })()}
+                <circle cx="80" cy="80" r="35" fill="#0f0f0f" />
+                <text x="80" y="76" textAnchor="middle" fill="#888" fontSize="10">總計</text>
+                <text x="80" y="92" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="bold">
+                  {Object.values(strategyMap).reduce((s, d) => s + d.total, 0)}
+                </text>
+              </svg>
+              <div className="space-y-2 flex-1">
+                {(() => {
+                  const total = Object.values(strategyMap).reduce((s, d) => s + d.total, 0)
+                  return Object.entries(strategyMap).map(([name, data], i) => (
+                    <div key={name} className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                      <span className="text-sm text-gray-300 truncate flex-1">{name}</span>
+                      <span className="text-xs text-gray-500">{data.total}筆</span>
+                      <span className="text-xs font-medium" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
+                        {(data.total / total * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     )
   }
