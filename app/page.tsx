@@ -165,7 +165,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="gold-border flex-1 overflow-hidden">
+              <div className="gold-border flex-1">
                 <div className="gold-border-inner overflow-hidden">
                   <TradeList
                     trades={trades}
@@ -178,15 +178,15 @@ export default function Home() {
           )}
 
           {page === 'stats' && (
-            <div className="gold-border flex-1 overflow-hidden">
-              <div className="gold-border-inner overflow-auto">
+  <div className="gold-border flex-1">
+    <div className="gold-border-inner overflow-auto">
                 <StatsPanel completed={completed} trades={trades} />
               </div>
             </div>
           )}
 
           {page === 'calendar' && (
-            <div className="gold-border flex-1 overflow-hidden">
+            <div className="gold-border flex-1">
               <div className="gold-border-inner overflow-auto">
                 <CalendarView completed={completed} />
               </div>
@@ -194,7 +194,7 @@ export default function Home() {
           )}
 
           {page === 'strategy' && (
-            <div className="gold-border flex-1 overflow-hidden">
+            <div className="gold-border flex-1">
               <div className="gold-border-inner overflow-auto">
                 <StrategyAnalysis completed={completed} />
               </div>
@@ -202,7 +202,7 @@ export default function Home() {
           )}
 
           {page === 'settings' && (
-            <div className="gold-border flex-1 overflow-hidden">
+            <div className="gold-border flex-1">
               <div className="gold-border-inner overflow-auto">
                 <SettingsPanel onImported={loadCompleted} />
               </div>
@@ -210,7 +210,7 @@ export default function Home() {
           )}
 
           {page === 'history' && (
-            <div className="gold-border flex-1 overflow-hidden">
+            <div className="gold-border flex-1">
               <div className="gold-border-inner overflow-auto p-6">
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
