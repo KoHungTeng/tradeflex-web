@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
 
@@ -146,6 +148,20 @@ export default function StrategyAnalysis({ completed }: Props) {
   const [compareA, setCompareA] = useState<string>('__all__')
   const [compareB, setCompareB] = useState<string>('__all__')
 
+  const printRef = useRef<HTMLDivElement>(null)
+
+async function exportPDF() {
+  if (!printRef.current) return
+  const canvas = await html2canvas(printRef.current, {
+    backgroundColor: '#0a0a0a',
+    scale: 2,
+    useCORS: true,
+  })
+  const imgData = canvas.toDataURL('image/png')
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width / 2, canvas.height / 2] })
+  pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2)
+  pdf.save(`strategy-report-${new Date().toISOString().split('T')[0]}.pdf`)
+}
   const [strategies, setStrategies] = useState<Strategy[]>([])
 
   useEffect(() => {
@@ -188,7 +204,7 @@ export default function StrategyAnalysis({ completed }: Props) {
   const statsB = calcStats(tradesB)
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-6" ref={printRef}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">{t('strategyAnalysis')}</h2>
         <div className="flex gap-2">
@@ -204,7 +220,7 @@ export default function StrategyAnalysis({ completed }: Props) {
               策略比較
             </button>
           </div>
-          <button onClick={() => window.print()}
+          <button onClick={exportPDF}
             className="no-print px-4 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>
             ↓ 輸出 PDF
