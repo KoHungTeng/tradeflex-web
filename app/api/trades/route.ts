@@ -71,11 +71,16 @@ export async function POST(request: NextRequest) {
         small_dif: openTrade.small_dif, small_dea: openTrade.small_dea, small_hist: openTrade.small_hist,
         small_rsi: openTrade.small_rsi, small_k: openTrade.small_k, small_d: openTrade.small_d, small_j: openTrade.small_j,
         user_id: user.id,
-      })
-    }
+    })
+
+    // 刪除對應的開倉單
+    await supabase.from('trades').delete()
+      .eq('id', openTrade.id)
+      .eq('user_id', user.id)
   }
-  return NextResponse.json(trade)
-}
+      
+ }
+  }
 
 export async function DELETE(request: NextRequest) {
   const { supabase, user } = await getSupabaseAndUser(request)
