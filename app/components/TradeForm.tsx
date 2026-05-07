@@ -393,17 +393,19 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     const avgPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / totalQuantity
 
     const newTrade: any = {
-      id: crypto.randomUUID(),
-      portfolio_id: activePortfolio,
-      symbol: symbol.toUpperCase(),
-      action,
-      price: Math.round(avgPrice * 100) / 100,
-      quantity: totalQuantity,
-      fee: parseFloat(fee) * totalQuantity,
-      strategy,
-      remark,
-      trade_time,
-    }
+  id: crypto.randomUUID(),
+  portfolio_id: activePortfolio,
+  symbol: symbol.toUpperCase(),
+  action,
+  price: Math.round(avgPrice * 100) / 100,
+  quantity: totalQuantity,
+  fee: parseFloat(fee) * totalQuantity,
+  strategy,
+  remark,
+  trade_time,
+  tp: tp ? parseFloat(tp) : 0,
+  sl: sl ? parseFloat(sl) : 0,
+}
 
     onAdded(newTrade)
 
