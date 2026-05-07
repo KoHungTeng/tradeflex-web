@@ -134,13 +134,14 @@ export default function Home() {
   const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
 
   return (
-    <div className="flex flex-col h-screen text-white overflow-hidden p-2 gap-2" style={{ background: '#0a0a0a' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0a0a', color: 'white', padding: 8, gap: 8, overflow: 'hidden' }}>
 
-      <div className="flex flex-1 overflow-hidden gap-2">
+      {/* 上方主區域 */}
+      <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
 
         {/* 側邊欄 */}
-        <div className="gold-border flex-shrink-0 no-print">
-          <div className="gold-border-inner overflow-y-auto h-full">
+        <div className="gold-border flex-shrink-0 no-print" style={{ overflow: 'hidden' }}>
+          <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
             <Sidebar
               page={page}
               setPage={setPage}
@@ -152,12 +153,12 @@ export default function Home() {
         </div>
 
         {/* 主內容區 */}
-        <div className="flex-1 flex flex-col overflow-hidden gap-2">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
 
           {page === 'trade' && (
-            <div className="flex flex-1 overflow-hidden gap-2">
-              <div className="gold-border flex-shrink-0 no-print" style={{ alignSelf: 'stretch' }}>
-                <div className="gold-border-inner overflow-y-auto" style={{ height: '100%', borderRadius: '11px' }}>
+            <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
+              <div className="gold-border flex-shrink-0 no-print" style={{ alignSelf: 'stretch', overflow: 'hidden' }}>
+                <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                   <TradeForm
                     activePortfolio={activePortfolio}
                     onAdded={optimisticAddTrade}
@@ -165,8 +166,8 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="gold-border flex-1 min-h-0">
-  <div className="gold-border-inner overflow-auto h-full">
+              <div className="gold-border" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                <div className="gold-border-inner" style={{ height: '100%', overflow: 'hidden' }}>
                   <TradeList
                     trades={trades}
                     onDeleted={optimisticDeleteTrade}
@@ -178,40 +179,40 @@ export default function Home() {
           )}
 
           {page === 'stats' && (
-  <div className="gold-border flex-1 min-h-0">
-    <div className="gold-border-inner overflow-auto h-full">
+            <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                 <StatsPanel completed={completed} trades={trades} />
               </div>
             </div>
           )}
 
           {page === 'calendar' && (
-            <div className="gold-border flex-1 min-h-0">
-  <div className="gold-border-inner overflow-auto h-full">
+            <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                 <CalendarView completed={completed} />
               </div>
             </div>
           )}
 
           {page === 'strategy' && (
-            <div className="gold-border flex-1 min-h-0">
-  <div className="gold-border-inner overflow-auto h-full">
+            <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                 <StrategyAnalysis completed={completed} />
               </div>
             </div>
           )}
 
           {page === 'settings' && (
-            <div className="gold-border flex-1 min-h-0">
-  <div className="gold-border-inner overflow-auto h-full">
+            <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                 <SettingsPanel onImported={loadCompleted} />
               </div>
             </div>
           )}
 
           {page === 'history' && (
-            <div className="gold-border flex-1 min-h-0">
-  <div className="gold-border-inner overflow-auto h-full">
+            <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
                 {/* 篩選區塊 */}
