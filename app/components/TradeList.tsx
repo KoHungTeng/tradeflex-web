@@ -12,7 +12,7 @@ type Props = {
 
 const DEFAULT_WIDTHS: Record<string, number> = {
   action: 80, symbol: 80, price: 90, quantity: 60, fee: 80,
-  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 120, time: 150, delete: 40,
+  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 80, time: 150, delete: 40,
 }
 
 function DropdownEditCell({ value, tradeId, field, color, onSaved, options, placeholder }: {
