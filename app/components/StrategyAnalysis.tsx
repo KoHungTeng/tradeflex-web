@@ -475,46 +475,72 @@ function TagAnalysisCard({ trades, cardStyle }: {
 }) {
   if (trades.length === 0) return null
 
-  // 統計每個標籤的勝/敗次數
-  const tagStats: Record<string, { wins: number; total: number }> = {}
+  const total = trades.length
+
+  // 統計每個標籤的出現次數、勝/敗
+  const tagStats: Record<string, { count: number; wins: number }> = {}
   trades.forEach(trade => {
     const tags = (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
     tags.forEach(tag => {
-      if (!tagStats[tag]) tagStats[tag] = { wins: 0, total: 0 }
-      tagStats[tag].total++
+      if (!tagStats[tag]) tagStats[tag] = { count: 0, wins: 0 }
+      tagStats[tag].count++
       if (trade.pnl > 0) tagStats[tag].wins++
     })
   })
 
   const tagList = Object.entries(tagStats)
-    .map(([tag, s]) => ({ tag, wins: s.wins, losses: s.total - s.wins, total: s.total, winRate: s.wins / s.total * 100 }))
-    .filter(t => t.total >= 1)
-    .sort((a, b) => b.total - a.total)
+    .map(([tag, s]) => ({
+      tag,
+      count: s.count,
+      wins: s.wins,
+      losses: s.count - s.wins,
+      freq: s.count / total * 100,       // 出現頻率（佔總筆數%）
+      winRate: s.wins / s.count * 100,   // 該標籤勝率
+    }))
+    .sort((a, b) => b.count - a.count)
 
   if (tagList.length === 0) return null
 
   return (
     <div className="rounded-xl p-5" style={cardStyle}>
-      <h3 className="text-sm font-semibold text-gray-400 mb-4">標籤分析</h3>
-      <div className="space-y-3">
-        {tagList.map(({ tag, wins, losses, total, winRate }) => (
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400">標籤分析</h3>
+        <span className="text-xs text-gray-600">共 {total} 筆</span>
+      </div>
+      <div className="space-y-4">
+        {tagList.map(({ tag, count, wins, losses, freq, winRate }) => (
           <div key={tag}>
+            {/* 標籤名稱 + 統計數字 */}
             <div className="flex items-center justify-between text-xs mb-1">
               <div className="flex items-center gap-2">
-                <span className="text-[#d4a843]">{tag}</span>
-                <span className="text-gray-600">{total} 筆</span>
+                <span className="text-[#d4a843] font-medium">{tag}</span>
+                <span className="text-gray-600">{count} 筆</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-green-400">{wins} 勝</span>
-                <span className="text-red-400">{losses} 敗</span>
-                <span className={`font-semibold w-12 text-right ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                  {winRate.toFixed(0)}%
+                <span className="text-green-400">{wins}勝</span>
+                <span className="text-red-400">{losses}敗</span>
+                <span className={`font-semibold w-10 text-right ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                  勝{winRate.toFixed(0)}%
+                </span>
+                <span className="text-[#d4a843] font-semibold w-12 text-right">
+                  出現{freq.toFixed(0)}%
                 </span>
               </div>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+            {/* 出現頻率條（金色） */}
+            <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: '#1a1a1a' }}>
               <div
-                className="h-full rounded-full transition-all"
+                className="h-full rounded-full"
+                style={{
+                  width: `${freq}%`,
+                  background: 'linear-gradient(90deg, #d4a843, #b8892e)',
+                }}
+              />
+            </div>
+            {/* 勝率條（綠/紅） */}
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+              <div
+                className="h-full rounded-full"
                 style={{
                   width: `${winRate}%`,
                   background: winRate >= 50
