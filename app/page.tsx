@@ -346,8 +346,8 @@ export default function Home() {
                               </div>
                               {/* 第三行：指標 */}
                               {(ct.big_dif != null || ct.big_rsi != null || ct.small_dif != null) && (
-                                <div className="grid grid-cols-4">
-                                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
+                                <div className="grid grid-cols-6">
+                                  <div className="px-3 py-2 col-span-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                     <p className="text-gray-500 mb-2">大時間框架</p>
                                     <div className="space-y-1">
                                       {ct.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
@@ -359,7 +359,7 @@ export default function Home() {
                                       {ct.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
                                     </div>
                                   </div>
-                                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
+                                  <div className="px-3 py-2 col-span-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                     <p className="text-gray-500 mb-2">小時間框架</p>
                                     <div className="space-y-1">
                                       {ct.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
