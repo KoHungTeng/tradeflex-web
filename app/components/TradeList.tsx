@@ -385,7 +385,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       placeholder={t('searchStrategy')}
                     />
                   </td>
-                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-visible">
+                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden" style={{ maxWidth: widths['remark'] }}>
                     <DropdownEditCell
                       value={trade.remark || ''}
                       tradeId={trade.id}
