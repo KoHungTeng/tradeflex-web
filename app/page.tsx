@@ -304,7 +304,7 @@ export default function Home() {
                         {expandedHistory === ct.id && (
                           <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
                             style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
-                            <div className="rounded-lg overflow-hidden text-xs" style={{ borderBottom: 'none' }}>
+                            <div className="rounded-lg overflow-hidden text-xs">
                               {/* 第一行 */}
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
                                 {[
@@ -338,8 +338,8 @@ export default function Home() {
                                 <div className="px-3 py-2" style={{ borderBottom: 'none' }}>
                                   <p className="text-gray-500 mb-1">盈虧比</p>
                                   <p className="text-[#d4a843] font-semibold">
-                                    {ct.tp && ct.sl && ct.sl !== ct.open_price
-                                      ? `${Math.abs((ct.tp - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
+                                    {ct.sl && ct.sl !== ct.open_price
+                                      ? `${Math.abs((ct.close_price - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
                                       : '--'}
                                   </p>
                                 </div>
