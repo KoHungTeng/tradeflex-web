@@ -285,6 +285,7 @@ function exportPDF() {
                 </div>
               )}
 
+              <TagAnalysisCard trades={filtered} cardStyle={cardStyle} />
               <div className="rounded-xl p-4" style={cardStyle}>
                 <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
                 <div className="space-y-2">
@@ -464,6 +465,66 @@ function IndicatorCompare({ label, wins, losses, field, winLabel, lossLabel }: {
           <div className="h-full bg-green-500 rounded-full"
             style={{ width: `${Math.min(Math.abs(winAvg) / (Math.abs(winAvg) + Math.abs(lossAvg ?? 1)) * 100, 100)}%` }} />
         )}
+      </div>
+    </div>
+  )
+}
+function TagAnalysisCard({ trades, cardStyle }: {
+  trades: CompletedTrade[]
+  cardStyle: React.CSSProperties
+}) {
+  if (trades.length === 0) return null
+
+  // 統計每個標籤的勝/敗次數
+  const tagStats: Record<string, { wins: number; total: number }> = {}
+  trades.forEach(trade => {
+    const tags = (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
+    tags.forEach(tag => {
+      if (!tagStats[tag]) tagStats[tag] = { wins: 0, total: 0 }
+      tagStats[tag].total++
+      if (trade.pnl > 0) tagStats[tag].wins++
+    })
+  })
+
+  const tagList = Object.entries(tagStats)
+    .map(([tag, s]) => ({ tag, wins: s.wins, losses: s.total - s.wins, total: s.total, winRate: s.wins / s.total * 100 }))
+    .filter(t => t.total >= 1)
+    .sort((a, b) => b.total - a.total)
+
+  if (tagList.length === 0) return null
+
+  return (
+    <div className="rounded-xl p-5" style={cardStyle}>
+      <h3 className="text-sm font-semibold text-gray-400 mb-4">標籤分析</h3>
+      <div className="space-y-3">
+        {tagList.map(({ tag, wins, losses, total, winRate }) => (
+          <div key={tag}>
+            <div className="flex items-center justify-between text-xs mb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[#d4a843]">{tag}</span>
+                <span className="text-gray-600">{total} 筆</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-green-400">{wins} 勝</span>
+                <span className="text-red-400">{losses} 敗</span>
+                <span className={`font-semibold w-12 text-right ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                  {winRate.toFixed(0)}%
+                </span>
+              </div>
+            </div>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${winRate}%`,
+                  background: winRate >= 50
+                    ? 'linear-gradient(90deg, #22c55e, #16a34a)'
+                    : 'linear-gradient(90deg, #ef4444, #dc2626)',
+                }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
