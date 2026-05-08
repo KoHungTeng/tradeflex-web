@@ -149,6 +149,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
     )
   }
 
+  // ✅ 修改1：非編輯狀態下，文字截斷 + title tooltip 顯示完整內容
   return (
     <div
       onClick={() => { setEditing(true); setShowDropdown(true); setSearch('') }}
@@ -212,12 +213,12 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
   const COLS = [
     { key: 'action',   label: t('colAction'),   minWidth: 60,  defaultWidth: 80,  align: 'left' },
     { key: 'symbol',   label: t('colSymbol'),   minWidth: 50,  defaultWidth: 80,  align: 'left' },
-    { key: 'price',    label: t('colPrice'),    minWidth: 60,  defaultWidth: 90,  align: 'left' },
-    { key: 'quantity', label: t('colQty'),      minWidth: 40,  defaultWidth: 60,  align: 'left' },
-    { key: 'fee',      label: t('colFee'),      minWidth: 55,  defaultWidth: 80,  align: 'left' },
-    { key: 'tp',       label: 'TP',             minWidth: 40,  defaultWidth: 70,  align: 'left' },
-    { key: 'sl',       label: 'SL',             minWidth: 40,  defaultWidth: 70,  align: 'left' },
-    { key: 'rr',       label: 'R:R',            minWidth: 40,  defaultWidth: 60,  align: 'left' },
+    { key: 'price',    label: t('colPrice'),    minWidth: 60,  defaultWidth: 90,  align: 'right' },
+    { key: 'quantity', label: t('colQty'),      minWidth: 40,  defaultWidth: 60,  align: 'right' },
+    { key: 'fee',      label: t('colFee'),      minWidth: 55,  defaultWidth: 80,  align: 'right' },
+    { key: 'tp',       label: 'TP',             minWidth: 40,  defaultWidth: 70,  align: 'right' },
+    { key: 'sl',       label: 'SL',             minWidth: 40,  defaultWidth: 70,  align: 'right' },
+    { key: 'rr',       label: 'R:R',            minWidth: 40,  defaultWidth: 60,  align: 'right' },
     { key: 'strategy', label: t('colStrategy'), minWidth: 50,  defaultWidth: 120, align: 'left' },
     { key: 'remark',   label: t('colRemark'),   minWidth: 50,  defaultWidth: 120, align: 'left' },
     { key: 'time',     label: t('colTime'),     minWidth: 130, defaultWidth: 150, align: 'left' },
@@ -331,17 +332,26 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
           </colgroup>
           <thead>
             <tr className="text-gray-500 border-b border-[#222222] text-left">
-              {COLS.map(col => (
+              {COLS.map((col, i) => (
                 <th
                   key={col.key}
-                  className="py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium"
+                  className={`py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium ${col.align === 'right' ? 'text-right' : ''}`}
                 >
                   {col.label}
+                  {/* ✅ 修改2：明顯分隔線 + 只在線上可拖拉
+                      - 寬度從 w-3 改成 w-1（2px），視覺上是一條線
+                      - 顏色預設 #2a2a2a（與表格邊框同色），hover 變金色
+                      - position absolute 貼齊右邊緣，高度撐滿整個 th
+                      - 最後一欄（delete）不加
+                  */}
                   {col.key !== 'delete' && (
                     <div
                       onMouseDown={e => onResizeStart(e, col)}
                       className="absolute right-0 top-0 h-full w-[3px] cursor-col-resize transition-colors"
-                      style={{ background: '#2a2a2a', zIndex: 10 }}
+                      style={{
+                        background: '#2a2a2a',
+                        zIndex: 10,
+                      }}
                       onMouseEnter={e => (e.currentTarget.style.background = '#d4a843')}
                       onMouseLeave={e => (e.currentTarget.style.background = '#2a2a2a')}
                     />
@@ -366,12 +376,12 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                     </span>
                   </td>
                   <td className="py-2 px-3 font-semibold whitespace-nowrap overflow-hidden">{trade.symbol}</td>
-                  <td className="py-2 px-3 whitespace-nowrap overflow-hidden">{trade.price}</td>
-                  <td className="py-2 px-3 whitespace-nowrap overflow-hidden">{trade.quantity}</td>
-                  <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.fee || '--'}</td>
-                  <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
-                  <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
-                  <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{trade.price}</td>
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">{trade.quantity}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.fee || '--'}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
+                  <td className="py-2 px-3 text-right text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
+                  <td className="py-2 px-3 text-right whitespace-nowrap overflow-hidden">
                     {trade.tp && trade.sl && trade.sl !== trade.price ? (
                       <span className="text-[#d4a843] text-xs">
                         {Math.abs((trade.tp - trade.price) / (trade.price - trade.sl)).toFixed(2)}R
@@ -389,6 +399,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       placeholder={t('searchStrategy')}
                     />
                   </td>
+                  {/* ✅ 備注欄：overflow-hidden 截斷，DropdownEditCell 內部 truncate */}
                   <td className="py-2 px-3 text-xs overflow-hidden" style={{ maxWidth: 0 }}>
                     <DropdownEditCell
                       value={trade.remark || ''}
