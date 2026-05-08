@@ -73,10 +73,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
     })
 
-    // 刪除對應的開倉單
-    await supabase.from('trades').delete()
-      .eq('id', openTrade.id)
-      .eq('user_id', user.id)
+    
   }
       
  }
