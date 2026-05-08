@@ -339,13 +339,14 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     }
   }
 
-  const relevantOpenTrades = openTrades.filter(t => {
-    if (!symbol) return false
-    const matchSymbol = t.symbol.toUpperCase() === symbol.toUpperCase()
-    if (action === '平多') return matchSymbol && t.action === '做多'
-    if (action === '平空') return matchSymbol && t.action === '做空'
-    return false
-  })
+  const relevantOpenTrades = openTrades.filter((t: any) => {
+  if (!symbol) return false
+  if (t.is_closed === true) return false
+  const matchSymbol = t.symbol.toUpperCase() === symbol.toUpperCase()
+  if (action === '平多') return matchSymbol && t.action === '做多'
+  if (action === '平空') return matchSymbol && t.action === '做空'
+  return false
+})
 
   const totalOpenQty = relevantOpenTrades.reduce((sum, t) => sum + t.quantity, 0)
   const avgOpenPrice = relevantOpenTrades.length > 0
