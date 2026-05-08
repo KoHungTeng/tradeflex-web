@@ -95,7 +95,7 @@ export default function CalendarView({ completed }: Props) {
 
   return (
     <div
-      className="flex-1 overflow-auto p-6"
+      className="flex-1 overflow-auto p-6 relative"
       onClick={() => { setSelectedDay(null); setNoteInput('') }}
     >
       <div className="flex items-center justify-between mb-6">
@@ -172,49 +172,74 @@ export default function CalendarView({ completed }: Props) {
                   <span className="text-xs text-yellow-400 mt-1">📝 {notes.length}</span>
                 )}
               </div>
-
-              {isSelected && (
-                <div
-                  onClick={e => e.stopPropagation()}
-                  className="mt-1 bg-[#1a1a1a] rounded-lg p-3"
-                >
-                  <p className="text-xs text-gray-400 mb-2">
-                    {year}/{month + 1}/{day} {t('calendarNote')}
-                  </p>
-                  {notes.map(n => (
-                    <div key={n.id} className="flex items-center justify-between text-sm text-white mb-1 group">
-                      <span>• {n.text}</span>
-                      <button
-                        onClick={() => deleteNote(n.id)}
-                        className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100"
-                      >✕</button>
-                    </div>
-                  ))}
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      value={noteInput}
-                      onChange={e => setNoteInput(e.target.value)}
-                      onCompositionStart={() => { isComposingRef.current = true }}
-onCompositionEnd={() => { isComposingRef.current = false; compositionEndTimeRef.current = Date.now() }}
-onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
-                      placeholder={t('calendarNotePlaceholder')}
-                      autoFocus
-                      className="flex-1 bg-[#222222] border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
-                    />
-                    <button
-                      onClick={saveNote}
-                      disabled={saving}
-                      className="px-2 py-1 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50"
-                    >
-                      {t('calendarSave')}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )
         })}
       </div>
+    {selectedDay !== null && (
+  <div
+    className="fixed inset-0 z-40 flex items-center justify-center"
+    style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.4)' }}
+    onClick={() => { setSelectedDay(null); setNoteInput('') }}
+  >
+    <div
+      onClick={e => e.stopPropagation()}
+      className="rounded-2xl p-6 w-80 shadow-2xl"
+      style={{
+        background: '#1a1a1a',
+        border: '1px solid #2a2a2a',
+        animation: 'modalPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-semibold text-white">
+          {year}/{month + 1}/{selectedDay}
+        </p>
+        <button
+          onClick={() => { setSelectedDay(null); setNoteInput('') }}
+          className="text-gray-500 hover:text-white text-lg leading-none"
+        >×</button>
+      </div>
+
+      {dailyPnL[selectedDay.toString()] !== undefined && (
+        <div className={`text-2xl font-bold mb-4 ${dailyPnL[selectedDay.toString()] > 0 ? 'text-green-400' : 'text-red-400'}`}>
+          {dailyPnL[selectedDay.toString()] > 0 ? '+' : ''}{dailyPnL[selectedDay.toString()].toFixed(0)}
+        </div>
+      )}
+
+      {getNoteForDay(selectedDay).map(n => (
+        <div key={n.id} className="flex items-center justify-between text-sm text-white mb-2 group">
+          <span className="text-gray-300">• {n.text}</span>
+          <button
+            onClick={() => deleteNote(n.id)}
+            className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100"
+          >✕</button>
+        </div>
+      ))}
+
+      <div className="flex gap-2 mt-3">
+        <input
+          value={noteInput}
+          onChange={e => setNoteInput(e.target.value)}
+          onCompositionStart={() => { isComposingRef.current = true }}
+          onCompositionEnd={() => { isComposingRef.current = false; compositionEndTimeRef.current = Date.now() }}
+          onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
+          placeholder={t('calendarNotePlaceholder')}
+          autoFocus
+          className="flex-1 bg-[#222222] border border-gray-600 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+        />
+        <button
+          onClick={saveNote}
+          disabled={saving}
+          className="px-3 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+        >
+          {t('calendarSave')}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   )
 }
