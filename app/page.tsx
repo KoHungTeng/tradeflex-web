@@ -89,12 +89,6 @@ export default function Home() {
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
   const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
-  useEffect(() => {
-  if (activePortfolio) {
-    loadTrades()
-    loadCompleted()
-  }
-}, [page])
   const [loading, setLoading] = useState(true)
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
   const [historySymbol, setHistorySymbol] = useState<string>('__all__')
@@ -105,6 +99,7 @@ export default function Home() {
 
   useEffect(() => { loadPortfolios() }, [])
   useEffect(() => { if (activePortfolio) { loadTrades(); loadCompleted() } }, [activePortfolio])
+  useEffect(() => { if (activePortfolio) { loadTrades(); loadCompleted() } }, [page])
 
   async function loadPortfolios() {
     const res = await fetch('/api/portfolios')
@@ -146,10 +141,8 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0a0a', color: 'white', padding: 8, gap: 8, overflow: 'hidden' }}>
 
-      {/* 上方主區域 */}
       <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
 
-        {/* 側邊欄 */}
         <div className="gold-border flex-shrink-0 no-print" style={{ overflow: 'hidden' }}>
           <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
             <Sidebar
@@ -162,7 +155,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 主內容區 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
 
           {page === 'trade' && (
@@ -225,7 +217,6 @@ export default function Home() {
               <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
-                {/* 篩選區塊 */}
                 <div className="rounded-xl p-4 mb-4 flex gap-4 flex-wrap items-end"
                   style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
                   <div>
@@ -313,89 +304,86 @@ export default function Home() {
                         {expandedHistory === ct.id && (
                           <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
                             style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
-                            <div className="rounded-lg p-3 mb-3" style={{ background: '#111', border: '1px solid #222' }}>
-  <div className="grid grid-cols-6 text-xs" style={{ borderBottom: '1px solid #222' }}>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">標的</p>
-      <p className="text-white font-semibold">{ct.symbol}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">口數</p>
-      <p className="text-white font-semibold">{ct.quantity}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">進場價</p>
-      <p className="text-white font-semibold">{ct.open_price}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">出場價</p>
-      <p className="text-white font-semibold">{ct.close_price}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">目標價</p>
-      <p className="text-white font-semibold">{ct.tp || '--'}</p>
-    </div>
-    <div className="px-3 py-2">
-      <p className="text-gray-500 mb-1">停損價</p>
-      <p className="text-white font-semibold">{ct.sl || '--'}</p>
-    </div>
-  </div>
-  <div className="grid grid-cols-6 text-xs">
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">開倉時間</p>
-      <p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">平倉時間</p>
-      <p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">手續費</p>
-      <p className="text-white">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
-    </div>
-    <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
-      <p className="text-gray-500 mb-1">盈虧比</p>
-      <p className="text-[#d4a843] font-semibold">
-        {ct.tp && ct.sl && ct.sl !== ct.open_price
-          ? `${Math.abs((ct.tp - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
-          : '--'}
-      </p>
-    </div>
-    <div className="px-3 py-2 col-span-2">
-      <p className="text-gray-500 mb-1">標籤</p>
-      <p className="text-[#d4a843] text-xs leading-relaxed">{ct.remark || '--'}</p>
-    </div>
-  </div>
-</div>
-                            {(ct.big_dif != null || ct.big_rsi != null || ct.small_dif != null) && (
-  <div className="grid grid-cols-2 gap-4 text-xs">
-                                <div>
-                                  <p className="text-gray-500 mb-2">{t('bigTimeframe')}</p>
-                                  <div className="space-y-1">
-                                    {ct.big_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
-                                    {ct.big_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
-                                    {ct.big_hist != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.big_hist}</span></div>}
-                                    {ct.big_rsi != null && <div className="flex gap-3"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.big_rsi}</span></div>}
-                                    {ct.big_k != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.big_k}</span></div>}
-                                    {ct.big_d != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.big_d}</span></div>}
-                                    {ct.big_j != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
+                            <div className="rounded-lg overflow-hidden text-xs" style={{ border: '1px solid #222' }}>
+                              {/* 第一行 */}
+                              <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #222' }}>
+                                {[
+                                  { label: '標的', value: ct.symbol },
+                                  { label: '口數', value: ct.quantity },
+                                  { label: '進場價', value: ct.open_price },
+                                  { label: '出場價', value: ct.close_price },
+                                  { label: '目標價', value: ct.tp || '--' },
+                                  { label: '停損價', value: ct.sl || '--' },
+                                ].map(({ label, value }, i, arr) => (
+                                  <div key={label} className="px-3 py-2" style={{ borderRight: i < arr.length - 1 ? '1px solid #222' : 'none' }}>
+                                    <p className="text-gray-500 mb-1">{label}</p>
+                                    <p className="text-white font-semibold">{value}</p>
                                   </div>
+                                ))}
+                              </div>
+                              {/* 第二行 */}
+                              <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #222' }}>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
+                                  <p className="text-gray-500 mb-1">開倉時間</p>
+                                  <p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
                                 </div>
-                                <div>
-                                  <p className="text-gray-500 mb-2">{t('smallTimeframe')}</p>
-                                  <div className="space-y-1">
-                                    {ct.small_dif != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
-                                    {ct.small_dea != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
-                                    {ct.small_hist != null && <div className="flex gap-3"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.small_hist}</span></div>}
-                                    {ct.small_rsi != null && <div className="flex gap-3"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.small_rsi}</span></div>}
-                                    {ct.small_k != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.small_k}</span></div>}
-                                    {ct.small_d != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.small_d}</span></div>}
-                                    {ct.small_j != null && <div className="flex gap-3"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
-                                   
-                                  </div>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
+                                  <p className="text-gray-500 mb-1">平倉時間</p>
+                                  <p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p>
+                                </div>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
+                                  <p className="text-gray-500 mb-1">手續費</p>
+                                  <p className="text-white">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
+                                </div>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #222' }}>
+                                  <p className="text-gray-500 mb-1">盈虧比</p>
+                                  <p className="text-[#d4a843] font-semibold">
+                                    {ct.tp && ct.sl && ct.sl !== ct.open_price
+                                      ? `${Math.abs((ct.tp - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
+                                      : '--'}
+                                  </p>
+                                </div>
+                                <div className="px-3 py-2 col-span-2">
+                                  <p className="text-gray-500 mb-1">標籤</p>
+                                  <p className="text-[#d4a843] leading-relaxed">{ct.remark || '--'}</p>
                                 </div>
                               </div>
-                            )}
+                              {/* 第三行：指標 */}
+                              {(ct.big_dif != null || ct.big_rsi != null || ct.small_dif != null) && (
+                                <div className="grid grid-cols-6">
+                                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #222' }}>
+                                    <p className="text-gray-500 mb-2">大時間框架</p>
+                                    <div className="space-y-1">
+                                      {ct.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
+                                      {ct.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
+                                      {ct.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.big_hist}</span></div>}
+                                      {ct.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.big_rsi}</span></div>}
+                                      {ct.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.big_k}</span></div>}
+                                      {ct.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.big_d}</span></div>}
+                                      {ct.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
+                                    </div>
+                                  </div>
+                                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #222' }}>
+                                    <p className="text-gray-500 mb-2">小時間框架</p>
+                                    <div className="space-y-1">
+                                      {ct.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
+                                      {ct.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
+                                      {ct.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.small_hist}</span></div>}
+                                      {ct.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.small_rsi}</span></div>}
+                                      {ct.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.small_k}</span></div>}
+                                      {ct.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.small_d}</span></div>}
+                                      {ct.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
+                                    </div>
+                                  </div>
+                                  <div className="px-3 py-2 col-span-2" style={{ borderRight: '1px solid #222' }}>
+                                    <p className="text-gray-500 mb-2">開倉標籤</p>
+                                    <p className="text-[#d4a843] leading-relaxed mb-3">{ct.open_remark || '--'}</p>
+                                    <p className="text-gray-500 mb-2">平倉標籤</p>
+                                    <p className="text-[#d4a843] leading-relaxed">{ct.close_remark || '--'}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -411,7 +399,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 隨手筆記 - 滿版底部 */}
       <div className="gold-border no-print">
         <div className="gold-border-inner">
           <QuickNote />
