@@ -47,8 +47,8 @@ export async function POST(request: NextRequest) {
     const direction = body.action === '平多' ? 'long' : 'short'
     const openAction = direction === 'long' ? '做多' : '做空'
     const { data: openTrades } = await supabase
-      .from('trades').select('*').eq('portfolio_id', body.portfolio_id).eq('symbol', body.symbol)
-      .eq('action', openAction).eq('user_id', user.id).order('trade_time', { ascending: false }).limit(1)
+  .from('trades').select('*').eq('portfolio_id', body.portfolio_id).eq('symbol', body.symbol)
+  .eq('action', openAction).eq('user_id', user.id).neq('is_closed', true).order('trade_time', { ascending: false }).limit(1)
     if (openTrades && openTrades.length > 0) {
       const openTrade = openTrades[0]
       const { data: symbolData } = await supabase.from('symbols').select('tick_size, tick_value').eq('name', body.symbol).single()
