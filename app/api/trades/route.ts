@@ -26,8 +26,10 @@ export async function GET(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const portfolioId = searchParams.get('portfolio_id')
-  let query = supabase.from('trades').select('*').eq('user_id', user.id).order('trade_time', { ascending: false })
-  if (portfolioId) query = query.eq('portfolio_id', portfolioId)
+  const showAll = searchParams.get('show_all')
+let query = supabase.from('trades').select('*').eq('user_id', user.id).order('trade_time', { ascending: false })
+if (portfolioId) query = query.eq('portfolio_id', portfolioId)
+if (!showAll) query = query.neq('is_closed', true)
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
@@ -73,10 +75,13 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
     })
 
-    
+    // 標記開倉單為已平倉
+    await supabase.from('trades').update({ is_closed: true })
+      .eq('id', openTrade.id)
+      .eq('user_id', user.id)
   }
-      
- }
+
+}
   }
 
 export async function DELETE(request: NextRequest) {
