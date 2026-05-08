@@ -12,7 +12,7 @@ type Props = {
 
 const DEFAULT_WIDTHS: Record<string, number> = {
   action: 80, symbol: 80, price: 90, quantity: 60, fee: 80,
-  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 80, time: 150, delete: 40,
+  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 120, time: 150, delete: 40,
 }
 
 function DropdownEditCell({ value, tradeId, field, color, onSaved, options, placeholder }: {
@@ -34,11 +34,11 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
 
   useEffect(() => { setVal(value) }, [value])
   useEffect(() => {
-  if (editing && inputRef.current) {
-    const rect = inputRef.current.getBoundingClientRect()
-    setDropdownPos({ top: rect.bottom + 4, left: rect.left })
-  }
-}, [editing])
+    if (editing && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect()
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left })
+    }
+  }, [editing])
 
   const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
 
@@ -108,14 +108,14 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           autoFocus
           value={field === 'remark' ? val : search}
           onChange={e => {
-  if (field === 'remark') {
-    setVal(e.target.value)
-    setSearch(e.target.value.split(' ').pop() || '')
-  } else {
-    setSearch(e.target.value)
-  }
-  setShowDropdown(true)
-}}
+            if (field === 'remark') {
+              setVal(e.target.value)
+              setSearch(e.target.value.split(' ').pop() || '')
+            } else {
+              setSearch(e.target.value)
+            }
+            setShowDropdown(true)
+          }}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
@@ -149,12 +149,17 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
     )
   }
 
+  // ✅ 修改1：非編輯狀態下，文字截斷 + title tooltip 顯示完整內容
   return (
     <div
       onClick={() => { setEditing(true); setShowDropdown(true); setSearch('') }}
-      className={`cursor-pointer flex items-center gap-1 group ${color}`}
+      className={`cursor-pointer flex items-center gap-1 group ${color} overflow-hidden`}
+      title={val || undefined}
     >
-      {val || <span className="text-gray-600 group-hover:text-gray-400">+</span>}
+      {val
+        ? <span className="truncate block w-full">{val}</span>
+        : <span className="text-gray-600 group-hover:text-gray-400 flex-shrink-0">+</span>
+      }
     </div>
   )
 }
@@ -205,7 +210,6 @@ function IndicatorTooltip({ trade, pos, higherTF, lowerTF }: {
 export default function TradeList({ trades, onDeleted, onCompletedChanged }: Props) {
   const { t } = useLanguage()
 
-  // 動態產生 COLS，label 從翻譯取
   const COLS = [
     { key: 'action',   label: t('colAction'),   minWidth: 60,  defaultWidth: 80,  align: 'left' },
     { key: 'symbol',   label: t('colSymbol'),   minWidth: 50,  defaultWidth: 80,  align: 'left' },
@@ -282,7 +286,6 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
     }
   }
 
-  // 動作標籤顏色：對應翻譯後的 action 字串
   const actionMap: Record<string, { bg: string; label: string }> = {
     '做多': { bg: 'bg-green-900 text-green-400',    label: t('actionLong') },
     '做空': { bg: 'bg-red-900 text-red-400',        label: t('actionShort') },
@@ -329,17 +332,28 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
           </colgroup>
           <thead>
             <tr className="text-gray-500 border-b border-[#222222] text-left">
-              {COLS.map(col => (
+              {COLS.map((col, i) => (
                 <th
                   key={col.key}
-                  className={`py-2 px-3 select-none relative whitespace-nowrap overflow-hidden ${col.align === 'right' ? 'text-right' : ''}`}
+                  className={`py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium ${col.align === 'right' ? 'text-right' : ''}`}
                 >
                   {col.label}
+                  {/* ✅ 修改2：明顯分隔線 + 只在線上可拖拉
+                      - 寬度從 w-3 改成 w-1（2px），視覺上是一條線
+                      - 顏色預設 #2a2a2a（與表格邊框同色），hover 變金色
+                      - position absolute 貼齊右邊緣，高度撐滿整個 th
+                      - 最後一欄（delete）不加
+                  */}
                   {col.key !== 'delete' && (
                     <div
                       onMouseDown={e => onResizeStart(e, col)}
-                      className="absolute right-0 top-0 h-full w-3 cursor-col-resize hover:bg-[#d4a843] hover:opacity-50"
-                      style={{ zIndex: 10 }}
+                      className="absolute right-0 top-0 h-full w-[3px] cursor-col-resize transition-colors"
+                      style={{
+                        background: '#2a2a2a',
+                        zIndex: 10,
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#d4a843')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '#2a2a2a')}
                     />
                   )}
                 </th>
@@ -385,7 +399,8 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       placeholder={t('searchStrategy')}
                     />
                   </td>
-                  <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden" style={{ maxWidth: widths['remark'] }}>
+                  {/* ✅ 備注欄：overflow-hidden 截斷，DropdownEditCell 內部 truncate */}
+                  <td className="py-2 px-3 text-xs overflow-hidden" style={{ maxWidth: 0 }}>
                     <DropdownEditCell
                       value={trade.remark || ''}
                       tradeId={trade.id}
