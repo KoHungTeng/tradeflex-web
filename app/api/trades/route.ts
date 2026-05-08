@@ -26,10 +26,8 @@ export async function GET(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { searchParams } = new URL(request.url)
   const portfolioId = searchParams.get('portfolio_id')
-  const showAll = searchParams.get('show_all')
-let query = supabase.from('trades').select('*').eq('user_id', user.id).order('trade_time', { ascending: false })
+  let query = supabase.from('trades').select('*').eq('user_id', user.id).order('trade_time', { ascending: false })
 if (portfolioId) query = query.eq('portfolio_id', portfolioId)
-if (!showAll) query = query.neq('is_closed', true)
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
