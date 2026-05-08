@@ -54,6 +54,8 @@ export type CompletedTrade = {
   remark?: string
   open_remark?: string
   close_remark?: string
+  tp?: number
+  sl?: number
   direction: string
   open_price: number
   close_price: number
@@ -311,12 +313,61 @@ export default function Home() {
                         {expandedHistory === ct.id && (
                           <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
                             style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                              <div><span className="text-gray-500 text-xs">{t('openTime')}</span><p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p></div>
-                              <div><span className="text-gray-500 text-xs">{t('closeTime')}</span><p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p></div>
-                              <div><span className="text-gray-500 text-xs">{t('openFee')}</span><p className="text-white">{ct.open_fee}</p></div>
-                              <div><span className="text-gray-500 text-xs">{t('closeFee')}</span><p className="text-white">{ct.close_fee}</p></div>
-                            </div>
+                            {/* 第一行：基本資訊 */}
+<div className="rounded-lg p-3 mb-3" style={{ background: '#111', border: '1px solid #222' }}>
+  <div className="grid grid-cols-6 gap-3 text-xs mb-3">
+    <div>
+      <p className="text-gray-500 mb-1">標的</p>
+      <p className="text-white font-semibold">{ct.symbol}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">口數</p>
+      <p className="text-white font-semibold">{ct.quantity}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">進場價</p>
+      <p className="text-white font-semibold">{ct.open_price}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">出場價</p>
+      <p className="text-white font-semibold">{ct.close_price}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">目標價</p>
+      <p className="text-white font-semibold">{ct.tp || '--'}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">停損價</p>
+      <p className="text-white font-semibold">{ct.sl || '--'}</p>
+    </div>
+  </div>
+  <div className="grid grid-cols-5 gap-3 text-xs border-t border-[#222] pt-3">
+    <div>
+      <p className="text-gray-500 mb-1">開倉時間</p>
+      <p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">平倉時間</p>
+      <p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">手續費</p>
+      <p className="text-white">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">盈虧比</p>
+      <p className="text-[#d4a843] font-semibold">
+        {ct.tp && ct.sl && ct.sl !== ct.open_price
+          ? `${Math.abs((ct.tp - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
+          : '--'}
+      </p>
+    </div>
+    <div>
+      <p className="text-gray-500 mb-1">標籤</p>
+      <p className="text-[#d4a843] text-xs leading-relaxed">{ct.remark || '--'}</p>
+    </div>
+  </div>
+</div>
                             {(ct.big_dif != null || ct.big_rsi != null || ct.small_dif != null) && (
                               <div className="grid grid-cols-2 gap-4 text-xs">
                                 <div>
