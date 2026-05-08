@@ -85,6 +85,12 @@ export default function Home() {
   const [trades, setTrades] = useState<Trade[]>([])
   const [completed, setCompleted] = useState<CompletedTrade[]>([])
   const [page, setPage] = useState<'trade' | 'stats' | 'history' | 'calendar' | 'strategy' | 'settings'>('trade')
+  useEffect(() => {
+  if (activePortfolio) {
+    loadTrades()
+    loadCompleted()
+  }
+}, [page])
   const [loading, setLoading] = useState(true)
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
   const [historySymbol, setHistorySymbol] = useState<string>('__all__')
