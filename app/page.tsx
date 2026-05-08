@@ -322,9 +322,9 @@ export default function Home() {
                                 ))}
                               </div>
                               {/* 第二行 */}
-                              <div className="grid grid-cols-4" style={{ borderBottom: '1px solid #1a1a1a' }}>
-                                      <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
-                                        <p className="text-gray-500 mb-1">開倉時間</p>
+                              <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
+                                      <div className="px-3 py-2 col-span-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                                        <p className="text-gray-500 mb-1">盈虧比</p>
                                   <p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
                                 </div>
                                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
