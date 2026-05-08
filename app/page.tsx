@@ -371,7 +371,7 @@ export default function Home() {
                                       {ct.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
                                     </div>
                                   </div>
-                                  <div className="px-3 py-2 col-span-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                                  <div className="px-3 py-2 col-span-4">
                                     <p className="text-gray-500 mb-2">開倉標籤</p>
                                     <p className="text-[#d4a843] leading-relaxed mb-3">{ct.open_remark || '--'}</p>
                                     <p className="text-gray-500 mb-2">平倉標籤</p>
