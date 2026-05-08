@@ -220,9 +220,9 @@ function exportPDF() {
       {mode === 'single' ? (
         <>
           {/* 篩選區塊 */}
-          <div className="rounded-xl p-4 mb-6 flex gap-6 items-end flex-wrap" style={cardStyle}>
-            <div>
-              <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+          <div className="rounded-xl p-4 mb-6 flex gap-4 items-end flex-wrap" style={cardStyle}>
+            <div className="flex flex-col">
+  <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
               <select value={selected} onChange={e => setSelected(e.target.value)} className={selectStyle}>
                 <option value="__all__">{t('allStrategies')}</option>
                 {strategyNames.map(s => <option key={s} value={s}>{s}</option>)}
