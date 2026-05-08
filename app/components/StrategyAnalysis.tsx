@@ -477,40 +477,39 @@ function TagAnalysisCard({ trades, cardStyle }: {
 
   const total = trades.length
 
-  // 統計每個標籤的出現次數、勝/敗
-  const tagStats: Record<string, { count: number; wins: number }> = {}
-  trades.forEach(trade => {
-    const tags = (trade.remark || '').split(' ').filter(w => w.startsWith('#'))
-    tags.forEach(tag => {
-      if (!tagStats[tag]) tagStats[tag] = { count: 0, wins: 0 }
-      tagStats[tag].count++
-      if (trade.pnl > 0) tagStats[tag].wins++
+  function calcTagList(getField: (t: CompletedTrade) => string) {
+    const tagStats: Record<string, { count: number; wins: number }> = {}
+    trades.forEach(trade => {
+      const tags = (getField(trade) || '').split(' ').filter(w => w.startsWith('#'))
+      tags.forEach(tag => {
+        if (!tagStats[tag]) tagStats[tag] = { count: 0, wins: 0 }
+        tagStats[tag].count++
+        if (trade.pnl > 0) tagStats[tag].wins++
+      })
     })
-  })
+    return Object.entries(tagStats)
+      .map(([tag, s]) => ({
+        tag,
+        count: s.count,
+        wins: s.wins,
+        losses: s.count - s.wins,
+        freq: s.count / total * 100,
+        winRate: s.wins / s.count * 100,
+      }))
+      .sort((a, b) => b.count - a.count)
+  }
 
-  const tagList = Object.entries(tagStats)
-    .map(([tag, s]) => ({
-      tag,
-      count: s.count,
-      wins: s.wins,
-      losses: s.count - s.wins,
-      freq: s.count / total * 100,       // 出現頻率（佔總筆數%）
-      winRate: s.wins / s.count * 100,   // 該標籤勝率
-    }))
-    .sort((a, b) => b.count - a.count)
+  const openTags = calcTagList(t => t.open_remark || '')
+  const closeTags = calcTagList(t => t.close_remark || '')
 
-  if (tagList.length === 0) return null
+  if (openTags.length === 0 && closeTags.length === 0) return null
 
-  return (
-    <div className="rounded-xl p-5" style={cardStyle}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-400">標籤分析</h3>
-        <span className="text-xs text-gray-600">共 {total} 筆</span>
-      </div>
-      <div className="space-y-4">
+  function TagTable({ tagList }: { tagList: ReturnType<typeof calcTagList> }) {
+    if (tagList.length === 0) return <p className="text-xs text-gray-600">無標籤</p>
+    return (
+      <div className="space-y-3">
         {tagList.map(({ tag, count, wins, losses, freq, winRate }) => (
           <div key={tag}>
-            {/* 標籤名稱 + 統計數字 */}
             <div className="flex items-center justify-between text-xs mb-1">
               <div className="flex items-center gap-2">
                 <span className="text-[#d4a843] font-medium">{tag}</span>
@@ -527,30 +526,36 @@ function TagAnalysisCard({ trades, cardStyle }: {
                 </span>
               </div>
             </div>
-            {/* 出現頻率條（金色） */}
             <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: '#1a1a1a' }}>
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${freq}%`,
-                  background: 'linear-gradient(90deg, #d4a843, #b8892e)',
-                }}
-              />
+              <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #d4a843, #b8892e)' }} />
             </div>
-            {/* 勝率條（綠/紅） */}
             <div className="h-1 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${winRate}%`,
-                  background: winRate >= 50
-                    ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-                    : 'linear-gradient(90deg, #ef4444, #dc2626)',
-                }}
-              />
+              <div className="h-full rounded-full" style={{
+                width: `${winRate}%`,
+                background: winRate >= 50 ? 'linear-gradient(90deg, #22c55e, #16a34a)' : 'linear-gradient(90deg, #ef4444, #dc2626)',
+              }} />
             </div>
           </div>
         ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-xl p-5" style={cardStyle}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400">標籤分析</h3>
+        <span className="text-xs text-gray-600">共 {total} 筆</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <p className="text-xs text-green-400 font-medium mb-3">開倉標籤</p>
+          <TagTable tagList={openTags} />
+        </div>
+        <div>
+          <p className="text-xs text-red-400 font-medium mb-3">平倉標籤</p>
+          <TagTable tagList={closeTags} />
+        </div>
       </div>
     </div>
   )
