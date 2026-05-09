@@ -47,3 +47,14 @@ export async function DELETE(req: Request) {
   if (error) return NextResponse.json({ error }, { status: 500 })
   return NextResponse.json({ success: true })
 }
+export async function PATCH(req: Request) {
+  const { supabase, user } = await getSupabaseAndUser(req)
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+  const { name } = await req.json()
+  const { error } = await supabase.from('tags').update({ name }).eq('id', id).eq('user_id', user.id)
+  if (error) return NextResponse.json({ error }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
