@@ -31,6 +31,7 @@ export type Trade = {
   trade_time: string
   tp?: number
   sl?: number
+  open_price?: number
   big_dif?: number
   big_dea?: number
   big_hist?: number
@@ -303,7 +304,7 @@ export default function Home() {
 
                         {expandedHistory === ct.id && (
                           <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
-                            style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
+                            style={{ background: '#0f0f0f', borderTop: 'none' }}>
                             <div className="rounded-lg overflow-hidden text-xs">
                               {/* 第一行 */}
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>

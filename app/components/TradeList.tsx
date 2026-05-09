@@ -372,12 +372,27 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
                   <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
-                    {trade.tp && trade.sl && trade.sl !== trade.price ? (
-                      <span className="text-[#d4a843] text-xs">
-                        {Math.abs((trade.tp - trade.price) / (trade.price - trade.sl)).toFixed(2)}R
-                      </span>
-                    ) : '--'}
-                  </td>
+  {trade.tp && trade.sl ? (() => {
+    const isClose = trade.action === '平多' || trade.action === '平空'
+    if (!isClose) {
+      // 開倉單：顯示預期盈虧比，金色
+      if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
+      const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
+      return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
+    }
+    // 平倉單：比較實際 vs 預期
+    if (!trade.open_price || trade.sl === trade.open_price) return <span className="text-gray-500 text-xs">--</span>
+    const expectedRR = Math.abs((trade.tp - trade.open_price) / (trade.open_price - trade.sl))
+    const direction = trade.action === '平多' ? 1 : -1
+    const actualRR = Math.abs((trade.price - trade.open_price) / (trade.open_price - trade.sl)) * direction
+    const achieved = actualRR >= expectedRR
+    return (
+      <span className={`text-xs font-medium ${achieved ? 'text-green-400' : 'text-red-400'}`}>
+        {Math.abs(actualRR).toFixed(2)}R
+      </span>
+    )
+  })() : '--'}
+</td>
                   <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
                     <DropdownEditCell
                       value={trade.strategy || ''}
