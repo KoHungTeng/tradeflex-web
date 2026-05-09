@@ -269,23 +269,120 @@ function exportPDF() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <IndicatorCard title={t('indicatorWin')} trades={wins} color="text-green-400" bgColor="bg-green-900/20" showMACD={showMACD} showRSI={showRSI} showKDJ={showKDJ} noData={t('noData')} />
-                <IndicatorCard title={t('indicatorLoss')} trades={losses} color="text-red-400" bgColor="bg-red-900/20" showMACD={showMACD} showRSI={showRSI} showKDJ={showKDJ} noData={t('noData')} />
+              <div className="rounded-xl p-5" style={cardStyle}>
+  <div className="grid grid-cols-4 gap-6">
+    {/* 獲利指標平均值 */}
+    <div>
+      <p className="text-xs font-semibold text-green-400 mb-3">獲利指標平均值（{wins.length} 筆）</p>
+      {wins.length === 0 ? <p className="text-xs text-gray-600">無資料</p> : (
+        <div className="space-y-1.5">
+          {[
+            ...(showMACD ? [{ label: 'MACD DIF', key: 'big_dif' }, { label: 'MACD DEA', key: 'big_dea' }, { label: 'MACD柱', key: 'big_hist' }] : []),
+            ...(showRSI ? [{ label: 'RSI (14)', key: 'big_rsi' }] : []),
+            ...(showKDJ ? [{ label: 'KDJ K', key: 'big_k' }, { label: 'KDJ D', key: 'big_d' }, { label: 'KDJ J', key: 'big_j' }] : []),
+          ].map(row => {
+            const vals = wins.map(t => t[row.key as keyof CompletedTrade] as number).filter(v => v != null && !isNaN(v))
+            const avg = vals.length > 0 ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(2) : '--'
+            return (
+              <div key={row.label} className="flex justify-between text-xs">
+                <span className="text-gray-500">{row.label}</span>
+                <span className="text-white font-medium">{avg}</span>
               </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
 
-              {selected !== '__all__' && (showMACD || showRSI || showKDJ) && (
-                <div className="rounded-xl p-5" style={cardStyle}>
-                  <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('indicatorDist')}</h3>
-                  <div className="space-y-4">
-                    {showMACD && <IndicatorCompare label="MACD DIF" wins={wins} losses={losses} field="big_dif" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
-                    {showRSI && <IndicatorCompare label="RSI" wins={wins} losses={losses} field="big_rsi" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
-                    {showKDJ && <IndicatorCompare label="KDJ K" wins={wins} losses={losses} field="big_k" winLabel={t('winAvgLabel')} lossLabel={t('lossAvgLabel')} />}
-                  </div>
+    {/* 虧損指標平均值 */}
+    <div>
+      <p className="text-xs font-semibold text-red-400 mb-3">虧損指標平均值（{losses.length} 筆）</p>
+      {losses.length === 0 ? <p className="text-xs text-gray-600">無資料</p> : (
+        <div className="space-y-1.5">
+          {[
+            ...(showMACD ? [{ label: 'MACD DIF', key: 'big_dif' }, { label: 'MACD DEA', key: 'big_dea' }, { label: 'MACD柱', key: 'big_hist' }] : []),
+            ...(showRSI ? [{ label: 'RSI (14)', key: 'big_rsi' }] : []),
+            ...(showKDJ ? [{ label: 'KDJ K', key: 'big_k' }, { label: 'KDJ D', key: 'big_d' }, { label: 'KDJ J', key: 'big_j' }] : []),
+          ].map(row => {
+            const vals = losses.map(t => t[row.key as keyof CompletedTrade] as number).filter(v => v != null && !isNaN(v))
+            const avg = vals.length > 0 ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(2) : '--'
+            return (
+              <div key={row.label} className="flex justify-between text-xs">
+                <span className="text-gray-500">{row.label}</span>
+                <span className="text-white font-medium">{avg}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+
+    {/* 獲利標籤頻率 */}
+    <div>
+      <p className="text-xs font-semibold text-green-400 mb-3">獲利標籤頻率</p>
+      {(() => {
+        const tagStats: Record<string, { count: number; wins: number }> = {}
+        wins.forEach(trade => {
+          const tags = (trade.open_remark || '').split(' ').filter(w => w.startsWith('#'))
+          tags.forEach(tag => {
+            if (!tagStats[tag]) tagStats[tag] = { count: 0, wins: 0 }
+            tagStats[tag].count++
+            tagStats[tag].wins++
+          })
+        })
+        const list = Object.entries(tagStats).map(([tag, s]) => ({ tag, count: s.count, freq: s.count / (wins.length || 1) * 100 })).sort((a, b) => b.count - a.count)
+        if (list.length === 0) return <p className="text-xs text-gray-600">無標籤</p>
+        return (
+          <div className="space-y-2">
+            {list.map(({ tag, count, freq }) => (
+              <div key={tag}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-[#d4a843]">{tag}</span>
+                  <span className="text-green-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
-              )}
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+                  <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+    </div>
 
-              <TagAnalysisCard trades={filtered} cardStyle={cardStyle} />
+    {/* 虧損標籤頻率 */}
+    <div>
+      <p className="text-xs font-semibold text-red-400 mb-3">虧損標籤頻率</p>
+      {(() => {
+        const tagStats: Record<string, { count: number }> = {}
+        losses.forEach(trade => {
+          const tags = (trade.open_remark || '').split(' ').filter(w => w.startsWith('#'))
+          tags.forEach(tag => {
+            if (!tagStats[tag]) tagStats[tag] = { count: 0 }
+            tagStats[tag].count++
+          })
+        })
+        const list = Object.entries(tagStats).map(([tag, s]) => ({ tag, count: s.count, freq: s.count / (losses.length || 1) * 100 })).sort((a, b) => b.count - a.count)
+        if (list.length === 0) return <p className="text-xs text-gray-600">無標籤</p>
+        return (
+          <div className="space-y-2">
+            {list.map(({ tag, count, freq }) => (
+              <div key={tag}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-[#d4a843]">{tag}</span>
+                  <span className="text-red-400 font-semibold">{freq.toFixed(0)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+                  <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #ef4444, #dc2626)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+    </div>
+  </div>
+</div>
               <div className="rounded-xl p-4" style={cardStyle}>
                 <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
                 <div className="space-y-2">
