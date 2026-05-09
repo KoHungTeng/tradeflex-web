@@ -81,9 +81,9 @@ export async function POST(request: NextRequest) {
       })
 
       // 把開倉單的 tp/sl 更新到平倉單
-      await supabase.from('trades').update({ tp: openTrade.tp || 0, sl: openTrade.sl || 0 })
-        .eq('id', trade.id)
-        .eq('user_id', user.id)
+      await supabase.from('trades').update({ tp: openTrade.tp || 0, sl: openTrade.sl || 0, open_price: openTrade.price || 0 })
+  .eq('id', trade.id)
+  .eq('user_id', user.id)
 
       // 標記開倉單為已平倉
       await supabase.from('trades').update({ is_closed: true })
