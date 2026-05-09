@@ -23,6 +23,8 @@ type OpenTrade = {
   price: number
   quantity: number
   trade_time: string
+  tp?: number
+  sl?: number
 }
 
 type SymbolInfo = {
@@ -394,7 +396,8 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     const totalQuantity = allEntries.reduce((a, b) => a + b.quantity, 0)
     const avgPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / totalQuantity
 
-    const newTrade: any = {
+    const openTradeRef = isClose ? relevantOpenTrades[0] : null
+const newTrade: any = {
   id: crypto.randomUUID(),
   portfolio_id: activePortfolio,
   symbol: symbol.toUpperCase(),
@@ -405,8 +408,9 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   strategy,
   remark,
   trade_time,
-  tp: tp ? parseFloat(tp) : 0,
-  sl: sl ? parseFloat(sl) : 0,
+  tp: isClose ? (openTradeRef?.tp || 0) : (tp ? parseFloat(tp) : 0),
+  sl: isClose ? (openTradeRef?.sl || 0) : (sl ? parseFloat(sl) : 0),
+  open_price: isClose ? (openTradeRef?.price || 0) : 0,
 }
 
     onAdded(newTrade)
