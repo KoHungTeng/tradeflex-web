@@ -1,18 +1,13 @@
 'use client'
 
 import { Trade } from '../page'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '../LanguageContext'
 
 type Props = {
   trades: Trade[]
   onDeleted: (id: string) => void
   onCompletedChanged: () => void
-}
-
-const DEFAULT_WIDTHS: Record<string, number> = {
-  action: 80, symbol: 80, price: 90, quantity: 60, fee: 80,
-  tp: 70, sl: 70, rr: 60, strategy: 120, remark: 120, time: 150, delete: 40,
 }
 
 function DropdownEditCell({ value, tradeId, field, color, onSaved, options, placeholder }: {
@@ -208,35 +203,10 @@ function IndicatorTooltip({ trade, pos, higherTF, lowerTF }: {
 
 export default function TradeList({ trades, onDeleted, onCompletedChanged }: Props) {
   const { t } = useLanguage()
-
-  const COLS = [
-    { key: 'action',   label: t('colAction'),   minWidth: 60,  defaultWidth: 80,  align: 'left' },
-    { key: 'symbol',   label: t('colSymbol'),   minWidth: 50,  defaultWidth: 80,  align: 'left' },
-    { key: 'price',    label: t('colPrice'),    minWidth: 60,  defaultWidth: 90,  align: 'left' },
-    { key: 'quantity', label: t('colQty'),      minWidth: 40,  defaultWidth: 60,  align: 'left' },
-    { key: 'fee',      label: t('colFee'),      minWidth: 55,  defaultWidth: 80,  align: 'left' },
-    { key: 'tp',       label: 'TP',             minWidth: 40,  defaultWidth: 70,  align: 'left' },
-    { key: 'sl',       label: 'SL',             minWidth: 40,  defaultWidth: 70,  align: 'left' },
-    { key: 'rr',       label: 'R:R',            minWidth: 40,  defaultWidth: 60,  align: 'left' },
-    { key: 'strategy', label: t('colStrategy'), minWidth: 50,  defaultWidth: 120, align: 'left' },
-    { key: 'remark',   label: t('colRemark'),   minWidth: 50,  defaultWidth: 120, align: 'left' },
-    { key: 'time',     label: t('colTime'),     minWidth: 130, defaultWidth: 150, align: 'left' },
-    { key: 'delete',   label: '',               minWidth: 30,  defaultWidth: 40,  align: 'left' },
-  ]
-
-  const [widths, setWidths] = useState<Record<string, number>>(() => {
-    if (typeof window === 'undefined') return DEFAULT_WIDTHS
-    try {
-      const saved = localStorage.getItem('tradeListWidths')
-      return saved ? { ...DEFAULT_WIDTHS, ...JSON.parse(saved) } : DEFAULT_WIDTHS
-    } catch { return DEFAULT_WIDTHS }
-  })
-
   const [hoveredTrade, setHoveredTrade] = useState<Trade | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [strategies, setStrategies] = useState<string[]>([])
   const [tags, setTags] = useState<string[]>([])
-  const dragging = useRef<{ col: string; startX: number; startWidth: number; minWidth: number } | null>(null)
 
   useEffect(() => {
     fetch('/api/strategies').then(r => r.json()).then(data => {
@@ -246,33 +216,6 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       setTags(Array.isArray(data) ? data.map((tag: any) => `#${tag.name}`) : [])
     })
   }, [])
-
-  function onResizeStart(e: React.MouseEvent, col: typeof COLS[0]) {
-    e.preventDefault()
-    dragging.current = {
-      col: col.key,
-      startX: e.clientX,
-      startWidth: widths[col.key],
-      minWidth: col.minWidth,
-    }
-    function onMove(e: MouseEvent) {
-      if (!dragging.current) return
-      const diff = e.clientX - dragging.current.startX
-      const newWidth = Math.max(dragging.current.minWidth, dragging.current.startWidth + diff)
-      setWidths(prev => {
-        const next = { ...prev, [dragging.current!.col]: newWidth }
-        localStorage.setItem('tradeListWidths', JSON.stringify(next))
-        return next
-      })
-    }
-    function onUp() {
-      dragging.current = null
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }
 
   async function deleteTrade(id: string) {
     const trade = trades.find(tr => tr.id === id)
@@ -302,6 +245,21 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
     return `${y}/${mo}/${day} ${h}:${mi}`
   }
 
+  const COLS = [
+    { key: 'action',   label: t('colAction'),   width: '8%' },
+    { key: 'symbol',   label: t('colSymbol'),   width: '7%' },
+    { key: 'price',    label: t('colPrice'),    width: '8%' },
+    { key: 'quantity', label: t('colQty'),      width: '5%' },
+    { key: 'fee',      label: t('colFee'),      width: '6%' },
+    { key: 'tp',       label: 'TP',             width: '7%' },
+    { key: 'sl',       label: 'SL',             width: '7%' },
+    { key: 'rr',       label: 'R:R',            width: '6%' },
+    { key: 'strategy', label: t('colStrategy'), width: '12%' },
+    { key: 'remark',   label: t('colRemark'),   width: '17%' },
+    { key: 'time',     label: t('colTime'),     width: '13%' },
+    { key: 'delete',   label: '',               width: '4%' },
+  ]
+
   return (
     <div
       className="flex-1 overflow-auto p-6"
@@ -323,25 +281,17 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       {trades.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noTrades')}</div>
       ) : (
-        <table className="text-sm border-collapse w-full" style={{ tableLayout: 'auto' }}>
+        <table className="text-sm border-collapse w-full" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            {COLS.map(col => (
+              <col key={col.key} style={{ width: col.width }} />
+            ))}
+          </colgroup>
           <thead>
             <tr className="text-gray-500 border-b border-[#222222] text-left">
               {COLS.map(col => (
-                <th
-  key={col.key}
-  className="py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium"
-  style={{ minWidth: widths[col.key] }}
->
+                <th key={col.key} className="py-2 px-3 select-none whitespace-nowrap overflow-hidden font-medium">
                   {col.label}
-                  {col.key !== 'delete' && (
-                    <div
-                      onMouseDown={e => onResizeStart(e, col)}
-                      className="absolute right-0 top-0 h-full w-[3px] cursor-col-resize transition-colors"
-                      style={{ background: '#2a2a2a', zIndex: 10 }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#d4a843')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '#2a2a2a')}
-                    />
-                  )}
                 </th>
               ))}
             </tr>
@@ -368,37 +318,36 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
                   <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
-                  {trade.tp && trade.sl ? (() => {
-                    const isClose = trade.action === '平多' || trade.action === '平空'
-                     if (!isClose) {
-                     if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
-                    const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
-                      return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
-    }
-    // 平倉單：從 trades 陣列找對應開倉單
-    const openAction = trade.action === '平多' ? '做多' : '做空'
-    const openTrade = trades.find(t =>
-      t.symbol === trade.symbol &&
-      t.action === openAction &&
-      (t as any).is_closed === true &&
-      new Date(t.trade_time) < new Date(trade.trade_time)
-    ) || trades.find(t =>
-      t.symbol === trade.symbol &&
-      t.action === openAction
-    )
-    const entryPrice = (trade as any).open_price || openTrade?.price
-    if (!entryPrice || trade.sl === entryPrice) return <span className="text-gray-500 text-xs">--</span>
-    const expectedRR = Math.abs((trade.tp - entryPrice) / (entryPrice - trade.sl))
-    const direction = trade.action === '平多' ? 1 : -1
-    const actualRR = direction * (trade.price - entryPrice) / Math.abs(entryPrice - trade.sl)
-    const achieved = actualRR >= expectedRR
-    return (
-      <span className={`text-xs font-medium ${achieved ? 'text-green-400' : 'text-red-400'}`}>
-        {Math.abs(actualRR).toFixed(2)}R
-      </span>
-    )
-  })() : '--'}
-</td>
+                    {trade.tp && trade.sl ? (() => {
+                      const isClose = trade.action === '平多' || trade.action === '平空'
+                      if (!isClose) {
+                        if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
+                        const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
+                        return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
+                      }
+                      const openAction = trade.action === '平多' ? '做多' : '做空'
+                      const openTrade = trades.find(t =>
+                        t.symbol === trade.symbol &&
+                        t.action === openAction &&
+                        (t as any).is_closed === true &&
+                        new Date(t.trade_time) < new Date(trade.trade_time)
+                      ) || trades.find(t =>
+                        t.symbol === trade.symbol &&
+                        t.action === openAction
+                      )
+                      const entryPrice = (trade as any).open_price || openTrade?.price
+                      if (!entryPrice || trade.sl === entryPrice) return <span className="text-gray-500 text-xs">--</span>
+                      const expectedRR = Math.abs((trade.tp - entryPrice) / (entryPrice - trade.sl))
+                      const direction = trade.action === '平多' ? 1 : -1
+                      const actualRR = direction * (trade.price - entryPrice) / Math.abs(entryPrice - trade.sl)
+                      const achieved = actualRR >= expectedRR
+                      return (
+                        <span className={`text-xs font-medium ${achieved ? 'text-green-400' : 'text-red-400'}`}>
+                          {Math.abs(actualRR).toFixed(2)}R
+                        </span>
+                      )
+                    })() : '--'}
+                  </td>
                   <td className="py-2 px-3 text-xs whitespace-nowrap overflow-hidden">
                     <DropdownEditCell
                       value={trade.strategy || ''}
@@ -411,20 +360,20 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                     />
                   </td>
                   <td
-  className="py-2 px-3 text-xs overflow-hidden"
-  style={{ maxWidth: 0 }}
-  onMouseEnter={() => setHoveredTrade(null)}
->
-  <DropdownEditCell
-    value={trade.remark || ''}
-    tradeId={trade.id}
-    field="remark"
-    color="text-gray-400"
-    onSaved={onCompletedChanged}
-    options={tags}
-    placeholder={t('inputRemark')}
-  />
-</td>
+                    className="py-2 px-3 text-xs overflow-hidden"
+                    style={{ maxWidth: 0 }}
+                    onMouseEnter={() => setHoveredTrade(null)}
+                  >
+                    <DropdownEditCell
+                      value={trade.remark || ''}
+                      tradeId={trade.id}
+                      field="remark"
+                      color="text-gray-400"
+                      onSaved={onCompletedChanged}
+                      options={tags}
+                      placeholder={t('inputRemark')}
+                    />
+                  </td>
                   <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
                     {formatTime(trade.trade_time)}
                   </td>
