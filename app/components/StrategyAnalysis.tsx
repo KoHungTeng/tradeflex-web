@@ -79,7 +79,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
                 const groups: Record<string, string[]> = {}
                 filtered.forEach(tag => {
                   const rawName = tag.startsWith('#') ? tag.slice(1) : tag
-                  const prefix = rawName.includes(' ') ? rawName.split(' ')[0] : rawName
+const prefix = rawName.includes('/') ? rawName.split('/')[0] : rawName
                   if (!groups[prefix]) groups[prefix] = []
                   groups[prefix].push(tag)
                 })
@@ -145,6 +145,7 @@ export default function StrategyAnalysis({ completed }: Props) {
   // 策略比較
   const [compareA, setCompareA] = useState<string>('__all__')
   const [compareB, setCompareB] = useState<string>('__all__')
+  const [expandedTrade, setExpandedTrade] = useState<string | null>(null)
 
   const printRef = useRef<HTMLDivElement>(null)
 
@@ -384,28 +385,115 @@ function exportPDF() {
   </div>
 </div>
               <div className="rounded-xl p-4" style={cardStyle}>
-                <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
-                <div className="space-y-2">
-                  {filtered.map(trade => (
-                    <div key={trade.id} className="flex items-center justify-between py-2 border-b border-[#222222]">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded text-xs ${trade.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
-                          {trade.direction === 'long' ? t('directionLong') : t('directionShort')}
-                        </span>
-                        <span className="font-semibold text-sm">{trade.symbol}</span>
-                        <span className="text-gray-400 text-xs">{trade.open_price} → {trade.close_price}</span>
-                        {trade.remark && <span className="text-gray-500 text-xs">{trade.remark}</span>}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`font-semibold text-sm ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(0)}
-                        </span>
-                        <span className="text-gray-500 text-xs">{new Date(trade.close_time).toLocaleDateString('zh-TW')}</span>
-                      </div>
-                    </div>
-                  ))}
+  <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
+  <div className="space-y-2">
+    {filtered.map(trade => (
+      <div key={trade.id}>
+        <div
+          className="flex items-center justify-between py-2 border-b border-[#222222] cursor-pointer"
+          onClick={() => setExpandedTrade(expandedTrade === trade.id ? null : trade.id)}
+        >
+          <div className="flex items-center gap-3">
+            <span className={`px-2 py-0.5 rounded text-xs ${trade.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+              {trade.direction === 'long' ? t('directionLong') : t('directionShort')}
+            </span>
+            <span className="font-semibold text-sm">{trade.symbol}</span>
+            <span className="text-gray-400 text-xs">{trade.open_price} → {trade.close_price}</span>
+            {trade.remark && <span className="text-gray-500 text-xs truncate max-w-xs">{trade.remark}</span>}
+          </div>
+          <div className="flex items-center gap-4">
+            <span className={`font-semibold text-sm ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(0)}
+            </span>
+            <span className="text-gray-500 text-xs">{new Date(trade.close_time).toLocaleDateString('zh-TW')}</span>
+            <span className="text-gray-600 text-xs">{expandedTrade === trade.id ? '▲' : '▼'}</span>
+          </div>
+        </div>
+        {expandedTrade === trade.id && (
+          <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-0.5 mb-1" style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
+            <div className="rounded-lg overflow-hidden text-xs">
+              <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
+                {[
+                  { label: '標的', value: trade.symbol },
+                  { label: '口數', value: trade.quantity },
+                  { label: '進場價', value: trade.open_price },
+                  { label: '出場價', value: trade.close_price },
+                  { label: '目標價', value: trade.tp || '--' },
+                  { label: '停損價', value: trade.sl || '--' },
+                ].map(({ label, value }, i, arr) => (
+                  <div key={label} className="px-3 py-2" style={{ borderRight: i < arr.length - 1 ? '1px solid #1a1a1a' : 'none' }}>
+                    <p className="text-gray-500 mb-1">{label}</p>
+                    <p className="text-white font-semibold">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-6">
+                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                  <p className="text-gray-500 mb-1">開倉時間</p>
+                  <p className="text-white">{new Date(trade.open_time).toLocaleString('zh-TW')}</p>
+                </div>
+                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                  <p className="text-gray-500 mb-1">平倉時間</p>
+                  <p className="text-white">{new Date(trade.close_time).toLocaleString('zh-TW')}</p>
+                </div>
+                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                  <p className="text-gray-500 mb-1">手續費</p>
+                  <p className="text-white">{(trade.open_fee || 0) + (trade.close_fee || 0)}</p>
+                </div>
+                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                  <p className="text-gray-500 mb-1">盈虧比</p>
+                  <p className="text-[#d4a843] font-semibold">
+                    {trade.tp && trade.sl && trade.sl !== trade.open_price
+                      ? `${Math.abs((trade.close_price - trade.open_price) / (trade.open_price - trade.sl)).toFixed(2)}R`
+                      : '--'}
+                  </p>
+                </div>
+                <div className="px-3 py-2 col-span-2">
+                  <p className="text-gray-500 mb-1">標籤</p>
+                  <p className="text-[#d4a843] leading-relaxed">{trade.remark || '--'}</p>
                 </div>
               </div>
+              {(trade.big_dif != null || trade.big_rsi != null || trade.small_dif != null) && (
+                <div className="grid grid-cols-6" style={{ borderTop: '1px solid #1a1a1a' }}>
+                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
+                    <p className="text-gray-500 mb-2">大時間框架</p>
+                    <div className="space-y-1">
+                      {trade.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{trade.big_dif}</span></div>}
+                      {trade.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{trade.big_dea}</span></div>}
+                      {trade.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{trade.big_hist}</span></div>}
+                      {trade.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{trade.big_rsi}</span></div>}
+                      {trade.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{trade.big_k}</span></div>}
+                      {trade.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{trade.big_d}</span></div>}
+                      {trade.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{trade.big_j}</span></div>}
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
+                    <p className="text-gray-500 mb-2">小時間框架</p>
+                    <div className="space-y-1">
+                      {trade.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{trade.small_dif}</span></div>}
+                      {trade.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{trade.small_dea}</span></div>}
+                      {trade.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{trade.small_hist}</span></div>}
+                      {trade.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{trade.small_rsi}</span></div>}
+                      {trade.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{trade.small_k}</span></div>}
+                      {trade.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{trade.small_d}</span></div>}
+                      {trade.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{trade.small_j}</span></div>}
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 col-span-2">
+                    <p className="text-gray-500 mb-2">開倉標籤</p>
+                    <p className="text-[#d4a843] leading-relaxed mb-3">{trade.open_remark || '--'}</p>
+                    <p className="text-gray-500 mb-2">平倉標籤</p>
+                    <p className="text-[#d4a843] leading-relaxed">{trade.close_remark || '--'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
             </div>
           )}
         </>
