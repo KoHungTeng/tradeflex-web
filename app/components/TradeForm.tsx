@@ -228,7 +228,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
   const groups: Record<string, string[]> = {}
   filtered.forEach(tag => {
     const rawName = tag.startsWith('#') ? tag.slice(1) : tag
-    const prefix = rawName.includes(' ') ? rawName.split(' ')[0] : rawName
+    const prefix = rawName.includes('/') ? rawName.split(' ')[0] : rawName
     if (!groups[prefix]) groups[prefix] = []
     groups[prefix].push(tag)
   })
