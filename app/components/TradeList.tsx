@@ -323,19 +323,15 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
       {trades.length === 0 ? (
         <div className="text-center text-gray-600 py-20">{t('noTrades')}</div>
       ) : (
-        <table className="text-sm border-collapse w-full" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            {COLS.map(col => (
-              <col key={col.key} style={{ width: widths[col.key] }} />
-            ))}
-          </colgroup>
+        <table className="text-sm border-collapse w-full" style={{ tableLayout: 'auto' }}>
           <thead>
             <tr className="text-gray-500 border-b border-[#222222] text-left">
               {COLS.map(col => (
                 <th
-                  key={col.key}
-                  className="py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium"
-                >
+  key={col.key}
+  className="py-2 px-3 select-none relative whitespace-nowrap overflow-hidden font-medium"
+  style={{ minWidth: widths[col.key] }}
+>
                   {col.label}
                   {col.key !== 'delete' && (
                     <div
