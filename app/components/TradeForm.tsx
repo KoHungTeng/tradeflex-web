@@ -447,7 +447,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
       }),
     }).then(() => {
   onCompletedChanged()
-  loadAfterAdd?.()
+  setTimeout(() => loadAfterAdd?.(), 500)
 })
   }
 
