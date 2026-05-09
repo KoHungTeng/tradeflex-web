@@ -389,17 +389,21 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       placeholder={t('searchStrategy')}
                     />
                   </td>
-                  <td className="py-2 px-3 text-xs overflow-hidden" style={{ maxWidth: 0 }}>
-                    <DropdownEditCell
-                      value={trade.remark || ''}
-                      tradeId={trade.id}
-                      field="remark"
-                      color="text-gray-400"
-                      onSaved={onCompletedChanged}
-                      options={tags}
-                      placeholder={t('inputRemark')}
-                    />
-                  </td>
+                  <td
+  className="py-2 px-3 text-xs overflow-hidden"
+  style={{ maxWidth: 0 }}
+  onMouseEnter={() => setHoveredTrade(null)}
+>
+  <DropdownEditCell
+    value={trade.remark || ''}
+    tradeId={trade.id}
+    field="remark"
+    color="text-gray-400"
+    onSaved={onCompletedChanged}
+    options={tags}
+    placeholder={t('inputRemark')}
+  />
+</td>
                   <td className="py-2 px-3 text-gray-500 text-xs whitespace-nowrap overflow-hidden">
                     {formatTime(trade.trade_time)}
                   </td>
