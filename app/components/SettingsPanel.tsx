@@ -290,6 +290,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [newStrategyName, setNewStrategyName] = useState('')
   const [newStrategyIndicators, setNewStrategyIndicators] = useState<string[]>([])
   const [newTagName, setNewTagName] = useState('')
+  const [editingTag, setEditingTag] = useState<Tag | null>(null)
+  const [editingTagName, setEditingTagName] = useState('')
   const [editingSymbol, setEditingSymbol] = useState<Symbol | null>(null)
   const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null)
   const { currency, symbol, setCurrency } = useCurrency()
@@ -431,6 +433,18 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     setNewTagName('')
     loadTags()
   }
+
+  async function updateTag() {
+  if (!editingTag || !editingTagName.trim()) return
+  await fetch(`/api/tags?id=${editingTag.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: editingTagName.trim() }),
+  })
+  setEditingTag(null)
+  setEditingTagName('')
+  loadTags()
+}
 
   async function deleteTag(id: string) {
     setTags(prev => prev.filter(t => t.id !== id))
@@ -818,11 +832,28 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         <p className="text-xs text-gray-500 mb-2">{prefix}</p>
         <div className="flex flex-wrap gap-2">
           {groupTags.map(tag => (
-            <div key={tag.id} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-              <span className="text-gray-300">#{tag.name}</span>
-              <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-            </div>
-          ))}
+  <div key={tag.id} className="flex items-center gap-1 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+    {editingTag?.id === tag.id ? (
+      <div className="flex items-center gap-1 px-2 py-1">
+        <input
+          value={editingTagName}
+          onChange={e => setEditingTagName(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') updateTag(); if (e.key === 'Escape') { setEditingTag(null); setEditingTagName('') } }}
+          className="bg-[#222] border border-[#d4a843] rounded px-2 py-0.5 text-xs text-white focus:outline-none w-32"
+          autoFocus
+        />
+        <button type="button" onClick={updateTag} className="text-green-400 text-xs px-1">✓</button>
+        <button type="button" onClick={() => { setEditingTag(null); setEditingTagName('') }} className="text-gray-500 text-xs px-1">✕</button>
+      </div>
+    ) : (
+      <div className="flex items-center gap-1 px-3 py-1.5">
+        <span className="text-gray-300">#{tag.name}</span>
+        <button type="button" onClick={() => { setEditingTag(tag); setEditingTagName(tag.name) }} className="text-gray-600 hover:text-[#d4a843] ml-1 text-xs">✎</button>
+<button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 text-xs">✕</button>
+      </div>
+    )}
+  </div>
+))}
         </div>
       </div>
     ))
