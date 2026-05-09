@@ -372,19 +372,29 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.tp || '--'}</td>
                   <td className="py-2 px-3 text-gray-400 whitespace-nowrap overflow-hidden">{trade.sl || '--'}</td>
                   <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
-  {trade.tp && trade.sl ? (() => {
-    const isClose = trade.action === '平多' || trade.action === '平空'
-    if (!isClose) {
-      // 開倉單：顯示預期盈虧比，金色
-      if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
-      const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
-      return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
+                  {trade.tp && trade.sl ? (() => {
+                    const isClose = trade.action === '平多' || trade.action === '平空'
+                     if (!isClose) {
+                     if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
+                    const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
+                      return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
     }
-    // 平倉單：比較實際 vs 預期
-    if (!trade.open_price || trade.sl === trade.open_price) return <span className="text-gray-500 text-xs">--</span>
-    const expectedRR = Math.abs((trade.tp - trade.open_price) / (trade.open_price - trade.sl))
+    // 平倉單：從 trades 陣列找對應開倉單
+    const openAction = trade.action === '平多' ? '做多' : '做空'
+    const openTrade = trades.find(t =>
+      t.symbol === trade.symbol &&
+      t.action === openAction &&
+      (t as any).is_closed === true &&
+      new Date(t.trade_time) < new Date(trade.trade_time)
+    ) || trades.find(t =>
+      t.symbol === trade.symbol &&
+      t.action === openAction
+    )
+    const entryPrice = (trade as any).open_price || openTrade?.price
+    if (!entryPrice || trade.sl === entryPrice) return <span className="text-gray-500 text-xs">--</span>
+    const expectedRR = Math.abs((trade.tp - entryPrice) / (entryPrice - trade.sl))
     const direction = trade.action === '平多' ? 1 : -1
-    const actualRR = Math.abs((trade.price - trade.open_price) / (trade.open_price - trade.sl)) * direction
+    const actualRR = direction * (trade.price - entryPrice) / Math.abs(entryPrice - trade.sl)
     const achieved = actualRR >= expectedRR
     return (
       <span className={`text-xs font-medium ${achieved ? 'text-green-400' : 'text-red-400'}`}>
