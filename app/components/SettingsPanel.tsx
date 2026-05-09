@@ -823,7 +823,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     // 按 - 前綴分組
     const groups: Record<string, Tag[]> = {}
     tags.forEach(tag => {
-      const prefix = tag.name.includes(' ') ? tag.name.split(' ')[0] : tag.name
+      const prefix = tag.name.includes('/') ? tag.name.split('/')[0] : tag.name
       if (!groups[prefix]) groups[prefix] = []
       groups[prefix].push(tag)
     })
