@@ -7,6 +7,7 @@ type Props = {
   activePortfolio: string
   onAdded: (trade: any) => void
   onCompletedChanged: () => void
+  loadAfterAdd?: () => void
 }
 
 type Strategy = {
@@ -271,7 +272,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
   )
 }
 
-export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged }: Props) {
+export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged, loadAfterAdd }: Props) {
   const { t } = useLanguage()
   const [symbol, setSymbol] = useState('')
   const [action, setAction] = useState('做多')
@@ -444,7 +445,10 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
         small_d: smallD ? parseFloat(smallD) : null,
         small_j: smallJ ? parseFloat(smallJ) : null,
       }),
-    }).then(() => onCompletedChanged())
+    }).then(() => {
+  onCompletedChanged()
+  loadAfterAdd?.()
+})
   }
 
   const actionLabels = [t('long'), t('short'), t('closeLong'), t('closeShort')]
