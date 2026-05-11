@@ -704,9 +704,9 @@ const entryPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / to
         <Field label={t('strategyLabel')}>
           <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
             <option value="">-</option>
-            {strategies.map(s => (
-              <option key={s.id} value={s.name}>{s.name}</option>
-            ))}
+            {[...strategies].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')).map(s => (
+  <option key={s.id} value={s.name}>{s.name}</option>
+))}
           </select>
         </Field>
 
