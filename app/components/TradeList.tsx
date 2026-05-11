@@ -290,9 +290,12 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
           <thead>
             <tr className="text-gray-500 border-b border-[#222222] text-left">
               {COLS.map(col => (
-                <th key={col.key} className="py-2 px-3 select-none whitespace-nowrap overflow-hidden font-medium">
-                  {col.label}
-                </th>
+                <th key={col.key} className="py-2 px-3 select-none whitespace-nowrap overflow-hidden font-medium text-center relative">
+  {col.label}
+  {col.key !== 'delete' && (
+    <div className="absolute right-0 top-0 h-full w-[1px]" style={{ background: '#2a2a2a' }} />
+  )}
+</th>
               ))}
             </tr>
           </thead>
@@ -360,10 +363,16 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                     />
                   </td>
                   <td
-                    className="py-2 px-3 text-xs overflow-hidden"
-                    style={{ maxWidth: 0 }}
-                    onMouseEnter={() => setHoveredTrade(null)}
-                  >
+  className="py-2 px-3 text-xs overflow-hidden relative group/remark"
+  style={{ maxWidth: 0 }}
+  onMouseEnter={() => setHoveredTrade(null)}
+>
+  {trade.remark && (
+    <div className="absolute z-50 hidden group-hover/remark:block bottom-full left-0 mb-1 px-2 py-1 rounded text-xs text-white whitespace-nowrap pointer-events-none"
+      style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+      {trade.remark}
+    </div>
+  )}
                     <DropdownEditCell
                       value={trade.remark || ''}
                       tradeId={trade.id}
