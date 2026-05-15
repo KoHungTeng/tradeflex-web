@@ -58,7 +58,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
         style={{
           background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : '#1a1a1a',
           color: selectedTags.length > 0 ? '#000' : '#aaa',
-          border: '1px solid #2a2a2a', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          border: '1px solid #2a2a2a', width: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}
       >
         <span className="truncate">{label}</span>
