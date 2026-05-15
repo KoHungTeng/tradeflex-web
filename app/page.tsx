@@ -163,14 +163,15 @@ export default function Home() {
               <div className="gold-border flex-shrink-0 no-print" style={{ alignSelf: 'stretch', overflow: 'hidden' }}>
                 <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
                   <TradeForm
-                    activePortfolio={activePortfolio}
-                    onAdded={optimisticAddTrade}
-                    onCompletedChanged={loadCompleted}
-                  />
+  activePortfolio={activePortfolio}
+  onAdded={optimisticAddTrade}
+  onCompletedChanged={loadCompleted}
+  loadAfterAdd={loadTrades}
+/>
                 </div>
               </div>
               <div className="gold-border" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                <div className="gold-border-inner" style={{ height: '100%', overflow: 'hidden' }}>
+                <div className="gold-border-inner" style={{ height: '100%', overflow: 'auto' }}>
                   <TradeList
                     trades={trades}
                     onDeleted={optimisticDeleteTrade}
