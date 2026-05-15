@@ -360,12 +360,12 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <div key={name}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-300">{name}</span>
-                      <div className="flex gap-4">
-                        <span className={data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}>
+                      <div className="flex gap-2">
+                        <span className={`w-16 text-right ${data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
                         </span>
-                        <span className="text-gray-400">{data.total} {t('tradesCount')}</span>
-                        <span className={rate >= 50 ? 'text-green-400' : 'text-red-400'}>
+                        <span className="w-12 text-right text-gray-400">{data.total} {t('tradesCount')}</span>
+                        <span className={`w-10 text-right ${rate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                           {rate.toFixed(0)}%
                         </span>
                       </div>
@@ -430,8 +430,8 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div key={name} className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                       <span className="text-sm text-gray-300 truncate flex-1">{name}</span>
-                      <span className="text-xs text-gray-500">{data.total}筆</span>
-                      <span className="text-xs font-medium" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
+                      <span className="text-xs text-gray-500 w-10 text-right">{data.total}筆</span>
+                      <span className="text-xs font-medium w-8 text-right" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
                         {(data.total / total * 100).toFixed(0)}%
                       </span>
                     </div>
