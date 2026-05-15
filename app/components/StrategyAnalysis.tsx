@@ -223,26 +223,26 @@ function exportPDF() {
           {/* 篩選區塊 */}
           <div className="rounded-xl p-4 mb-6 flex gap-4 items-end flex-wrap" style={cardStyle}>
             <div className="flex flex-col">
-  <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
+              <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
               <select value={selected} onChange={e => setSelected(e.target.value)} className={selectStyle}>
                 <option value="__all__">{t('allStrategies')}</option>
                 {strategyNames.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
+            <div className="flex flex-col">
+              <p className="text-xs text-gray-500 mb-1">{t('directionLong')}/{t('directionShort')}</p>
               <select value={direction} onChange={e => setDirection(e.target.value as Direction)} className={selectStyle}>
                 <option value="all">{t('allDirections')}</option>
                 <option value="long">{t('directionLong')}</option>
                 <option value="short">{t('directionShort')}</option>
               </select>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-2">{t('tagSettings')}</p>
+            <div className="flex flex-col">
+              <p className="text-xs text-gray-500 mb-1">{t('tagSettings')}</p>
               <TagDropdown allTags={allTags} selectedTags={selectedTags} onToggle={toggleTag} onClear={() => setSelectedTags([])} />
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-2">{t('symbol')}</p>
+            <div className="flex flex-col">
+              <p className="text-xs text-gray-500 mb-1">{t('symbol')}</p>
               <select value={selectedSymbol} onChange={e => setSelectedSymbol(e.target.value)} className={selectStyle}>
                 <option value="__all__">{t('allStrategies')}</option>
                 {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}
