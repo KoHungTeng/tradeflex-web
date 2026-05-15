@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
 
     if (openTrades && openTrades.length > 0) {
       const openTrade = openTrades[0]
+      console.log("symbol lookup:", body.symbol);
       const { data: symbolData } = await supabase.from('symbols').select('tick_size, tick_value').eq('name', body.symbol).single()
+      console.log("symbolData result:", JSON.stringify(symbolData));
       let pnl = 0
       if (symbolData && symbolData.tick_size > 0) {
         const priceDiff = direction === 'long' ? body.price - openTrade.price : openTrade.price - body.price

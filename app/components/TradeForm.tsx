@@ -240,7 +240,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
     <span>{tag}</span>
     {selectedTags.includes(tag) && <span>✓</span>}
   </div>
-))
+     ))
             )}
           </div>
           {value && (
