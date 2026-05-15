@@ -58,7 +58,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
         style={{
           background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : '#1a1a1a',
           color: selectedTags.length > 0 ? '#000' : '#aaa',
-          border: '1px solid #2a2a2a', width: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          border: '1px solid #2a2a2a', width: 120, height: 38, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}
       >
         <span className="truncate">{label}</span>
@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px]"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
