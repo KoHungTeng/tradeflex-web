@@ -228,7 +228,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
                     } ${isCardDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
-                    style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #333' }}
+                    style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
                   >
                     {!card.empty && (
                       <>
