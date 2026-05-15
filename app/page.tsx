@@ -284,12 +284,12 @@ export default function Home() {
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+                            <span className={`w-12 text-center px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
                               {ct.direction === 'long' ? t('long') : t('short')}
                             </span>
-                            <span className="font-semibold">{ct.symbol}</span>
-                            <span className="text-gray-400 text-sm">{ct.open_price} → {ct.close_price}</span>
-                            <span className="text-gray-400 text-sm">{ct.quantity} {t('lots')}</span>
+                            <span className="w-12 font-semibold">{ct.symbol}</span>
+                            <span className="w-36 text-gray-400 text-sm">{ct.open_price} → {ct.close_price}</span>
+                            <span className="w-12 text-gray-400 text-sm">{ct.quantity} {t('lots')}</span>
                             {ct.strategy && <span className="text-[#d4a843] text-xs">{ct.strategy}</span>}
                           </div>
                           <div className="flex items-center gap-6">
