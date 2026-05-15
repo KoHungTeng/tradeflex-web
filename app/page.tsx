@@ -137,7 +137,7 @@ export default function Home() {
     </div>
   )
 
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843]"
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px]"
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0a0a', color: 'white', padding: 8, gap: 8, overflow: 'hidden' }}>
@@ -221,8 +221,8 @@ export default function Home() {
 
                 <div className="rounded-xl p-4 mb-4 flex gap-4 flex-wrap items-end"
                   style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">{t('symbol')}</p>
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-500 mb-1">{t('symbol')}</p>
                     <select value={historySymbol} onChange={e => setHistorySymbol(e.target.value)} className={selectStyle}>
                       <option value="__all__">{t('allStrategies')}</option>
                       {Array.from(new Set(completed.map(ct => ct.symbol))).sort().map(s => (
@@ -230,8 +230,8 @@ export default function Home() {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">{t('strategyLabel')}</p>
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
                     <select value={historyStrategy} onChange={e => setHistoryStrategy(e.target.value)} className={selectStyle}>
                       <option value="__all__">{t('allStrategies')}</option>
                       {Array.from(new Set(completed.map(ct => ct.strategy).filter(Boolean))).sort().map(s => (
@@ -239,20 +239,20 @@ export default function Home() {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">{t('directionLong')}/{t('directionShort')}</p>
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-500 mb-1">{t('directionLong')}/{t('directionShort')}</p>
                     <select value={historyDirection} onChange={e => setHistoryDirection(e.target.value)} className={selectStyle}>
                       <option value="all">{t('allDirections')}</option>
                       <option value="long">{t('directionLong')}</option>
                       <option value="short">{t('directionShort')}</option>
                     </select>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">{t('startDate')}</p>
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-500 mb-1">{t('startDate')}</p>
                     <input type="date" value={historyDateFrom} onChange={e => setHistoryDateFrom(e.target.value)} className={selectStyle} />
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">{t('endDate')}</p>
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-500 mb-1">{t('endDate')}</p>
                     <input type="date" value={historyDateTo} onChange={e => setHistoryDateTo(e.target.value)} className={selectStyle} />
                   </div>
                   {(historySymbol !== '__all__' || historyStrategy !== '__all__' || historyDirection !== 'all' || historyDateFrom || historyDateTo) && (
