@@ -207,6 +207,27 @@ export default function CalendarView({ completed }: Props) {
         </div>
       )}
 
+      {/* 當天交易明細 */}
+      {(() => {
+        const dayTrades = completed.filter(t => {
+          const d = new Date(t.close_time)
+          return d.getFullYear() === year && d.getMonth() === month && d.getDate() === selectedDay
+        })
+        if (dayTrades.length === 0) return null
+        return (
+          <div className="mb-4 space-y-1">
+            {dayTrades.map((t, i) => (
+              <div key={i} className="flex justify-between text-xs">
+                <span className="text-gray-400">{t.symbol}</span>
+                <span className={t.pnl >= 0 ? 'text-green-400' : 'text-red-400'}>
+                  {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+
       {getNoteForDay(selectedDay).map(n => (
         <div key={n.id} className="flex items-center justify-between text-sm text-white mb-2 group">
           <span className="text-gray-300">• {n.text}</span>
