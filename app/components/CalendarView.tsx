@@ -157,8 +157,9 @@ export default function CalendarView({ completed }: Props) {
   ? pnl > 0
     ? 'bg-green-800/50 hover:bg-green-800/70'
     : 'bg-red-800/50 hover:bg-red-800/70'
-  : 'bg-[#1a1a1a] hover:bg-[#222222]'
+  : ''
                 }`}
+                style={!hasTrade ? { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #333' } : {}}
               >
                 <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : 'text-gray-400'}`}>
                   {day}
