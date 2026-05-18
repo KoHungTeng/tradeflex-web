@@ -137,7 +137,7 @@ export default function Home() {
     </div>
   )
 
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px]"
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0a0a', color: 'white', padding: 8, gap: 8, overflow: 'hidden' }}>
@@ -223,12 +223,15 @@ export default function Home() {
                   style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #2a2a2a' }}>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('symbol')}</p>
+                    <div className="relative">
                     <select value={historySymbol} onChange={e => setHistorySymbol(e.target.value)} className={selectStyle}>
                       <option value="__all__">{t('allStrategies')}</option>
                       {Array.from(new Set(completed.map(ct => ct.symbol))).sort().map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                    </div>
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>

@@ -54,7 +54,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
   return (
     <div className="relative">
       <button ref={btnRef} onClick={handleOpen}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors"
+        className="flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors"
         style={{
           background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : '#1a1a1a',
           color: selectedTags.length > 0 ? '#000' : '#aaa',
