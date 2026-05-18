@@ -290,7 +290,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 資金成長曲線 */}
         {block.type === 'growth' && (
-          <div className="p-5 cursor-grab">
+          <div className="pt-5 px-5 pb-5 cursor-grab">
             <h3 className="text-sm font-semibold text-gray-400 mb-1">{t('growthCurve')}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('initialCapitalLabel')}{convert(initialCapital)}</p>
             {growthData.length <= 1 ? (
@@ -327,7 +327,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     fill="url(#growthGrad)"
                   />
                 </svg>
-                <div className="flex justify-between mt-2">
+                <div className="flex justify-between mt-2 pb-1">
                   {growthData
                     .filter((_, i) =>
                       i === 0 ||
