@@ -296,6 +296,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             {growthData.length <= 1 ? (
               <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
             ) : (
+              <>
               <div className="relative" style={{ height: 140 }}>
                 <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none" style={{ display: 'block' }}>
                   <defs>
@@ -346,6 +347,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       <span key={i} className="text-xs text-gray-600">{d.date}</span>
                     ))}
               </div>
+              </>
             )}
           </div>
         )}
