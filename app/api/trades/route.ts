@@ -137,5 +137,31 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json()
   const { error } = await supabase.from('trades').update(body).eq('id', id).eq('user_id', user.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // 同步更新 completed_trades 的 strategy/remark
+  if (body.strategy !== undefined || body.remark !== undefined) {
+    const { data: trade } = await supabase.from('trades').select('trade_time, symbol, portfolio_id, action').eq('id', id).eq('user_id', user.id).single()
+    if (trade) {
+      const isOpen = trade.action === '做多' || trade.action === '做空'
+      const syncFields: Record<string, string> = {}
+      if (body.strategy !== undefined) syncFields.strategy = body.strategy
+      if (body.remark !== undefined) {
+        if (isOpen) syncFields.open_remark = body.remark
+        else syncFields.close_remark = body.remark
+        syncFields.remark = body.remark
+      }
+      const tradeTime = new Date(trade.trade_time)
+      const from = new Date(tradeTime.getTime() - 5000).toISOString()
+      const to = new Date(tradeTime.getTime() + 5000).toISOString()
+      const timeField = isOpen ? 'open_time' : 'close_time'
+      await supabase.from('completed_trades').update(syncFields)
+        .eq('portfolio_id', trade.portfolio_id)
+        .eq('symbol', trade.symbol)
+        .eq('user_id', user.id)
+        .gte(timeField, from)
+        .lte(timeField, to)
+    }
+  }
+
   return NextResponse.json({ success: true })
 }
