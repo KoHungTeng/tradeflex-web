@@ -258,11 +258,17 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('startDate')}</p>
-                    <input type="date" value={historyDateFrom} onChange={e => setHistoryDateFrom(e.target.value)} className={selectStyle} />
+                    <div className="relative">
+                      <input type="date" value={historyDateFrom} onChange={e => setHistoryDateFrom(e.target.value)} className={selectStyle + " [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute"} />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                    </div>
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('endDate')}</p>
-                    <input type="date" value={historyDateTo} onChange={e => setHistoryDateTo(e.target.value)} className={selectStyle} />
+                    <div className="relative">
+                      <input type="date" value={historyDateTo} onChange={e => setHistoryDateTo(e.target.value)} className={selectStyle + " [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute"} />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                    </div>
                   </div>
                   {(historySymbol !== '__all__' || historyStrategy !== '__all__' || historyDirection !== 'all' || historyDateFrom || historyDateTo) && (
                     <button
