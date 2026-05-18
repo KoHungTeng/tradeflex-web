@@ -220,7 +220,7 @@ export default function Home() {
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
                 <div className="rounded-xl p-4 mb-4 flex gap-4 flex-wrap items-end"
-                  style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }}>
+                  style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #2a2a2a' }}>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('symbol')}</p>
                     <select value={historySymbol} onChange={e => setHistorySymbol(e.target.value)} className={selectStyle}>
@@ -280,7 +280,7 @@ export default function Home() {
                       <div key={ct.id}>
                         <div
                           className="rounded-lg p-4 flex items-center justify-between cursor-pointer"
-                          style={{ background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: `1px solid ${expandedHistory === ct.id ? '#d4a843' : '#2a2a2a'}` }}
+                          style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: `1px solid ${expandedHistory === ct.id ? '#d4a843' : '#2a2a2a'}` }}
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
