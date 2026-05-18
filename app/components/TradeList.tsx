@@ -210,10 +210,10 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
 
   useEffect(() => {
     fetch('/api/strategies').then(r => r.json()).then(data => {
-      setStrategies(Array.isArray(data) ? data.map((s: any) => s.name) : [])
+      setStrategies(Array.isArray(data) ? data.map((s: any) => s.name).sort((a: string, b: string) => a.localeCompare(b, 'zh-TW')) : [])
     })
     fetch('/api/tags').then(r => r.json()).then(data => {
-      setTags(Array.isArray(data) ? data.map((tag: any) => `#${tag.name}`) : [])
+      setTags(Array.isArray(data) ? data.map((tag: any) => `#${tag.name}`).sort((a: string, b: string) => a.localeCompare(b, 'zh-TW')) : [])
     })
   }, [])
 
