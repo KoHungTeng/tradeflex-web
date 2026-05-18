@@ -166,7 +166,7 @@ function exportPDF() {
   )).sort()
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
-  const cardStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }
+  const cardStyle = { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #2a2a2a' }
   const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px]"
 
   // 單策略篩選
@@ -410,7 +410,7 @@ function exportPDF() {
           </div>
         </div>
         {expandedTrade === trade.id && (
-          <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-0.5 mb-1" style={{ background: '#0f0f0f', border: '1px solid #d4a843', borderTop: 'none' }}>
+          <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-0.5 mb-1" style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', borderTop: 'none' }}>
             <div className="rounded-lg overflow-hidden text-xs">
               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
                 {[
