@@ -296,7 +296,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             {growthData.length <= 1 ? (
               <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
             ) : (
-              <div className="relative h-40">
+              <div className="relative" style={{ height: 140 }}>
                 <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
@@ -327,7 +327,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     fill="url(#growthGrad)"
                   />
                 </svg>
-                <div className="flex justify-between mt-2 pb-1">
+                <div className="flex justify-between mt-3 pb-3">
                   {growthData
                     .filter((_, i) =>
                       i === 0 ||
