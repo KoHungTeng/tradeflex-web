@@ -204,7 +204,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         onMouseDown={() => onBlockMouseDown(index, block.id)}
         onMouseEnter={() => onBlockMouseEnter(index)}
         onMouseUp={onBlockMouseUp}
-        className={`rounded-xl select-none transition-all ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
+        className={`rounded-xl select-none transition-all h-full ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
         style={blockStyle}
       >
         {/* 數據卡片 */}
@@ -354,7 +354,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 策略勝率 */}
         {block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
-          <div className="p-5 cursor-grab">
+          <div className="p-5 cursor-grab h-full">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('strategyWinRate')}</h3>
             <div className="space-y-3">
               {Object.entries(strategyMap).map(([name, data]) => {
@@ -388,7 +388,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 各策略交易佔比圓餅圖 */}
         {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
-          <div className="p-5 cursor-grab">
+          <div className="p-5 cursor-grab h-full">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">各策略交易佔比</h3>
             <div className="flex items-center gap-6">
               <svg width="160" height="160" viewBox="0 0 160 160">
