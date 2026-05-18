@@ -235,20 +235,26 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
-                    <select value={historyStrategy} onChange={e => setHistoryStrategy(e.target.value)} className={selectStyle}>
-                      <option value="__all__">{t('allStrategies')}</option>
-                      {Array.from(new Set(completed.map(ct => ct.strategy).filter(Boolean))).sort().map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select value={historyStrategy} onChange={e => setHistoryStrategy(e.target.value)} className={selectStyle}>
+                        <option value="__all__">{t('allStrategies')}</option>
+                        {Array.from(new Set(completed.map(ct => ct.strategy).filter(Boolean))).sort().map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                    </div>
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('directionLong')}/{t('directionShort')}</p>
-                    <select value={historyDirection} onChange={e => setHistoryDirection(e.target.value)} className={selectStyle}>
-                      <option value="all">{t('allDirections')}</option>
-                      <option value="long">{t('directionLong')}</option>
-                      <option value="short">{t('directionShort')}</option>
-                    </select>
+                    <div className="relative">
+                      <select value={historyDirection} onChange={e => setHistoryDirection(e.target.value)} className={selectStyle}>
+                        <option value="all">{t('allDirections')}</option>
+                        <option value="long">{t('directionLong')}</option>
+                        <option value="short">{t('directionShort')}</option>
+                      </select>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+                    </div>
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs text-gray-500 mb-1">{t('startDate')}</p>
