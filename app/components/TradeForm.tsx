@@ -686,7 +686,8 @@ const entryPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / to
           )}
         </div>
 
-        {/* 策略 */}
+        {/* 策略 - 只在開倉時顯示 */}
+        {!isClose && (
         <Field label={t('strategyLabel')}>
           <select value={strategy} onChange={e => setStrategy(e.target.value)} className="input">
             <option value="">-</option>
@@ -695,6 +696,7 @@ const entryPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / to
 ))}
           </select>
         </Field>
+        )}
 
         {/* 備注 */}
         <Field label={t('remark')}>

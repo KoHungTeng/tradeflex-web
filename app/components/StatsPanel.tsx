@@ -78,7 +78,8 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
   completed.forEach(trade => {
-    const s = trade.strategy || '—'
+    if (!trade.strategy) return  // 只統計有填開倉策略的
+    const s = trade.strategy
     if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
     strategyMap[s].total++
     strategyMap[s].pnl += trade.pnl
