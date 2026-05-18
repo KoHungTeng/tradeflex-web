@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #2a2a2a' }
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
