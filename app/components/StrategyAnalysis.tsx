@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #2a2a2a' }
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px]"
+  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
@@ -224,18 +224,24 @@ function exportPDF() {
           <div className="rounded-xl p-4 mb-6 flex gap-4 items-end flex-wrap" style={cardStyle}>
             <div className="flex flex-col">
               <p className="text-xs text-gray-500 mb-1">{t('strategyLabel')}</p>
-              <select value={selected} onChange={e => setSelected(e.target.value)} className={selectStyle}>
-                <option value="__all__">{t('allStrategies')}</option>
-                {strategyNames.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div className="relative">
+                <select value={selected} onChange={e => setSelected(e.target.value)} className={selectStyle}>
+                  <option value="__all__">{t('allStrategies')}</option>
+                  {strategyNames.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+              </div>
             </div>
             <div className="flex flex-col">
               <p className="text-xs text-gray-500 mb-1">{t('directionLong')}/{t('directionShort')}</p>
-              <select value={direction} onChange={e => setDirection(e.target.value as Direction)} className={selectStyle}>
-                <option value="all">{t('allDirections')}</option>
-                <option value="long">{t('directionLong')}</option>
-                <option value="short">{t('directionShort')}</option>
-              </select>
+              <div className="relative">
+                <select value={direction} onChange={e => setDirection(e.target.value as Direction)} className={selectStyle}>
+                  <option value="all">{t('allDirections')}</option>
+                  <option value="long">{t('directionLong')}</option>
+                  <option value="short">{t('directionShort')}</option>
+                </select>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+              </div>
             </div>
             <div className="flex flex-col">
               <p className="text-xs text-gray-500 mb-1">{t('tagSettings')}</p>
@@ -243,10 +249,13 @@ function exportPDF() {
             </div>
             <div className="flex flex-col">
               <p className="text-xs text-gray-500 mb-1">{t('symbol')}</p>
-              <select value={selectedSymbol} onChange={e => setSelectedSymbol(e.target.value)} className={selectStyle}>
-                <option value="__all__">{t('allStrategies')}</option>
-                {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div className="relative">
+                <select value={selectedSymbol} onChange={e => setSelectedSymbol(e.target.value)} className={selectStyle}>
+                  <option value="__all__">{t('allStrategies')}</option>
+                  {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+              </div>
             </div>
           </div>
 
