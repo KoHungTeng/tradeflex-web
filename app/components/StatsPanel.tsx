@@ -297,7 +297,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
             ) : (
               <div className="relative" style={{ height: 140 }}>
-                <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none">
+                <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none" style={{ display: 'block' }}>
                   <defs>
                     <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#d4a843" stopOpacity="0.3" />
@@ -327,7 +327,15 @@ export default function StatsPanel({ completed, trades }: Props) {
                     fill="url(#growthGrad)"
                   />
                 </svg>
-                <div className="flex justify-between mt-3 pb-3">
+                <div className="absolute right-0 top-0 text-right">
+                  <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
+                  <div className="text-xs text-gray-600">
+                    {capital >= initialCapital ? '+' : ''}
+                    {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between mt-2 mb-1">
                   {growthData
                     .filter((_, i) =>
                       i === 0 ||
@@ -337,14 +345,6 @@ export default function StatsPanel({ completed, trades }: Props) {
                     .map((d, i) => (
                       <span key={i} className="text-xs text-gray-600">{d.date}</span>
                     ))}
-                </div>
-                <div className="absolute right-0 top-0 text-right">
-                  <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
-                  <div className="text-xs text-gray-600">
-                    {capital >= initialCapital ? '+' : ''}
-                    {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
-                  </div>
-                </div>
               </div>
             )}
           </div>
