@@ -458,7 +458,30 @@ export default function StatsPanel({ completed, trades }: Props) {
       <h2 className="text-lg font-semibold mb-6">{t('statsOverview')}</h2>
 
       <div className="flex flex-col gap-4">
-        {blocks.map((block, index) => renderBlock(block, index))}
+        {(() => {
+          const result = []
+          let i = 0
+          while (i < blocks.length) {
+            const block = blocks[i]
+            const next = blocks[i + 1]
+            if (
+              (block.type === 'strategy' || block.type === 'pie') &&
+              next && (next.type === 'strategy' || next.type === 'pie')
+            ) {
+              result.push(
+                <div key={`row-${i}`} className="flex gap-4">
+                  <div className="flex-1 min-w-0">{renderBlock(block, i)}</div>
+                  <div className="flex-1 min-w-0">{renderBlock(next, i + 1)}</div>
+                </div>
+              )
+              i += 2
+            } else {
+              result.push(renderBlock(block, i))
+              i++
+            }
+          }
+          return result
+        })()}
       </div>
 
       {completed.length === 0 && (
