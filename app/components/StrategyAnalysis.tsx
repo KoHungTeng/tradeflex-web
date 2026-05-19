@@ -419,7 +419,7 @@ function exportPDF() {
           </div>
         </div>
         {expandedTrade === trade.id && (
-          <div className="rounded-b-lg px-4 py-4 mb-1" style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', marginTop: -1 }}>
+          <div className="rounded-lg px-4 py-4 mb-1" style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', marginTop: -1 }}>
             <div className="rounded-lg overflow-hidden text-xs">
               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
                 {[
@@ -457,9 +457,9 @@ function exportPDF() {
                       : '--'}
                   </p>
                 </div>
-                <div className="px-3 col-span-2" style={{ padding: '8px 12px' }}>
+                <div className="px-3 py-2 col-span-2">
                   <p className="text-gray-500 mb-1">標籤</p>
-                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ maxHeight: 44, minHeight: 20 }}>{trade.remark || '--'}</div>
+                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{trade.remark || '--'}</div>
                 </div>
               </div>
               {(trade.big_dif != null || trade.big_rsi != null || trade.small_dif != null) && (
