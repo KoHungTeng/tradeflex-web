@@ -325,8 +325,8 @@ export default function Home() {
                         </div>
 
                         {expandedHistory === ct.id && (
-                          <div className="rounded-b-lg px-4 pb-4 pt-3 -mt-1"
-                            style={{ background: '#0f0f0f', borderTop: 'none' }}>
+                          <div className="rounded-lg px-4 py-4 mb-1"
+                            style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', marginTop: -1 }}>
                             <div className="rounded-lg overflow-hidden text-xs">
                               {/* 第一行 */}
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
@@ -358,13 +358,21 @@ export default function Home() {
                                   <p className="text-gray-500 mb-1">手續費</p>
                                   <p className="text-white">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
                                 </div>
-                                <div className="px-3 py-2" style={{ borderBottom: 'none' }}>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                   <p className="text-gray-500 mb-1">盈虧比</p>
                                   <p className="text-[#d4a843] font-semibold">
                                     {ct.sl && ct.sl !== ct.open_price
                                       ? `${Math.abs((ct.close_price - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
                                       : '--'}
                                   </p>
+                                </div>
+                                <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
+                                  <p className="text-gray-500 mb-1">策略</p>
+                                  <p className="text-[#d4a843]">{ct.strategy || '--'}</p>
+                                </div>
+                                <div className="px-3 py-2">
+                                  <p className="text-gray-500 mb-1">備注</p>
+                                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{ct.remark || '--'}</div>
                                 </div>
                               </div>
                               {/* 第三行：指標 */}
