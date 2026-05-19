@@ -262,7 +262,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
           <div className="p-5 cursor-grab">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('recentPnl')}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <div className="flex items-end gap-2 h-32">
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
@@ -294,7 +294,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 資金成長曲線 */}
         {block.type === 'growth' && (
           <div className="pt-5 px-5 pb-5 cursor-grab">
-            <h3 className="text-sm font-semibold text-gray-400 mb-1">{t('growthCurve')}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-1">{t('growthCurve')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('initialCapitalLabel')}{convert(initialCapital)}</p>
             {growthData.length <= 1 ? (
               <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
@@ -358,7 +358,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 策略勝率 */}
         {block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
           <div className="p-5 cursor-grab h-full">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('strategyWinRate')}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('strategyWinRate')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <div className="space-y-3">
               {Object.entries(strategyMap).map(([name, data]) => {
                 const rate = data.wins / data.total * 100
@@ -392,7 +392,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 各策略交易佔比圓餅圖 */}
         {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
           <div className="p-5 cursor-grab h-full">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4">各策略交易佔比</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <div className="flex items-center gap-6">
               <svg width="160" height="160" viewBox="0 0 160 160">
                 {(() => {
