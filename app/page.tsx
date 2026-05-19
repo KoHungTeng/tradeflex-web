@@ -216,7 +216,8 @@ export default function Home() {
 
           {page === 'history' && (
             <div className="gold-border" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
+              <div className="gold-border-inner" style={{ height: '100%', overflowY: 'auto' }}>
+                <div className="p-6">
                 <h2 className="text-lg font-semibold mb-4">{t('historyTitle')}</h2>
 
                 <div className="rounded-xl p-4 mb-4 flex gap-4 flex-wrap items-end"
