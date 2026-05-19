@@ -301,7 +301,7 @@ export default function Home() {
                       <div key={ct.id}>
                         <div
                           className="rounded-lg p-4 flex items-center justify-between cursor-pointer"
-                          style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: `1px solid ${expandedHistory === ct.id ? '#d4a843' : '#2a2a2a'}` }}
+                          style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: `1px solid ${expandedHistory === ct.id ? '#d4a843' : '#2a2a2a'}`, borderBottom: expandedHistory === ct.id ? 'none' : `1px solid #2a2a2a`, borderRadius: expandedHistory === ct.id ? '8px 8px 0 0' : '8px' }}
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
@@ -325,8 +325,8 @@ export default function Home() {
                         </div>
 
                         {expandedHistory === ct.id && (
-                          <div className="rounded-lg px-4 py-4 mb-1"
-                            style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', marginTop: -1 }}>
+                          <div className="px-4 py-4 mb-1"
+                            style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #d4a843', borderTop: 'none', borderRadius: '0 0 8px 8px' }}>
                             <div className="rounded-lg overflow-hidden text-xs">
                               {/* 第一行 */}
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
