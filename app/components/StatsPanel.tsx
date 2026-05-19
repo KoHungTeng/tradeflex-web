@@ -135,6 +135,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
+  const [animKey, setAnimKey] = useState(0)
 
   useEffect(() => {
     setCards(prev => prev.map(card => {
@@ -152,6 +153,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         default: return card
       }
     }))
+    setAnimKey(k => k + 1)
   }, [selectedSymbol, totalPnL, todayPnL, weekPnL, monthPnL, winRate, avgWin, avgLoss, rrAchieveRate, avgHoldDisplay])
   const [blocks, setBlocks] = useState<BlockItem[]>([
     { id: 'cards',    type: 'cards' },
@@ -477,7 +479,13 @@ export default function StatsPanel({ completed, trades }: Props) {
       onMouseLeave={() => { onCardMouseUp(); onBlockMouseUp() }}
     >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">{t('statsOverview')}</h2>
+        <style>{`
+        @keyframes statsFadeIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <h2 className="text-lg font-semibold">{t('statsOverview')}</h2>
         <div className="relative">
           <select
             value={selectedSymbol}
@@ -491,7 +499,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div key={animKey} className="flex flex-col gap-4" style={{ animation: 'statsFadeIn 0.4s ease-out' }}>
         {(() => {
           const result = []
           let i = 0
