@@ -95,14 +95,14 @@ export default function StatsPanel({ completed, trades }: Props) {
     d.setDate(d.getDate() - i)
     const dateStr = d.toDateString()
     const label = `${d.getMonth() + 1}/${d.getDate()}`
-    const pnl = completed
+    const pnl = filteredCompleted
       .filter(t => new Date(t.close_time).toDateString() === dateStr)
       .reduce((s, t) => s + t.pnl, 0)
     last7.push({ date: label, pnl })
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
 
-  const sortedTrades = [...completed].sort((a, b) =>
+  const sortedTrades = [...filteredCompleted].sort((a, b) =>
     new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
   )
   const growthData: { date: string; capital: number }[] = []
