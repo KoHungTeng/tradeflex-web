@@ -135,6 +135,24 @@ export default function StatsPanel({ completed, trades }: Props) {
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
+
+  useEffect(() => {
+    setCards(prev => prev.map(card => {
+      switch (card.id) {
+        case 'totalPnL':  return { ...card, value: totalPnL }
+        case 'todayPnL':  return { ...card, value: todayPnL }
+        case 'weekPnL':   return { ...card, value: weekPnL }
+        case 'monthPnL':  return { ...card, value: monthPnL }
+        case 'winRate':   return { ...card, value: winRate }
+        case 'total':     return { ...card, value: filteredCompleted.length }
+        case 'avgWin':    return { ...card, value: avgWin }
+        case 'avgLoss':   return { ...card, value: avgLoss }
+        case 'rrRate':    return { ...card, value: rrAchieveRate, custom: `${rrAchieveRate.toFixed(2)}R` }
+        case 'holdTime':  return { ...card, value: 0, custom: avgHoldDisplay }
+        default: return card
+      }
+    }))
+  }, [selectedSymbol, totalPnL, todayPnL, weekPnL, monthPnL, winRate, avgWin, avgLoss, rrAchieveRate, avgHoldDisplay])
   const [blocks, setBlocks] = useState<BlockItem[]>([
     { id: 'cards',    type: 'cards' },
     { id: 'chart',    type: 'chart' },
