@@ -459,7 +459,7 @@ function exportPDF() {
                 </div>
                 <div className="px-3 py-2 col-span-2">
                   <p className="text-gray-500 mb-1">標籤</p>
-                  <p className="text-[#d4a843] leading-relaxed">{trade.remark || '--'}</p>
+                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ maxHeight: 60 }}>{trade.remark || '--'}</div>
                 </div>
               </div>
               {(trade.big_dif != null || trade.big_rsi != null || trade.small_dif != null) && (
