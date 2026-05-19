@@ -129,15 +129,25 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
               left: dropdownPos.left,
             }}
           >
-            {filtered.map(opt => (
-              <div
-                key={opt}
-                onMouseDown={e => { e.preventDefault(); select(opt) }}
-                className="px-3 py-1.5 text-xs cursor-pointer hover:bg-[#2a2a2a] text-gray-300"
-              >
-                {opt}
-              </div>
-            ))}
+            {filtered.map(opt => {
+              const isSelected = val.split(' ').includes(opt)
+              return (
+                <div
+                  key={opt}
+                  onMouseDown={e => { e.preventDefault(); select(opt) }}
+                  className="px-3 py-1.5 text-xs cursor-pointer flex items-center justify-between gap-2"
+                  style={{
+                    background: isSelected ? '#2a2000' : 'transparent',
+                    color: isSelected ? '#d4a843' : '#ccc',
+                  }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = '#2a2a2a' }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+                >
+                  <span>{opt}</span>
+                  {isSelected && <span style={{ color: '#d4a843' }}>✓</span>}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
