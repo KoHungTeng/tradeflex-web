@@ -617,15 +617,15 @@ const newTrade: any = {
         const symbolInfo = symbolList.find(s => s.name === symbol)
         const tickSize = symbolInfo?.tick_size || 1
         const tickValue = symbolInfo?.tick_value || 1
-        const qty = parseFloat(quantity) || 1
         const mainQty = parseFloat(quantity) || 1
-const validExtras = extraPrices.filter(p => p.price !== '')
-const allEntries = [
-  { price: parseFloat(price), quantity: mainQty },
-  ...validExtras.map(p => ({ price: parseFloat(p.price), quantity: parseFloat(p.quantity) || mainQty }))
-]
-const totalQtyCalc = allEntries.reduce((a, b) => a + b.quantity, 0)
-const entryPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / totalQtyCalc
+        const validExtras = extraPrices.filter(p => p.price !== '')
+        const allEntries = [
+          { price: parseFloat(price), quantity: mainQty },
+          ...validExtras.map(p => ({ price: parseFloat(p.price), quantity: parseFloat(p.quantity) || mainQty }))
+        ]
+        const totalQtyCalc = allEntries.reduce((a, b) => a + b.quantity, 0)
+        const qty = totalQtyCalc
+        const entryPrice = allEntries.reduce((a, b) => a + b.price * b.quantity, 0) / totalQtyCalc
         const tpPrice = parseFloat(tp)
         const slPrice = parseFloat(sl)
         const isLong = action === '做多'
