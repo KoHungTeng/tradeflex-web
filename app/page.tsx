@@ -406,6 +406,7 @@ export default function Home() {
                     <div className="text-center text-gray-600 py-20">{t('noHistory')}</div>
                   )}
                 </div>
+                </div>
               </div>
             </div>
           )}
