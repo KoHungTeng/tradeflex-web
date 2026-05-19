@@ -97,6 +97,8 @@ export default function Home() {
   const [historyDirection, setHistoryDirection] = useState<string>('all')
   const [historyDateFrom, setHistoryDateFrom] = useState<string>('')
   const [historyDateTo, setHistoryDateTo] = useState<string>('')
+  const [historyPage, setHistoryPage] = useState(1)
+  const HISTORY_PER_PAGE = 50
 
   useEffect(() => { loadPortfolios() }, [])
   useEffect(() => { if (activePortfolio) { loadTrades(); loadCompleted() } }, [activePortfolio])
@@ -273,7 +275,7 @@ export default function Home() {
                   </div>
                   {(historySymbol !== '__all__' || historyStrategy !== '__all__' || historyDirection !== 'all' || historyDateFrom || historyDateTo) && (
                     <button
-                      onClick={() => { setHistorySymbol('__all__'); setHistoryStrategy('__all__'); setHistoryDirection('all'); setHistoryDateFrom(''); setHistoryDateTo('') }}
+                      onClick={() => { setHistorySymbol('__all__'); setHistoryStrategy('__all__'); setHistoryDirection('all'); setHistoryDateFrom(''); setHistoryDateTo(''); setHistoryPage(1) }}
                       className="px-3 py-1.5 rounded-lg text-xs"
                       style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
                     >
@@ -283,8 +285,8 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-2">
-                  {completed
-                    .filter(ct => {
+                  {(() => {
+                    const filtered = completed.filter(ct => {
                       if (historySymbol !== '__all__' && ct.symbol !== historySymbol) return false
                       if (historyStrategy !== '__all__' && ct.strategy !== historyStrategy) return false
                       if (historyDirection !== 'all' && ct.direction !== historyDirection) return false
@@ -292,7 +294,10 @@ export default function Home() {
                       if (historyDateTo && ct.close_time > historyDateTo + 'T23:59:59') return false
                       return true
                     })
-                    .map(ct => (
+                    const totalPages = Math.ceil(filtered.length / HISTORY_PER_PAGE)
+                    const paginated = filtered.slice((historyPage - 1) * HISTORY_PER_PAGE, historyPage * HISTORY_PER_PAGE)
+                    return <>
+                    {paginated.map(ct => (
                       <div key={ct.id}>
                         <div
                           className="rounded-lg p-4 flex items-center justify-between cursor-pointer"
@@ -405,6 +410,35 @@ export default function Home() {
                   {completed.length === 0 && (
                     <div className="text-center text-gray-600 py-20">{t('noHistory')}</div>
                   )}
+                    {(() => {
+                      const filtered = completed.filter(ct => {
+                        if (historySymbol !== '__all__' && ct.symbol !== historySymbol) return false
+                        if (historyStrategy !== '__all__' && ct.strategy !== historyStrategy) return false
+                        if (historyDirection !== 'all' && ct.direction !== historyDirection) return false
+                        if (historyDateFrom && ct.close_time < historyDateFrom) return false
+                        if (historyDateTo && ct.close_time > historyDateTo + 'T23:59:59') return false
+                        return true
+                      })
+                      const totalPages = Math.ceil(filtered.length / HISTORY_PER_PAGE)
+                      if (totalPages <= 1) return null
+                      return (
+                        <div className="flex items-center justify-center gap-2 mt-4">
+                          <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1}
+                            className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-30"
+                            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#aaa' }}>
+                            ← 上一頁
+                          </button>
+                          <span className="text-xs text-gray-500">{historyPage} / {totalPages}</span>
+                          <button onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))} disabled={historyPage === totalPages}
+                            className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-30"
+                            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#aaa' }}>
+                            下一頁 →
+                          </button>
+                        </div>
+                      )
+                    })()}
+                    </>
+                    })()}
                 </div>
                 </div>
               </div>
