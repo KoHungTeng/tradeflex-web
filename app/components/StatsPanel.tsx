@@ -29,6 +29,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   const { convert } = useCurrency()
   const { t } = useLanguage()
   const [initialCapital, setInitialCapital] = useState(10000)
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('__all__')
 
   useEffect(() => {
     fetch('/api/capital').then(r => r.json()).then(data => {
@@ -36,35 +37,37 @@ export default function StatsPanel({ completed, trades }: Props) {
     })
   }, [])
 
-  const totalPnL = completed.reduce((s, t) => s + t.pnl, 0)
-  const wins = completed.filter(t => t.pnl > 0)
-  const losses = completed.filter(t => t.pnl < 0)
-  const winRate = completed.length > 0 ? (wins.length / completed.length * 100) : 0
+  const allSymbols = Array.from(new Set(completed.map(t => t.symbol))).sort()
+  const filteredCompleted = selectedSymbol === '__all__' ? completed : completed.filter(t => t.symbol === selectedSymbol)
+  const totalPnL = filteredCompleted.reduce((s, t) => s + t.pnl, 0)
+  const wins = filteredCompleted.filter(t => t.pnl > 0)
+  const losses = filteredCompleted.filter(t => t.pnl < 0)
+  const winRate = filteredCompleted.length > 0 ? (wins.length / filteredCompleted.length * 100) : 0
   const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0
   const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : 0
 
   const today = new Date()
-  const todayPnL = completed
+  const todayPnL = filteredCompleted
     .filter(t => new Date(t.close_time).toDateString() === today.toDateString())
     .reduce((s, t) => s + t.pnl, 0)
 
   const thisMonth = today.getMonth()
-  const monthPnL = completed
+  const monthPnL = filteredCompleted
     .filter(t => new Date(t.close_time).getMonth() === thisMonth)
     .reduce((s, t) => s + t.pnl, 0)
 
   const startOfWeek = new Date(today)
   startOfWeek.setDate(today.getDate() - today.getDay())
   startOfWeek.setHours(0, 0, 0, 0)
-  const weekPnL = completed
+  const weekPnL = filteredCompleted
     .filter(t => new Date(t.close_time) >= startOfWeek)
     .reduce((s, t) => s + t.pnl, 0)
 
-  const avgHoldMin = completed.length > 0
-    ? completed.reduce((s, t) => {
+  const avgHoldMin = filteredCompleted.length > 0
+    ? filteredCompleted.reduce((s, t) => {
         const diff = new Date(t.close_time).getTime() - new Date(t.open_time).getTime()
         return s + diff / 60000
-      }, 0) / completed.length
+      }, 0) / filteredCompleted.length
     : 0
   const avgHoldDisplay = avgHoldMin < 60
     ? `${avgHoldMin.toFixed(0)}m`
@@ -77,7 +80,7 @@ export default function StatsPanel({ completed, trades }: Props) {
     : 0
 
   const strategyMap: Record<string, { wins: number; total: number; pnl: number }> = {}
-  completed.forEach(trade => {
+  filteredCompleted.forEach(trade => {
     if (!trade.strategy) return  // 只統計有填開倉策略的
     const s = trade.strategy
     if (!strategyMap[s]) strategyMap[s] = { wins: 0, total: 0, pnl: 0 }
@@ -122,7 +125,7 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'weekPnL',   labelKey: 'weekPnl',     value: weekPnL,           isPrice: true },
     { id: 'monthPnL',  labelKey: 'monthPnl',    value: monthPnL,          isPrice: true },
     { id: 'winRate',   labelKey: 'winRate',     value: winRate,           suffix: '%' },
-    { id: 'total',     labelKey: 'totalTrades', value: completed.length },
+    { id: 'total',     labelKey: 'totalTrades', value: filteredCompleted.length },
     { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
     { id: 'avgLoss',   labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
     { id: 'rrRate',    labelKey: 'profitFactor',value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
@@ -455,7 +458,20 @@ export default function StatsPanel({ completed, trades }: Props) {
       onMouseUp={() => { onCardMouseUp(); onBlockMouseUp() }}
       onMouseLeave={() => { onCardMouseUp(); onBlockMouseUp() }}
     >
-      <h2 className="text-lg font-semibold mb-6">{t('statsOverview')}</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">{t('statsOverview')}</h2>
+        <div className="relative">
+          <select
+            value={selectedSymbol}
+            onChange={e => setSelectedSymbol(e.target.value)}
+            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+          >
+            <option value="__all__">全部標的</option>
+            {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▾</span>
+        </div>
+      </div>
 
       <div className="flex flex-col gap-4">
         {(() => {
@@ -484,7 +500,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         })()}
       </div>
 
-      {completed.length === 0 && (
+      {filteredCompleted.length === 0 && (
         <div className="text-center text-gray-600 py-20">{t('noCompletedTrades')}</div>
       )}
     </div>
