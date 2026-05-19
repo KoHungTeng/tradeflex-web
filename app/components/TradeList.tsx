@@ -130,7 +130,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
             }}
           >
             {filtered.map(opt => {
-              const isSelected = val.split(' ').includes(opt)
+              const isSelected = field === 'remark' ? val.split(' ').includes(opt) : val === opt
               return (
                 <div
                   key={opt}
