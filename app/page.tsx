@@ -107,8 +107,22 @@ export default function Home() {
   async function loadPortfolios() {
     const res = await fetch('/api/portfolios')
     const data = await res.json()
-    setPortfolios(data)
-    if (data.length > 0) setActivePortfolio(data[0].id)
+    if (Array.isArray(data) && data.length === 0) {
+      // 新用戶自動建立預設 portfolio
+      const createRes = await fetch('/api/portfolios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: '預設', asset_type: 'futures', currency: 'USD' }),
+      })
+      const newPortfolio = await createRes.json()
+      if (newPortfolio?.id) {
+        setPortfolios([newPortfolio])
+        setActivePortfolio(newPortfolio.id)
+      }
+    } else {
+      setPortfolios(data)
+      if (data.length > 0) setActivePortfolio(data[0].id)
+    }
     setLoading(false)
   }
 
