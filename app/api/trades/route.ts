@@ -47,10 +47,15 @@ export async function POST(request: NextRequest) {
     const openAction = direction === 'long' ? '做多' : '做空'
     const { data: openTrades } = await supabase
       .from('trades').select('*').eq('portfolio_id', body.portfolio_id).eq('symbol', body.symbol)
-      .eq('action', openAction).eq('user_id', user.id).neq('is_closed', true).order('trade_time', { ascending: false }).limit(1)
+      .eq('action', openAction).eq('user_id', user.id).neq('is_closed', true).order('trade_time', { ascending: false })
 
     if (openTrades && openTrades.length > 0) {
-      const openTrade = openTrades[0]
+      // 加權均價計算
+      const totalQty = openTrades.reduce((s: number, t: any) => s + t.quantity, 0)
+      const avgPrice = openTrades.reduce((s: number, t: any) => s + t.price * t.quantity, 0) / totalQty
+      const totalFee = openTrades.reduce((s: number, t: any) => s + (t.fee || 0), 0)
+      const openTrade = openTrades[0] // 用最新一筆的 tp/sl/remark 等資訊
+
       const { data: symbolData } = await supabase
         .from('symbols')
         .select('tick_size, tick_value')
@@ -59,16 +64,16 @@ export async function POST(request: NextRequest) {
         .single()
       let pnl = 0
       if (symbolData && symbolData.tick_size > 0) {
-        const priceDiff = direction === 'long' ? body.price - openTrade.price : openTrade.price - body.price
+        const priceDiff = direction === 'long' ? body.price - avgPrice : avgPrice - body.price
         pnl = (priceDiff / symbolData.tick_size) * symbolData.tick_value * body.quantity
       } else {
-        pnl = direction === 'long' ? (body.price - openTrade.price) * body.quantity : (openTrade.price - body.price) * body.quantity
+        pnl = direction === 'long' ? (body.price - avgPrice) * body.quantity : (avgPrice - body.price) * body.quantity
       }
-      pnl = pnl - (openTrade.fee || 0) - (body.fee || 0)
+      pnl = pnl - totalFee - (body.fee || 0)
 
       await supabase.from('completed_trades').insert({
         portfolio_id: body.portfolio_id, symbol: body.symbol, direction,
-        open_price: openTrade.price, close_price: body.price, quantity: body.quantity,
+        open_price: avgPrice, close_price: body.price, quantity: body.quantity,
         open_fee: openTrade.fee || 0, close_fee: body.fee || 0,
         open_time: openTrade.trade_time, close_time: body.trade_time,
         strategy: body.strategy || openTrade.strategy || '',
@@ -90,9 +95,10 @@ export async function POST(request: NextRequest) {
   .eq('id', trade.id)
   .eq('user_id', user.id)
 
-      // 標記開倉單為已平倉
+      // 標記所有開倉單為已平倉
+      const openTradeIds = openTrades.map((t: any) => t.id)
       await supabase.from('trades').update({ is_closed: true })
-        .eq('id', openTrade.id)
+        .in('id', openTradeIds)
         .eq('user_id', user.id)
     }
   }
