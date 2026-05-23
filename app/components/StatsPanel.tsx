@@ -150,6 +150,8 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'minRR',     labelKey: 'minRR',       value: minRR,             custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' },
     { id: 'maxWin',    labelKey: 'maxWin',      value: maxWin,            isPrice: true },
     { id: 'maxLoss',   labelKey: 'maxLoss',     value: maxLoss,           isPrice: true },
+    { id: 'empty1',    labelKey: '',            value: 0,                 empty: true },
+    { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
@@ -337,10 +339,10 @@ export default function StatsPanel({ completed, trades }: Props) {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
                 return (
-                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full" style={{ maxWidth: 40 }}>
+                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full items-center">
                     {d.pnl !== 0 ? (
                       <div
-                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
+                        className={`rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`} style={{ ...{}, width: '70%' }}
                         style={{ height: `${Math.max(height, 4)}%` }}
                       />
                     ) : (
