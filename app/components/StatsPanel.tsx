@@ -311,7 +311,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               })}
             </div>
             {/* 柱狀圖 + 折線疊加 */}
-            <div className="flex-1 relative flex items-end gap-2" style={{ minHeight: 0 }}>
+            <div className="relative flex items-end gap-2" style={{ height: 120 }}>
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
