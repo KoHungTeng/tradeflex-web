@@ -172,7 +172,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+        <div key={page} className="page-fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0, overflow: 'hidden' }}>
 
           {page === 'trade' && (
             <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
