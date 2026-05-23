@@ -100,7 +100,7 @@ export default function QuickNote() {
               })()}</span>
               <button
                 onClick={() => deleteNote(n.id)}
-                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" style={{ width: 24, textAlign: 'center' }}
               >
                 ✕
               </button>
