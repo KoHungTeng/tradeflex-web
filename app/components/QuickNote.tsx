@@ -51,7 +51,7 @@ export default function QuickNote() {
 
   return (
     <div className="bg-[#111111] px-4 py-3" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div className="flex gap-2 items-center flex-shrink-0">
+      <div className="flex gap-2 items-center flex-shrink-0 justify-between">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -86,7 +86,7 @@ export default function QuickNote() {
                 <span className="text-white truncate">{n.text}</span>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                <span className="text-gray-500 text-xs" style={{ minWidth: 140, textAlign: 'right' }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
+                <span className="text-gray-500 text-xs" style={{ width: 160, textAlign: 'right', flexShrink: 0 }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
                 <button
                   onClick={() => deleteNote(n.id)}
                   className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
