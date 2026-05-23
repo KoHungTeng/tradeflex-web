@@ -470,8 +470,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="gold-border no-print">
-        <div className="gold-border-inner">
+      <div className="gold-border no-print" style={{ height: "20vh" }}>
+        <div className="gold-border-inner" style={{ height: "100%", overflowY: "auto" }}>
           <QuickNote />
         </div>
       </div>
