@@ -322,7 +322,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   )
                 })}
                 {/* 折線圖 SVG 疊在上面 */}
-                <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+                <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" style={{ pointerEvents: 'none' }}>
                   <polyline
                     points={last7.map((d, i) => {
                       const x = (i + 0.5) / last7.length * 700
@@ -344,11 +344,13 @@ export default function StatsPanel({ completed, trades }: Props) {
                   })}
                 </svg>
               </div>
-              {/* 日期 */}
+              {/* 日期 + 次數 */}
               <div className="flex gap-2 mt-1">
                 {last7.map(d => (
                   <div key={d.date} className="flex-1 text-center">
                     <span className="text-xs text-gray-500">{d.date}</span>
+                    <br/>
+                    <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
                   </div>
                 ))}
               </div>
