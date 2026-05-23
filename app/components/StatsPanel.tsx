@@ -403,13 +403,19 @@ export default function StatsPanel({ completed, trades }: Props) {
                     fill="url(#growthGrad)"
                   />
                 </svg>
-                <div className="absolute right-0 top-0 text-right">
-                  <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
-                  <div className="text-xs text-gray-600">
-                    {capital >= initialCapital ? '+' : ''}
-                    {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
-                  </div>
-                </div>
+                {(() => {
+                  const lastY = capitalRange === 0 ? 10 : 140 - ((capital - minCapital) / capitalRange) * 140 - 10
+                  const pct = Math.max(0, Math.min(100, (lastY / 140) * 100))
+                  return (
+                    <div className="absolute right-0 text-right" style={{ top: `${pct}%`, transform: 'translateY(-50%)' }}>
+                      <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
+                      <div className="text-xs text-gray-600">
+                        {capital >= initialCapital ? '+' : ''}
+                        {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
               <div className="flex justify-between mt-2 mb-1">
                   {growthData
