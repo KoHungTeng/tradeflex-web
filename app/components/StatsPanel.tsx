@@ -89,18 +89,19 @@ export default function StatsPanel({ completed, trades }: Props) {
     if (trade.pnl > 0) strategyMap[s].wins++
   })
 
-  const last7: { date: string; pnl: number }[] = []
+  const last7: { date: string; pnl: number; count: number }[] = []
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
     const dateStr = d.toDateString()
     const label = `${d.getMonth() + 1}/${d.getDate()}`
-    const pnl = filteredCompleted
-      .filter(t => new Date(t.close_time).toDateString() === dateStr)
-      .reduce((s, t) => s + t.pnl, 0)
-    last7.push({ date: label, pnl })
+    const dayTrades = filteredCompleted.filter(t => new Date(t.close_time).toDateString() === dateStr)
+    const pnl = dayTrades.reduce((s, t) => s + t.pnl, 0)
+    const count = dayTrades.length
+    last7.push({ date: label, pnl, count })
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
+  const maxCount = Math.max(...last7.map(d => d.count), 1)
 
   const sortedTrades = [...filteredCompleted].sort((a, b) =>
     new Date(a.close_time).getTime() - new Date(b.close_time).getTime()
@@ -284,30 +285,80 @@ export default function StatsPanel({ completed, trades }: Props) {
         {block.type === 'chart' && (
           <div className="p-5 cursor-grab flex flex-col" style={{ height: 280 }}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
-            <div className="flex items-end gap-2 flex-1" style={{ minHeight: 0 }}>
-              {last7.map(d => {
-                const height = Math.abs(d.pnl) / maxAbsPnl * 100
-                const isPos = d.pnl >= 0
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1 h-full">
-                    <span className={`text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`}>
-                      {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : ''}
-                    </span>
-                    <div className="w-full flex flex-col justify-end flex-1">
-                      {d.pnl !== 0 && (
-                        <div
-                          className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
-                          style={{ height: `${Math.max(height, 4)}%` }}
-                        />
-                      )}
-                      {d.pnl === 0 && (
-                        <div className="w-full h-0.5 mt-auto" style={{ background: '#2a2a2a' }} />
-                      )}
+            <div className="flex-1 relative" style={{ minHeight: 0 }}>
+              {/* 圖例 */}
+              <div className="flex gap-4 mb-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm bg-green-800" />
+                  <span className="text-xs text-gray-500">盈虧</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-0.5" style={{ background: '#d4a843' }} />
+                  <span className="text-xs text-gray-500">次數</span>
+                </div>
+              </div>
+              {/* 柱狀圖 + 折線圖 */}
+              <div className="relative flex items-end gap-2" style={{ height: 160 }}>
+                {last7.map((d, i) => {
+                  const height = Math.abs(d.pnl) / maxAbsPnl * 100
+                  const isPos = d.pnl >= 0
+                  return (
+                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1 h-full">
+                      <span className={`text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`} style={{ fontSize: 10 }}>
+                        {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : ''}
+                      </span>
+                      <div className="w-full flex flex-col justify-end flex-1">
+                        {d.pnl !== 0 && (
+                          <div
+                            className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
+                            style={{ height: `${Math.max(height, 4)}%` }}
+                          />
+                        )}
+                        {d.pnl === 0 && (
+                          <div className="w-full h-0.5 mt-auto" style={{ background: '#2a2a2a' }} />
+                        )}
+                      </div>
                     </div>
+                  )
+                })}
+                {/* 折線圖 SVG 疊在上面 */}
+                <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+                  <polyline
+                    points={last7.map((d, i) => {
+                      const x = (i + 0.5) / last7.length * 100
+                      const y = 100 - (d.count / maxCount * 80)
+                      return `${x}%,${y}%`
+                    }).join(' ')}
+                    fill="none"
+                    stroke="#d4a843"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  {last7.map((d, i) => {
+                    const x = (i + 0.5) / last7.length * 100
+                    const y = 100 - (d.count / maxCount * 80)
+                    return d.count > 0 ? (
+                      <circle key={i} cx={`${x}%`} cy={`${y}%`} r="3" fill="#d4a843" />
+                    ) : null
+                  })}
+                </svg>
+              </div>
+              {/* 日期 */}
+              <div className="flex gap-2 mt-1">
+                {last7.map(d => (
+                  <div key={d.date} className="flex-1 text-center">
                     <span className="text-xs text-gray-500">{d.date}</span>
                   </div>
-                )
-              })}
+                ))}
+              </div>
+              {/* 次數標籤 */}
+              <div className="flex gap-2 mt-1">
+                {last7.map(d => (
+                  <div key={d.date} className="flex-1 text-center">
+                    <span className="text-xs" style={{ color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
