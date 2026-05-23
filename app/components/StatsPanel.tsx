@@ -473,11 +473,11 @@ export default function StatsPanel({ completed, trades }: Props) {
               <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
                 <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-sm" style={{ background: '#d4a843' }} />
+                  <div className="w-3 h-3 rounded-sm bg-green-800" />
                   <span className="text-xs text-gray-500">次數</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-4 h-0.5 bg-green-500" />
+                  <div className="w-4 h-0.5" style={{ background: '#d4a843' }} />
                   <span className="text-xs text-gray-500">勝率</span>
                 </div>
               </div>
