@@ -121,3 +121,15 @@ body {
 .page-fade-in {
   animation: pageFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* 數字等寬字體 */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* 數字等寬字體 - 套用到所有數字顯示 */
+.font-bold, .font-semibold {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
