@@ -337,7 +337,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
                 return (
-                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full" style={{ maxWidth: 60 }}>
+                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full" style={{ maxWidth: 40 }}>
                     {d.pnl !== 0 ? (
                       <div
                         className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
