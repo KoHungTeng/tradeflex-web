@@ -284,12 +284,12 @@ export default function StatsPanel({ completed, trades }: Props) {
         {block.type === 'chart' && (
           <div className="p-5 cursor-grab flex flex-col" style={{ height: 280 }}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
-            <div className="flex items-end gap-2 flex-1">
+            <div className="flex items-end gap-2 flex-1" style={{ minHeight: 0 }}>
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
                 return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1 h-full">
                     <span className={`text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`}>
                       {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : ''}
                     </span>
