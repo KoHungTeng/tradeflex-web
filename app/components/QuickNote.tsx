@@ -85,10 +85,10 @@ export default function QuickNote() {
           <p className="text-gray-600 text-xs px-1">{t('noNotes')}</p>
         ) : (
           notes.map(n => (
-            <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a] gap-2">
-              <span className="text-gray-500 text-xs flex-shrink-0">•</span>
-              <span className="text-white flex-1 min-w-0 truncate">{n.text}</span>
-              <span className="text-gray-500 text-xs flex-shrink-0" style={{ width: 155, fontVariantNumeric: 'tabular-nums' }}>{(() => {
+            <div key={n.id} className="grid items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a]" style={{ gridTemplateColumns: '16px 1fr auto 24px', gap: '8px' }}>
+              <span className="text-gray-500 text-xs">•</span>
+              <span className="text-white min-w-0 truncate">{n.text}</span>
+              <span className="text-gray-500 text-xs" style={{ fontVariantNumeric: 'tabular-nums' }}>{(() => {
                 const d = new Date(n.created_at)
                 const date = d.toLocaleDateString('zh-TW')
                 const hours = d.getHours()
@@ -100,7 +100,7 @@ export default function QuickNote() {
               })()}</span>
               <button
                 onClick={() => deleteNote(n.id)}
-                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" style={{ width: 24, textAlign: 'center' }}
+                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity text-center"
               >
                 ✕
               </button>
