@@ -343,7 +343,7 @@ function exportPDF() {
         const list = Object.entries(tagStats).map(([tag, s]) => ({ tag, count: s.count, freq: s.count / (wins.length || 1) * 100 })).sort((a, b) => b.count - a.count)
         if (list.length === 0) return <p className="text-xs text-gray-600">無標籤</p>
         return (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {list.map(({ tag, count, freq }) => (
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
@@ -375,7 +375,7 @@ function exportPDF() {
         const list = Object.entries(tagStats).map(([tag, s]) => ({ tag, count: s.count, freq: s.count / (losses.length || 1) * 100 })).sort((a, b) => b.count - a.count)
         if (list.length === 0) return <p className="text-xs text-gray-600">無標籤</p>
         return (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {list.map(({ tag, count, freq }) => (
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
@@ -395,7 +395,7 @@ function exportPDF() {
 </div>
               <div className="rounded-xl p-4" style={cardStyle}>
   <h3 className="text-sm font-semibold text-gray-400 mb-3">{t('tradeDetail')}</h3>
-  <div className="space-y-2">
+  <div className="space-y-3">
     {filtered.map(trade => (
       <div key={trade.id}>
         <div

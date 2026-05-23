@@ -298,7 +298,7 @@ export default function Home() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {(() => {
                     const filtered = completed.filter(ct => {
                       if (historySymbol !== '__all__' && ct.symbol !== historySymbol) return false
