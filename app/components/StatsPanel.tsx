@@ -142,16 +142,16 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'monthPnL',  labelKey: 'monthPnl',    value: monthPnL,          isPrice: true },
     { id: 'winRate',   labelKey: 'winRate',     value: winRate,           suffix: '%' },
     { id: 'total',     labelKey: 'totalTrades', value: filteredCompleted.length },
-    { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
-    { id: 'avgLoss',   labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
-    { id: 'rrRate',    labelKey: 'avgRR',       value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
     { id: 'holdTime',  labelKey: 'avgHoldTime', value: 0,                 custom: avgHoldDisplay },
+    { id: 'empty1',    labelKey: '',            value: 0,                 empty: true },
     { id: 'maxRR',     labelKey: 'maxRR',       value: maxRR,             custom: maxRR > 0 ? `${maxRR.toFixed(2)}R` : '--' },
     { id: 'minRR',     labelKey: 'minRR',       value: minRR,             custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' },
+    { id: 'rrRate',    labelKey: 'avgRR',       value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
+    { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
     { id: 'maxWin',    labelKey: 'maxWin',      value: maxWin,            isPrice: true },
     { id: 'maxLoss',   labelKey: 'maxLoss',     value: maxLoss,           isPrice: true },
-    { id: 'empty1',    labelKey: '',            value: 0,                 empty: true },
-    { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
+    { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
+    { id: 'avgLoss',   labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(() => {
@@ -349,7 +349,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               })}
             </div>
             {/* 柱狀圖 + 折線疊加 */}
-            <div className="relative flex items-end gap-3 px-4" style={{ height: 120 }}>
+            <div className="relative flex items-end gap-3 px-4" style={{ height: 120, maxWidth: 420, margin: '0 auto', width: '100%' }}>
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
