@@ -101,6 +101,21 @@ export default function StatsPanel({ completed, trades }: Props) {
     last7.push({ date: label, pnl, count })
   }
   const maxAbsPnl = Math.max(...last7.map(d => Math.abs(d.pnl)), 1)
+
+  // 只抓有獲利的交易計算盈虧比
+  const winTrades = filteredCompleted.filter(t => t.pnl > 0)
+  const rrList = winTrades
+    .filter(t => t.sl && t.open_price && t.sl !== t.open_price)
+    .map(t => {
+      const risk = Math.abs(t.open_price - t.sl)
+      return Math.abs(t.pnl) / (risk * t.quantity)
+    })
+    .filter(r => r > 0 && r < 100)
+  const maxRR = rrList.length > 0 ? Math.max(...rrList) : 0
+  const minRR = rrList.length > 0 ? Math.min(...rrList) : 0
+  const maxWin = winTrades.length > 0 ? Math.max(...winTrades.map(t => t.pnl)) : 0
+  const lossTrades = filteredCompleted.filter(t => t.pnl < 0)
+  const maxLoss = lossTrades.length > 0 ? Math.min(...lossTrades.map(t => t.pnl)) : 0
   const maxCount = Math.max(...last7.map(d => d.count), 1)
 
   const sortedTrades = [...filteredCompleted].sort((a, b) =>
@@ -129,10 +144,12 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'total',     labelKey: 'totalTrades', value: filteredCompleted.length },
     { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
     { id: 'avgLoss',   labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
-    { id: 'rrRate',    labelKey: 'profitFactor',value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
+    { id: 'rrRate',    labelKey: 'avgRR',       value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
     { id: 'holdTime',  labelKey: 'avgHoldTime', value: 0,                 custom: avgHoldDisplay },
-    { id: 'empty1',    labelKey: '',            value: 0,                 empty: true },
-    { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
+    { id: 'maxRR',     labelKey: 'maxRR',       value: maxRR,             custom: maxRR > 0 ? `${maxRR.toFixed(2)}R` : '--' },
+    { id: 'minRR',     labelKey: 'minRR',       value: minRR,             custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' },
+    { id: 'maxWin',    labelKey: 'maxWin',      value: maxWin,            isPrice: true },
+    { id: 'maxLoss',   labelKey: 'maxLoss',     value: maxLoss,           isPrice: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(initialCards)
@@ -151,6 +168,10 @@ export default function StatsPanel({ completed, trades }: Props) {
         case 'avgLoss':   return { ...card, value: avgLoss }
         case 'rrRate':    return { ...card, value: rrAchieveRate, custom: `${rrAchieveRate.toFixed(2)}R` }
         case 'holdTime':  return { ...card, value: 0, custom: avgHoldDisplay }
+        case 'maxRR':     return { ...card, value: maxRR, custom: maxRR > 0 ? `${maxRR.toFixed(2)}R` : '--' }
+        case 'minRR':     return { ...card, value: minRR, custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' }
+        case 'maxWin':    return { ...card, value: maxWin }
+        case 'maxLoss':   return { ...card, value: maxLoss }
         default: return card
       }
     }))
@@ -316,7 +337,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
                 return (
-                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full">
+                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full" style={{ maxWidth: 60 }}>
                     {d.pnl !== 0 ? (
                       <div
                         className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
