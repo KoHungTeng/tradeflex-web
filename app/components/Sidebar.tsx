@@ -86,10 +86,9 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
       {NAV_ITEMS.map(item => {
         const isActive = page === item.id
         return (
+          <div key={item.id} className="relative group">
           <button
-            key={item.id}
             onClick={() => setPage(item.id)}
-            title={item.label}
             className="w-10 h-10 rounded-lg flex items-center justify-center transition-all"
             style={isActive ? {
               background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)',
@@ -111,6 +110,11 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
           >
             {item.icon}
           </button>
+          <div className="absolute left-14 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50"
+            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#d4a843', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
+            {item.label}
+          </div>
+          </div>
         )
       })}
 
