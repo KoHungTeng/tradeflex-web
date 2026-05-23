@@ -466,62 +466,88 @@ export default function StatsPanel({ completed, trades }: Props) {
           </div>
         )}
 
-        {/* 各策略交易佔比圓餅圖 */}
+        {/* 各策略交易佔比柱狀圖 */}
         {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
-          <div className="p-5 cursor-grab h-full">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
-            <div className="flex items-center gap-6">
-              <svg width="160" height="160" viewBox="0 0 160 160">
-                {(() => {
-                  const total = Object.values(strategyMap).reduce((s, d) => s + d.total, 0)
-                  let angle = -90
-                  return Object.entries(strategyMap).map(([name, data], i) => {
-                    const pct = data.total / total
-                    const startAngle = angle
-                    const endAngle = angle + pct * 360
-                    angle = endAngle
-                    const r = 70
-                    const cx = 80
-                    const cy = 80
-                    const x1 = cx + r * Math.cos((startAngle * Math.PI) / 180)
-                    const y1 = cy + r * Math.sin((startAngle * Math.PI) / 180)
-                    const x2 = cx + r * Math.cos((endAngle * Math.PI) / 180)
-                    const y2 = cy + r * Math.sin((endAngle * Math.PI) / 180)
-                    const largeArc = pct > 0.5 ? 1 : 0
-                    return (
-                      <path
-                        key={name}
-                        d={`M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} Z`}
-                        fill={PIE_COLORS[i % PIE_COLORS.length]}
-                        opacity={0.85}
-                        stroke="#0f0f0f"
-                        strokeWidth="2"
-                      />
-                    )
-                  })
-                })()}
-                <circle cx="80" cy="80" r="35" fill="#0f0f0f" />
-                <text x="80" y="76" textAnchor="middle" fill="#888" fontSize="10">總計</text>
-                <text x="80" y="92" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="bold">
-                  {Object.values(strategyMap).reduce((s, d) => s + d.total, 0)}
-                </text>
-              </svg>
-              <div className="space-y-2 flex-1">
-                {(() => {
-                  const total = Object.values(strategyMap).reduce((s, d) => s + d.total, 0)
-                  return Object.entries(strategyMap).map(([name, data], i) => (
-                    <div key={name} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                      <span className="text-sm text-gray-300 truncate flex-1">{name}</span>
-                      <span className="text-xs text-gray-500 w-10 text-right">{data.total}筆</span>
-                      <span className="text-xs font-medium w-8 text-right" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
-                        {(data.total / total * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                  ))
-                })()}
+          <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
+            <div className="flex items-center justify-between mb-2 flex-shrink-0">
+              <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: '#d4a843' }} />
+                  <span className="text-xs text-gray-500">次數</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-0.5 bg-green-500" />
+                  <span className="text-xs text-gray-500">勝率</span>
+                </div>
               </div>
             </div>
+            {(() => {
+              const entries = Object.entries(strategyMap)
+              const maxTotal = Math.max(...entries.map(([, d]) => d.total), 1)
+              const maxWinRate = 100
+              return (
+                <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
+                  {/* 次數標籤 */}
+                  <div className="flex gap-2 flex-shrink-0">
+                    {entries.map(([name, data]) => (
+                      <div key={name} className="flex-1 text-center">
+                        <span className="text-gray-400" style={{ fontSize: 10 }}>{data.total}筆</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* 柱狀圖 + 折線 */}
+                  <div className="flex-1 relative flex items-end gap-2" style={{ minHeight: 0 }}>
+                    {entries.map(([name, data], i) => {
+                      const height = data.total / maxTotal * 100
+                      return (
+                        <div key={name} className="flex-1 flex flex-col justify-end h-full">
+                          <div
+                            className="w-full rounded-t"
+                            style={{ height: `${Math.max(height, 4)}%`, background: PIE_COLORS[i % PIE_COLORS.length], opacity: 0.8 }}
+                          />
+                        </div>
+                      )
+                    })}
+                    {/* 勝率折線 */}
+                    <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+                      <polyline
+                        points={entries.map(([, data], i) => {
+                          const x = (i + 0.5) / entries.length * 700
+                          const winRate = data.total > 0 ? data.wins / data.total : 0
+                          const y = 160 - winRate * 150
+                          return `${x},${y}`
+                        }).join(' ')}
+                        fill="none"
+                        stroke="#22c55e"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  </div>
+                  {/* 策略名稱 */}
+                  <div className="flex gap-2 mt-1 flex-shrink-0">
+                    {entries.map(([name]) => (
+                      <div key={name} className="flex-1 text-center overflow-hidden">
+                        <span className="text-gray-500 truncate block" style={{ fontSize: 10 }}>{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* 勝率 */}
+                  <div className="flex gap-2 flex-shrink-0">
+                    {entries.map(([name, data]) => {
+                      const rate = data.total > 0 ? (data.wins / data.total * 100).toFixed(0) : '0'
+                      return (
+                        <div key={name} className="flex-1 text-center">
+                          <span className="text-green-400" style={{ fontSize: 10 }}>{rate}%</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
 
