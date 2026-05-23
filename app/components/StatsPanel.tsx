@@ -105,9 +105,9 @@ export default function StatsPanel({ completed, trades }: Props) {
   // 只抓有獲利的交易計算盈虧比
   const winTrades = filteredCompleted.filter(t => t.pnl > 0)
   const rrList = winTrades
-    .filter(t => t.sl && t.open_price && t.sl !== t.open_price)
+    .filter(t => t.sl != null && t.open_price != null && t.sl !== t.open_price)
     .map(t => {
-      const risk = Math.abs(t.open_price - t.sl)
+      const risk = Math.abs((t.open_price as number) - (t.sl as number))
       return Math.abs(t.pnl) / (risk * t.quantity)
     })
     .filter(r => r > 0 && r < 100)
