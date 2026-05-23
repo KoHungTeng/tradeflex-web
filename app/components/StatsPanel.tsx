@@ -322,23 +322,24 @@ export default function StatsPanel({ completed, trades }: Props) {
                   )
                 })}
                 {/* 折線圖 SVG 疊在上面 */}
-                <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+                <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
                   <polyline
                     points={last7.map((d, i) => {
-                      const x = (i + 0.5) / last7.length * 100
-                      const y = 100 - (d.count / maxCount * 80)
-                      return `${x}%,${y}%`
+                      const x = (i + 0.5) / last7.length * 700
+                      const y = 160 - (d.count / maxCount * 128)
+                      return `${x},${y}`
                     }).join(' ')}
                     fill="none"
                     stroke="#d4a843"
-                    strokeWidth="2"
+                    strokeWidth="3"
                     strokeLinejoin="round"
+                    vectorEffect="non-scaling-stroke"
                   />
                   {last7.map((d, i) => {
-                    const x = (i + 0.5) / last7.length * 100
-                    const y = 100 - (d.count / maxCount * 80)
+                    const x = (i + 0.5) / last7.length * 700
+                    const y = 160 - (d.count / maxCount * 128)
                     return d.count > 0 ? (
-                      <circle key={i} cx={`${x}%`} cy={`${y}%`} r="3" fill="#d4a843" />
+                      <circle key={i} cx={x} cy={y} r="4" fill="#d4a843" vectorEffect="non-scaling-stroke" />
                     ) : null
                   })}
                 </svg>
@@ -351,14 +352,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   </div>
                 ))}
               </div>
-              {/* 次數標籤 */}
-              <div className="flex gap-2 mt-1">
-                {last7.map(d => (
-                  <div key={d.date} className="flex-1 text-center">
-                    <span className="text-xs" style={{ color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
-                  </div>
-                ))}
-              </div>
+
             </div>
           </div>
         )}
