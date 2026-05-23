@@ -83,7 +83,16 @@ export default function QuickNote() {
             <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a] gap-2">
               <span className="text-gray-500 text-xs flex-shrink-0">•</span>
               <span className="text-white flex-1 min-w-0 truncate">{n.text}</span>
-              <span className="text-gray-500 text-xs flex-shrink-0" style={{ width: 155 }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
+              <span className="text-gray-500 text-xs flex-shrink-0" style={{ width: 155, fontVariantNumeric: 'tabular-nums' }}>{(() => {
+                const d = new Date(n.created_at)
+                const date = d.toLocaleDateString('zh-TW')
+                const hours = d.getHours()
+                const minutes = String(d.getMinutes()).padStart(2, '0')
+                const seconds = String(d.getSeconds()).padStart(2, '0')
+                const ampm = hours < 12 ? '上午' : '下午'
+                const h = String(hours % 12 || 12).padStart(2, '0')
+                return `${date} ${ampm}${h}:${minutes}:${seconds}`
+              })()}</span>
               <button
                 onClick={() => deleteNote(n.id)}
                 className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
