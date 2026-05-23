@@ -282,7 +282,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
-          <div className="p-5 cursor-grab">
+          <div className="p-5 cursor-grab" style={{ height: 280 }}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <div className="flex items-end gap-2 h-32">
               {last7.map(d => {
@@ -314,7 +314,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 資金成長曲線 */}
         {block.type === 'growth' && (
-          <div className="pt-5 px-5 pb-5 cursor-grab">
+          <div className="pt-5 px-5 pb-5 cursor-grab" style={{ height: 280 }}>
             <h3 className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-1">{t('growthCurve')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('initialCapitalLabel')}{convert(initialCapital)}</p>
             {growthData.length <= 1 ? (
