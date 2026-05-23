@@ -62,13 +62,15 @@ export default function QuickNote() {
           placeholder={t('notePlaceholder')}
           className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none px-3 py-1.5"
         />
-        <button
-          onClick={addNote}
-          disabled={submitting}
-          className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50 flex-shrink-0"
-        >
-          {t('noteAdd')}
-        </button>
+        <div style={{ width: 155, display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            onClick={addNote}
+            disabled={submitting}
+            className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50 flex-shrink-0"
+          >
+            {t('noteAdd')}
+          </button>
+        </div>
       </div>
 
       <div
