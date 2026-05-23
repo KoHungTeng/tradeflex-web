@@ -215,6 +215,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   const blockStyle = {
   background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)',
   border: '1px solid #333333',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
 }
 
   const PIE_COLORS = ['#d4a843', '#4ade80', '#f87171', '#60a5fa', '#c084fc', '#fb923c', '#34d399']
@@ -252,7 +253,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
                     } ${isCardDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
-                    style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+                    style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
                   >
                     {!card.empty && (
                       <>
