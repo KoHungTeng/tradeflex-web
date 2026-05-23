@@ -357,7 +357,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             <div className="flex gap-2 flex-shrink-0">
               {last7.map(d => (
                 <div key={d.date} className="flex-1 text-center">
-                  <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
+                  <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : '#666' }}>{d.count > 0 ? d.count + '筆' : '-'}</span>
                 </div>
               ))}
             </div>
