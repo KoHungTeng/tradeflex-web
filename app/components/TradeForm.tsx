@@ -435,10 +435,17 @@ const newTrade: any = {
         small_d: smallD ? parseFloat(smallD) : null,
         small_j: smallJ ? parseFloat(smallJ) : null,
       }),
-    }).then(() => {
-  onCompletedChanged()
-  setTimeout(() => loadAfterAdd?.(), 500)
-})
+    }).then(async res => {
+      if (res.status === 403) {
+        const data = await res.json()
+        if (data.error === 'FREE_LIMIT_REACHED') {
+          alert('免費版已達到 50 筆交易上限，請升級至 Pro 版本以繼續使用。')
+          return
+        }
+      }
+      onCompletedChanged()
+      setTimeout(() => loadAfterAdd?.(), 500)
+    })
   }
 
   const actionLabels = [t('long'), t('short'), t('closeLong'), t('closeShort')]
