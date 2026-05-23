@@ -331,7 +331,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     }).join(' ')}
                     fill="none"
                     stroke="#d4a843"
-                    strokeWidth="3"
+                    strokeWidth="2"
                     strokeLinejoin="round"
                     vectorEffect="non-scaling-stroke"
                   />
@@ -339,7 +339,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     const x = (i + 0.5) / last7.length * 700
                     const y = 160 - (d.count / maxCount * 128)
                     return d.count > 0 ? (
-                      <circle key={i} cx={x} cy={y} r="4" fill="#d4a843" vectorEffect="non-scaling-stroke" />
+                      <circle key={i} cx={x} cy={y} r="3" fill="#d4a843" stroke="#d4a843" strokeWidth="1" vectorEffect="non-scaling-stroke" />
                     ) : null
                   })}
                 </svg>
