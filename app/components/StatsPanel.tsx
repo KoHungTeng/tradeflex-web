@@ -284,7 +284,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
           <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 flex-shrink-0">
               <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
                 <div className="flex items-center gap-1">
@@ -297,88 +297,84 @@ export default function StatsPanel({ completed, trades }: Props) {
                 </div>
               </div>
             </div>
-            <div className="flex-1 flex flex-col" style={{ minHeight: 0 }}>
-              {/* 折線圖 */}
-              <div className="relative w-full flex-shrink-0" style={{ height: 50 }}>
-                <svg width="100%" height="100%" viewBox="0 0 700 50" preserveAspectRatio="none" style={{ pointerEvents: 'none', overflow: 'visible' }}>
-                  <polyline
-                    points={last7.map((d, i) => {
-                      const x = (i + 0.5) / last7.length * 700
-                      const y = 8 + (1 - d.count / maxCount) * 34
-                      return `${x},${y}`
-                    }).join(' ')}
-                    fill="none"
-                    stroke="#d4a843"
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex">
-                  {last7.map((d, i) => {
-                    const y = 8 + (1 - d.count / maxCount) * 34
-                    return (
-                      <div key={i} className="flex-1 relative flex justify-center">
-                        {d.count > 0 && (
-                          <div className="absolute w-2 h-2 rounded-full" style={{ background: '#d4a843', top: y - 4 }} />
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-              {/* 盈虧金額 */}
-              <div className="flex gap-2 flex-shrink-0">
-                {last7.map(d => {
-                  const isPos = d.pnl >= 0
+            {/* 盈虧金額 */}
+            <div className="flex gap-2 flex-shrink-0">
+              {last7.map(d => {
+                const isPos = d.pnl >= 0
+                return (
+                  <div key={d.date} className="flex-1 text-center">
+                    <span className={`font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`} style={{ fontSize: 10 }}>
+                      {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : '-'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+            {/* 柱狀圖 + 折線疊加 */}
+            <div className="flex-1 relative flex items-end gap-2" style={{ minHeight: 0 }}>
+              {last7.map(d => {
+                const height = Math.abs(d.pnl) / maxAbsPnl * 100
+                const isPos = d.pnl >= 0
+                return (
+                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full">
+                    {d.pnl !== 0 ? (
+                      <div
+                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
+                        style={{ height: `${Math.max(height, 4)}%` }}
+                      />
+                    ) : (
+                      <div className="w-full h-0.5" style={{ background: '#2a2a2a' }} />
+                    )}
+                  </div>
+                )
+              })}
+              {/* 折線疊在柱狀圖上 */}
+              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+                <polyline
+                  points={last7.map((d, i) => {
+                    const x = (i + 0.5) / last7.length * 700
+                    const y = 160 - (d.count / maxCount) * 150
+                    return `${x},${y}`
+                  }).join(' ')}
+                  fill="none"
+                  stroke="#d4a843"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+              {/* 圓點用 div 避免變形 */}
+              <div className="absolute inset-0 flex">
+                {last7.map((d, i) => {
+                  const pct = 1 - (d.count / maxCount)
                   return (
-                    <div key={d.date} className="flex-1 text-center">
-                      <span className={`font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`} style={{ fontSize: 10 }}>
-                        {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : '-'}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-              {/* 柱狀圖 */}
-              <div className="flex items-end gap-2 flex-1" style={{ minHeight: 0 }}>
-                {last7.map(d => {
-                  const height = Math.abs(d.pnl) / maxAbsPnl * 100
-                  const isPos = d.pnl >= 0
-                  return (
-                    <div key={d.date} className="flex-1 flex flex-col justify-end h-full">
-                      {d.pnl !== 0 ? (
-                        <div
-                          className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
-                          style={{ height: `${Math.max(height, 4)}%` }}
-                        />
-                      ) : (
-                        <div className="w-full h-0.5" style={{ background: '#2a2a2a' }} />
+                    <div key={i} className="flex-1 relative flex justify-center">
+                      {d.count > 0 && (
+                        <div className="absolute w-2 h-2 rounded-full" style={{ background: '#d4a843', top: `calc(${pct * 100}% - 4px)` }} />
                       )}
                     </div>
                   )
                 })}
               </div>
-              {/* 日期 */}
-              <div className="flex gap-2 mt-1 flex-shrink-0">
-                {last7.map(d => (
-                  <div key={d.date} className="flex-1 text-center">
-                    <span className="text-xs text-gray-500">{d.date}</span>
-                  </div>
-                ))}
-              </div>
-              {/* 次數 */}
-              <div className="flex gap-2 flex-shrink-0">
-                {last7.map(d => (
-                  <div key={d.date} className="flex-1 text-center">
-                    <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
-                  </div>
-                ))}
-              </div>
+            </div>
+            {/* 日期 */}
+            <div className="flex gap-2 mt-1 flex-shrink-0">
+              {last7.map(d => (
+                <div key={d.date} className="flex-1 text-center">
+                  <span className="text-xs text-gray-500">{d.date}</span>
+                </div>
+              ))}
+            </div>
+            {/* 次數 */}
+            <div className="flex gap-2 flex-shrink-0">
+              {last7.map(d => (
+                <div key={d.date} className="flex-1 text-center">
+                  <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : 'transparent' }}>{d.count}筆</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
-
         {/* 資金成長曲線 */}
         {block.type === 'growth' && (
           <div className="pt-5 px-5 pb-5 cursor-grab" style={{ height: 280 }}>
