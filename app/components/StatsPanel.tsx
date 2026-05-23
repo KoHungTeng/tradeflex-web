@@ -265,7 +265,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                         ) : (
                           <div className={`text-lg font-bold ${color}`}>
                             {card.isPrice ? (
-                              <>{card.value > 0 ? '+' : ''}{convert(card.value)}</>
+                              <>{card.value > 0 ? '+$' : card.value < 0 ? '-$' : '$'}{Math.abs(card.value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
                             ) : (
                               <>{card.value.toFixed(card.suffix ? 1 : 0)}{card.suffix}</>
                             )}
