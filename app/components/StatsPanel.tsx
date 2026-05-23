@@ -404,10 +404,9 @@ export default function StatsPanel({ completed, trades }: Props) {
                   />
                 </svg>
                 {(() => {
-                  const lastY = capitalRange === 0 ? 10 : 140 - ((capital - minCapital) / capitalRange) * 140 - 10
-                  const pct = Math.max(0, Math.min(100, (lastY / 140) * 100))
+                  const lastPct = capitalRange === 0 ? 0 : (capital - minCapital) / capitalRange
                   return (
-                    <div className="absolute right-0 text-right" style={{ top: `${pct}%`, transform: 'translateY(-50%)' }}>
+                    <div className="absolute right-0 text-right" style={{ bottom: `calc(${lastPct * 100}% - 10px)` }}>
                       <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
                       <div className="text-xs text-gray-600">
                         {capital >= initialCapital ? '+' : ''}
