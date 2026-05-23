@@ -50,7 +50,7 @@ export default function QuickNote() {
   }
 
   return (
-    <div className="bg-[#111111] px-4 py-3" style={{ height: '120px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="bg-[#111111] px-4 py-3" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div className="flex gap-2 items-center flex-shrink-0">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -60,7 +60,7 @@ export default function QuickNote() {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder={t('notePlaceholder')}
-          className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#d4a843]"
+          className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none px-3 py-1.5"
         />
         <button
           onClick={addNote}
