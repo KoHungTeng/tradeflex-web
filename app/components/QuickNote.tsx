@@ -86,7 +86,7 @@ export default function QuickNote() {
                 <span className="text-white truncate">{n.text}</span>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                <span className="text-gray-500 text-xs">{new Date(n.created_at).toLocaleString('zh-TW')}</span>
+                <span className="text-gray-500 text-xs" style={{ minWidth: 140, textAlign: 'right' }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
                 <button
                   onClick={() => deleteNote(n.id)}
                   className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
