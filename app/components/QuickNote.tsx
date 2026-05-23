@@ -80,7 +80,7 @@ export default function QuickNote() {
           <p className="text-gray-600 text-xs px-1">{t('noNotes')}</p>
         ) : (
           notes.map(n => (
-            <div key={n.id} className="flex items-center justify-between bg-[#1a1a1a] rounded px-3 py-1.5 text-sm group flex-shrink-0">
+            <div key={n.id} className="flex items-center justify-between px-3 py-1.5 text-sm group flex-shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <span className="text-gray-500 text-xs flex-shrink-0">•</span>
                 <span className="text-white truncate">{n.text}</span>
