@@ -80,20 +80,16 @@ export default function QuickNote() {
           <p className="text-gray-600 text-xs px-1">{t('noNotes')}</p>
         ) : (
           notes.map(n => (
-            <div key={n.id} className="flex items-center justify-between px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a]">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <span className="text-gray-500 text-xs flex-shrink-0">•</span>
-                <span className="text-white truncate">{n.text}</span>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                <span className="text-gray-500 text-xs" style={{ width: 160, textAlign: 'right', flexShrink: 0 }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
-                <button
-                  onClick={() => deleteNote(n.id)}
-                  className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  ✕
-                </button>
-              </div>
+            <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a] gap-2">
+              <span className="text-gray-500 text-xs flex-shrink-0">•</span>
+              <span className="text-white flex-1 min-w-0 truncate">{n.text}</span>
+              <span className="text-gray-500 text-xs flex-shrink-0" style={{ width: 155 }}>{new Date(n.created_at).toLocaleString('zh-TW')}</span>
+              <button
+                onClick={() => deleteNote(n.id)}
+                className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              >
+                ✕
+              </button>
             </div>
           ))
         )}
