@@ -282,9 +282,9 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
-          <div className="p-5 cursor-grab" style={{ height: 280 }}>
+          <div className="p-5 cursor-grab flex flex-col" style={{ height: 280 }}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
-            <div className="flex items-end gap-2 h-32">
+            <div className="flex items-end gap-2 flex-1">
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
@@ -293,7 +293,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <span className={`text-xs font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`}>
                       {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : ''}
                     </span>
-                    <div className="w-full flex flex-col justify-end" style={{ height: '80px' }}>
+                    <div className="w-full flex flex-col justify-end flex-1">
                       {d.pnl !== 0 && (
                         <div
                           className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
