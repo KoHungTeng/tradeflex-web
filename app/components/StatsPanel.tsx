@@ -296,7 +296,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div className="w-full flex flex-col justify-end" style={{ height: '80px' }}>
                       {d.pnl !== 0 && (
                         <div
-                          className={`w-full rounded-t ${isPos ? 'bg-green-600' : 'bg-red-600'}`}
+                          className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
                           style={{ height: `${Math.max(height, 4)}%` }}
                         />
                       )}
