@@ -154,7 +154,18 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
   ]
 
-  const [cards, setCards] = useState<CardItem[]>(initialCards)
+  const [cards, setCards] = useState<CardItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('tradeflex-cards-order')
+      if (saved) {
+        const savedIds: string[] = JSON.parse(saved)
+        const sorted = savedIds.map(id => initialCards.find(c => c.id === id)).filter(Boolean) as CardItem[]
+        const newCards = initialCards.filter(c => !savedIds.includes(c.id))
+        return [...sorted, ...newCards]
+      }
+    } catch {}
+    return initialCards
+  })
   const [animKey, setAnimKey] = useState(0)
 
   useEffect(() => {
@@ -212,6 +223,10 @@ export default function StatsPanel({ completed, trades }: Props) {
   function onCardMouseUp() {
     draggingCardIndex.current = null
     setDraggingCardId(null)
+    setCards(prev => {
+      try { localStorage.setItem('tradeflex-cards-order', JSON.stringify(prev.map(c => c.id))) } catch {}
+      return prev
+    })
   }
 
   function onBlockMouseDown(index: number, id: string) {
@@ -334,7 +349,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               })}
             </div>
             {/* 柱狀圖 + 折線疊加 */}
-            <div className="relative flex items-end gap-2" style={{ height: 120 }}>
+            <div className="relative flex items-end gap-3 px-4" style={{ height: 120 }}>
               {last7.map(d => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
