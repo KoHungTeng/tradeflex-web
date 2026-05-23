@@ -343,19 +343,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   vectorEffect="non-scaling-stroke"
                 />
               </svg>
-              {/* 圓點用 div 避免變形 */}
-              <div className="absolute inset-0 flex">
-                {last7.map((d, i) => {
-                  const pct = 1 - (d.count / maxCount)
-                  return (
-                    <div key={i} className="flex-1 relative flex justify-center">
-                      {d.count > 0 && (
-                        <div className="absolute w-2 h-2 rounded-full" style={{ background: '#d4a843', top: `calc(${pct * 100}% - 4px)` }} />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+
             </div>
             {/* 日期 */}
             <div className="flex gap-2 mt-1 flex-shrink-0">
