@@ -322,7 +322,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     key={card.id}
                     onMouseDown={e => { e.stopPropagation(); !card.empty && onCardMouseDown(ci, card.id) }}
                     onMouseEnter={() => onCardMouseEnter(ci)}
-                    onMouseUp={e => { e.stopPropagation(); onCardMouseUp() }}
+                    onMouseUp={e => { e.stopPropagation(); if (draggingCardIndex.current !== null && draggingCardIndex.current !== ci) { draggingCardTarget.current = ci } onCardMouseUp() }}
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
                     } ${isCardDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : hoverCardIndex === ci && draggingCardId ? 'ring-2 ring-[var(--gold)] opacity-90' : ''}`}
