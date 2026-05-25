@@ -81,7 +81,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
   return (
     <div
       className="w-14 flex flex-col items-center py-4 gap-1"
-      style={{ background: 'linear-gradient(180deg, #111111 0%, #0a0a0a 100%)' }}
+      style={{ background: 'linear-gradient(180deg, var(--bg-card2) 0%, var(--bg-base) 100%)' }}
     >
       <div className="font-bold text-xs mb-4" style={{ color: 'var(--gold)' }}>TF</div>
 
