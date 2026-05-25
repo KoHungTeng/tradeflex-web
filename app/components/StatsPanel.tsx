@@ -168,6 +168,8 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'avgLoss',     labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
     { id: 'maxWinStreak',  labelKey: 'maxWinStreak',  value: maxWinStreak,  custom: `${maxWinStreak}` },
     { id: 'maxLossStreak', labelKey: 'maxLossStreak', value: maxLossStreak, custom: `${maxLossStreak}` },
+    { id: 'empty1',       labelKey: '',              value: 0,             empty: true },
+    { id: 'empty2',       labelKey: '',              value: 0,             empty: true },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(() => {
