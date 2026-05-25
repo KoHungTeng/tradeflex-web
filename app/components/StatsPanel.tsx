@@ -367,19 +367,25 @@ export default function StatsPanel({ completed, trades }: Props) {
                 )
               })}
               {/* 折線疊在柱狀圖上 */}
-              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
-                <polyline
-                  points={last7.map((d, i) => {
-                    const x = (i + 0.5) / last7.length * 700
-                    const y = 160 - (d.count / maxCount) * 150
-                    return `${x},${y}`
-                  }).join(' ')}
-                  fill="none"
-                  stroke="#d4a843"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                />
+              <svg className="absolute inset-0" width="100%" height="100%" style={{ pointerEvents: 'none', overflow: 'visible' }}>
+                {last7.map((d, i) => {
+                  const next = last7[i + 1]
+                  if (!next) return null
+                  const x1 = `${(i + 0.5) / last7.length * 100}%`
+                  const y1 = `${100 - (d.count / maxCount) * 95}%`
+                  const x2 = `${(i + 1.5) / last7.length * 100}%`
+                  const y2 = `${100 - (next.count / maxCount) * 95}%`
+                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
+                })}
+                {last7.map((d, i) => (
+                  <circle
+                    key={i}
+                    cx={`${(i + 0.5) / last7.length * 100}%`}
+                    cy={`${100 - (d.count / maxCount) * 95}%`}
+                    r="3"
+                    fill="#d4a843"
+                  />
+                ))}
               </svg>
 
             </div>
