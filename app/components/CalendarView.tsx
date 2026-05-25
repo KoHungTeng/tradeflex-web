@@ -131,7 +131,7 @@ export default function CalendarView({ completed }: Props) {
       </div>
 
       {/* 日曆格子 */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-6">
         {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
 
         {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -180,7 +180,7 @@ export default function CalendarView({ completed }: Props) {
                   </div>
                 )}
                 {notes.length > 0 && (
-                  <span className="text-xs text-yellow-400 mt-1">📝 {notes.length}</span>
+                  <span className="text-xs text-[#d4a843] mt-1">筆記 {notes.length}</span>
                 )}
               </div>
             </div>
