@@ -541,7 +541,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     ))}
                   </div>
                   {/* 柱狀圖 + 折線 */}
-                  <div className="flex-1 relative flex items-end gap-2" style={{ minHeight: 0 }}>
+                  <div className="relative flex items-end gap-2" style={{ height: 140 }}>
                     {entries.map(([name, data], i) => {
                       const height = data.total / maxTotal * 100
                       return (
@@ -644,8 +644,8 @@ export default function StatsPanel({ completed, trades }: Props) {
             const block = blocks[i]
             const next = blocks[i + 1]
             if (
-              (block.type === 'strategy' || block.type === 'pie') &&
-              next && (next.type === 'strategy' || next.type === 'pie')
+              block.type === 'strategy' &&
+              next && next.type === 'strategy'
             ) {
               result.push(
                 <div key={`row-${i}`} className="flex gap-4">
