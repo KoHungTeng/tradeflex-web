@@ -486,14 +486,14 @@ export default function StatsPanel({ completed, trades }: Props) {
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
                         </span>
                         <span className="w-12 text-right text-gray-400">{data.total} {t('tradesCount')}</span>
-                        <span className={`w-10 text-right ${rate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-red-400'}`} style={rate >= 50 ? { color: '#166534' } : {}}>
                           {rate.toFixed(0)}%
                         </span>
                       </div>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
                       <div
-                        className={`h-full rounded-full ${rate >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
+                        className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`} style={rate >= 50 ? { background: '#166534' } : {}}
                         style={{ width: `${rate}%` }}
                       />
                     </div>
