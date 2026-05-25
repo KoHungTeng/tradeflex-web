@@ -158,7 +158,7 @@ export default function CalendarView({ completed }: Props) {
                   border: pnl > 0 ? '1px solid #166534' : '1px solid #7f1d1d',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 } : {
-                  background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)',
+                  background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)',
                   border: '1px solid #3a3a3a',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
