@@ -60,14 +60,14 @@ export default function QuickNote() {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder={t('notePlaceholder')}
-          className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none px-3 py-1.5"
+          className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none px-3 py-1.5"
         />
         <div className="flex items-center gap-2 flex-shrink-0">
           <div style={{ width: 155, display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={addNote}
               disabled={submitting}
-              className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-white disabled:opacity-50"
+              className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-[var(--text-primary)] disabled:opacity-50"
             >
               {t('noteAdd')}
             </button>
@@ -87,7 +87,7 @@ export default function QuickNote() {
           notes.map(n => (
             <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[var(--bg-card)] gap-2 relative">
               <span className="text-gray-500 text-xs flex-shrink-0">•</span>
-              <span className="text-white min-w-0 truncate flex-1">{n.text}</span>
+              <span className="text-[var(--text-primary)] min-w-0 truncate flex-1">{n.text}</span>
               <span className="text-gray-500 text-xs flex-shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>{(() => {
                 const d = new Date(n.created_at)
                 const date = d.toLocaleDateString('zh-TW')

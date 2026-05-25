@@ -203,12 +203,12 @@ export default function CalendarView({ completed }: Props) {
       }}
     >
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-white">
+        <p className="text-sm font-semibold text-[var(--text-primary)]">
           {year}/{month + 1}/{selectedDay}
         </p>
         <button
           onClick={() => { setSelectedDay(null); setNoteInput('') }}
-          className="text-gray-500 hover:text-white text-lg leading-none"
+          className="text-gray-500 hover:text-[var(--text-primary)] text-lg leading-none"
         >×</button>
       </div>
 
@@ -240,7 +240,7 @@ export default function CalendarView({ completed }: Props) {
       })()}
 
       {getNoteForDay(selectedDay).map(n => (
-        <div key={n.id} className="flex items-center justify-between text-sm text-white mb-2 group">
+        <div key={n.id} className="flex items-center justify-between text-sm text-[var(--text-primary)] mb-2 group">
           <span className="text-gray-300">• {n.text}</span>
           <button
             onClick={() => deleteNote(n.id)}
@@ -258,7 +258,7 @@ export default function CalendarView({ completed }: Props) {
           onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
           placeholder={t('calendarNotePlaceholder')}
           autoFocus
-          className="flex-1 bg-[var(--bg-input)] border border-gray-600 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+          className="flex-1 bg-[var(--bg-input)] border border-gray-600 rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
         />
         <button
           onClick={saveNote}

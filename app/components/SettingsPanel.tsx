@@ -839,7 +839,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           value={editingTagName}
           onChange={e => setEditingTagName(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') updateTag(); if (e.key === 'Escape') { setEditingTag(null); setEditingTagName('') } }}
-          className="bg-[#222] border border-[#d4a843] rounded px-2 py-0.5 text-xs text-white focus:outline-none w-32"
+          className="bg-[#222] border border-[#d4a843] rounded px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none w-32"
           autoFocus
         />
         <button type="button" onClick={updateTag} className="text-green-400 text-xs px-1">✓</button>

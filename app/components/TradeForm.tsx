@@ -82,7 +82,7 @@ function SearchDropdown({ options, value, onChange, placeholder }: {
         className="input cursor-pointer flex items-center justify-between"
         style={{ minHeight: 32 }}
       >
-        <span className={value ? 'text-white' : 'text-gray-600'}>
+        <span className={value ? 'text-[var(--text-primary)]' : 'text-gray-600'}>
           {value || placeholder || '選填'}
         </span>
         <span className="text-gray-500 text-xs">▾</span>
@@ -107,7 +107,7 @@ function SearchDropdown({ options, value, onChange, placeholder }: {
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -193,7 +193,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
         className="input cursor-pointer flex items-center justify-between"
         style={{ minHeight: 32 }}
       >
-        <span className={value ? 'text-white' : 'text-gray-600'} style={{ fontSize: 12 }}>
+        <span className={value ? 'text-[var(--text-primary)]' : 'text-gray-600'} style={{ fontSize: 12 }}>
           {value || placeholder || '選填'}
         </span>
         <span className="text-gray-500 text-xs">▾</span>
@@ -218,7 +218,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋標籤..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -511,7 +511,7 @@ const newTrade: any = {
                       <span className="text-gray-400">
                         #{i + 1} {new Date(t2.trade_time).toLocaleDateString('zh-TW')}
                       </span>
-                      <span className="text-white">
+                      <span className="text-[var(--text-primary)]">
                         {t2.price} × {t2.quantity}{t('lots')}
                       </span>
                     </div>
@@ -802,7 +802,7 @@ function MiniField({ label, value, onChange }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         type="number" step="0.01" placeholder="--"
-        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-white text-center"
+        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-[var(--text-primary)] text-center"
       />
     </div>
   )

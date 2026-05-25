@@ -281,7 +281,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 const isPos = card.value >= 0
                 const color = card.isPrice
                   ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
-                  : 'text-white'
+                  : 'text-[var(--text-primary)]'
                 const isCardDragging = draggingCardId === card.id
                 return (
                   <div
@@ -627,7 +627,7 @@ export default function StatsPanel({ completed, trades }: Props) {
           <select
             value={selectedSymbol}
             onChange={e => setSelectedSymbol(e.target.value)}
-            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
           >
             <option value="__all__">全部標的</option>
             {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}

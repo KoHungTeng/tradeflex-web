@@ -148,12 +148,12 @@ export default function Home() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen text-white text-lg" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex items-center justify-center h-screen text-[var(--text-primary)] text-lg" style={{ background: 'var(--bg-base)' }}>
       載入中...
     </div>
   )
 
-  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: 8, gap: 8, overflow: 'hidden' }}>
@@ -354,7 +354,7 @@ export default function Home() {
                                 ].map(({ label, value }, i, arr) => (
                                   <div key={label} className="px-3 py-2" style={{ borderRight: i < arr.length - 1 ? '1px solid #1a1a1a' : 'none' }}>
                                     <p className="text-gray-500 mb-1">{label}</p>
-                                    <p className="text-white font-semibold">{value}</p>
+                                    <p className="text-[var(--text-primary)] font-semibold">{value}</p>
                                   </div>
                                 ))}
                               </div>
@@ -362,15 +362,15 @@ export default function Home() {
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
                                  <div className="px-3 py-2" style={{ borderBottom: 'none' }}>
                                    <p className="text-gray-500 mb-1">開倉時間</p>
-                                   <p className="text-white">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
+                                   <p className="text-[var(--text-primary)]">{new Date(ct.open_time).toLocaleString('zh-TW')}</p>
                                 </div>
                                 <div className="px-3 py-2" style={{ borderBottom: 'none' }}>
                                   <p className="text-gray-500 mb-1">平倉時間</p>
-                                  <p className="text-white">{new Date(ct.close_time).toLocaleString('zh-TW')}</p>
+                                  <p className="text-[var(--text-primary)]">{new Date(ct.close_time).toLocaleString('zh-TW')}</p>
                                 </div>
                                 <div className="px-3 py-2" style={{ borderBottom: 'none' }}>
                                   <p className="text-gray-500 mb-1">手續費</p>
-                                  <p className="text-white">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
+                                  <p className="text-[var(--text-primary)]">{(ct.open_fee || 0) + (ct.close_fee || 0)}</p>
                                 </div>
                                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                   <p className="text-gray-500 mb-1">盈虧比</p>
@@ -395,25 +395,25 @@ export default function Home() {
                                   <div className="px-3 py-2 col-span-1" style={{ borderBottom: 'none' }}>
                                     <p className="text-gray-500 mb-2">大時間框架</p>
                                     <div className="space-y-1">
-                                      {ct.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.big_dif}</span></div>}
-                                      {ct.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.big_dea}</span></div>}
-                                      {ct.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.big_hist}</span></div>}
-                                      {ct.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.big_rsi}</span></div>}
-                                      {ct.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.big_k}</span></div>}
-                                      {ct.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.big_d}</span></div>}
-                                      {ct.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.big_j}</span></div>}
+                                      {ct.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{ct.big_dif}</span></div>}
+                                      {ct.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{ct.big_dea}</span></div>}
+                                      {ct.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{ct.big_hist}</span></div>}
+                                      {ct.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-[var(--text-primary)]">{ct.big_rsi}</span></div>}
+                                      {ct.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{ct.big_k}</span></div>}
+                                      {ct.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{ct.big_d}</span></div>}
+                                      {ct.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{ct.big_j}</span></div>}
                                     </div>
                                   </div>
                                   <div className="px-3 py-2 col-span-1" style={{ borderBottom: 'none' }}>
                                     <p className="text-gray-500 mb-2">小時間框架</p>
                                     <div className="space-y-1">
-                                      {ct.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{ct.small_dif}</span></div>}
-                                      {ct.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{ct.small_dea}</span></div>}
-                                      {ct.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{ct.small_hist}</span></div>}
-                                      {ct.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{ct.small_rsi}</span></div>}
-                                      {ct.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{ct.small_k}</span></div>}
-                                      {ct.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{ct.small_d}</span></div>}
-                                      {ct.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{ct.small_j}</span></div>}
+                                      {ct.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{ct.small_dif}</span></div>}
+                                      {ct.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{ct.small_dea}</span></div>}
+                                      {ct.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{ct.small_hist}</span></div>}
+                                      {ct.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-[var(--text-primary)]">{ct.small_rsi}</span></div>}
+                                      {ct.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{ct.small_k}</span></div>}
+                                      {ct.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{ct.small_d}</span></div>}
+                                      {ct.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{ct.small_j}</span></div>}
                                     </div>
                                   </div>
                                   <div className="px-3 py-2 col-span-4">

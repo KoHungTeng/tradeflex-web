@@ -70,7 +70,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
           <div className="p-2 border-b border-[var(--border)]">
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
               placeholder="搜尋標籤..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]" />
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]" />
           </div>
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {allTags.length === 0 ? <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }
-  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
@@ -265,12 +265,12 @@ function exportPDF() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-white' },
+                  { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-[var(--text-primary)]' },
                   { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
                   { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
                   { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[#d4a843]' },
                   { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[#d4a843]' },
-                  { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-white' },
+                  { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-[var(--text-primary)]' },
                 ].map(item => (
                   <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
                     <div className="text-xs text-gray-500 mb-1">{item.label}</div>
@@ -296,7 +296,7 @@ function exportPDF() {
             return (
               <div key={row.label} className="flex justify-between text-xs">
                 <span className="text-gray-500">{row.label}</span>
-                <span className="text-white font-medium">{avg}</span>
+                <span className="text-[var(--text-primary)] font-medium">{avg}</span>
               </div>
             )
           })}
@@ -319,7 +319,7 @@ function exportPDF() {
             return (
               <div key={row.label} className="flex justify-between text-xs">
                 <span className="text-gray-500">{row.label}</span>
-                <span className="text-white font-medium">{avg}</span>
+                <span className="text-[var(--text-primary)] font-medium">{avg}</span>
               </div>
             )
           })}
@@ -432,22 +432,22 @@ function exportPDF() {
                 ].map(({ label, value }, i, arr) => (
                   <div key={label} className="px-3 py-2" style={{ borderRight: i < arr.length - 1 ? '1px solid #1a1a1a' : 'none' }}>
                     <p className="text-gray-500 mb-1">{label}</p>
-                    <p className="text-white font-semibold">{value}</p>
+                    <p className="text-[var(--text-primary)] font-semibold">{value}</p>
                   </div>
                 ))}
               </div>
               <div className="grid grid-cols-6">
                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                   <p className="text-gray-500 mb-1">開倉時間</p>
-                  <p className="text-white">{new Date(trade.open_time).toLocaleString('zh-TW')}</p>
+                  <p className="text-[var(--text-primary)]">{new Date(trade.open_time).toLocaleString('zh-TW')}</p>
                 </div>
                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                   <p className="text-gray-500 mb-1">平倉時間</p>
-                  <p className="text-white">{new Date(trade.close_time).toLocaleString('zh-TW')}</p>
+                  <p className="text-[var(--text-primary)]">{new Date(trade.close_time).toLocaleString('zh-TW')}</p>
                 </div>
                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                   <p className="text-gray-500 mb-1">手續費</p>
-                  <p className="text-white">{(trade.open_fee || 0) + (trade.close_fee || 0)}</p>
+                  <p className="text-[var(--text-primary)]">{(trade.open_fee || 0) + (trade.close_fee || 0)}</p>
                 </div>
                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                   <p className="text-gray-500 mb-1">盈虧比</p>
@@ -467,25 +467,25 @@ function exportPDF() {
                   <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
                     <p className="text-gray-500 mb-2">大時間框架</p>
                     <div className="space-y-1">
-                      {trade.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{trade.big_dif}</span></div>}
-                      {trade.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{trade.big_dea}</span></div>}
-                      {trade.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{trade.big_hist}</span></div>}
-                      {trade.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{trade.big_rsi}</span></div>}
-                      {trade.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{trade.big_k}</span></div>}
-                      {trade.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{trade.big_d}</span></div>}
-                      {trade.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{trade.big_j}</span></div>}
+                      {trade.big_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{trade.big_dif}</span></div>}
+                      {trade.big_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{trade.big_dea}</span></div>}
+                      {trade.big_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{trade.big_hist}</span></div>}
+                      {trade.big_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-[var(--text-primary)]">{trade.big_rsi}</span></div>}
+                      {trade.big_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{trade.big_k}</span></div>}
+                      {trade.big_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{trade.big_d}</span></div>}
+                      {trade.big_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{trade.big_j}</span></div>}
                     </div>
                   </div>
                   <div className="px-3 py-2 col-span-1" style={{ borderRight: '1px solid #1a1a1a' }}>
                     <p className="text-gray-500 mb-2">小時間框架</p>
                     <div className="space-y-1">
-                      {trade.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-white">{trade.small_dif}</span></div>}
-                      {trade.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-white">{trade.small_dea}</span></div>}
-                      {trade.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-white">{trade.small_hist}</span></div>}
-                      {trade.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-white">{trade.small_rsi}</span></div>}
-                      {trade.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-white">{trade.small_k}</span></div>}
-                      {trade.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-white">{trade.small_d}</span></div>}
-                      {trade.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-white">{trade.small_j}</span></div>}
+                      {trade.small_dif != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{trade.small_dif}</span></div>}
+                      {trade.small_dea != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{trade.small_dea}</span></div>}
+                      {trade.small_hist != null && <div className="flex gap-2"><span className="text-gray-600 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{trade.small_hist}</span></div>}
+                      {trade.small_rsi != null && <div className="flex gap-2"><span className="text-gray-600 w-16">RSI</span><span className="text-[var(--text-primary)]">{trade.small_rsi}</span></div>}
+                      {trade.small_k != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{trade.small_k}</span></div>}
+                      {trade.small_d != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{trade.small_d}</span></div>}
+                      {trade.small_j != null && <div className="flex gap-2"><span className="text-gray-600 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{trade.small_j}</span></div>}
                     </div>
                   </div>
                   <div className="px-3 py-2 col-span-2">

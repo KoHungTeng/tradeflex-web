@@ -114,7 +114,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="bg-[var(--bg-input)] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+          className="bg-[var(--bg-input)] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-[var(--text-primary)] w-full focus:outline-none"
         />
         {showDropdown && filtered.length > 0 && (
           <div
@@ -185,25 +185,25 @@ function IndicatorTooltip({ trade, pos, higherTF, lowerTF }: {
         <div>
           <p className="text-gray-400 font-semibold mb-2">{higherTF}</p>
           <div className="space-y-1">
-            {trade.big_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{trade.big_dif}</span></div>}
-            {trade.big_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{trade.big_dea}</span></div>}
-            {trade.big_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{trade.big_hist}</span></div>}
-            {trade.big_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{trade.big_rsi}</span></div>}
-            {trade.big_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{trade.big_k}</span></div>}
-            {trade.big_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{trade.big_d}</span></div>}
-            {trade.big_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{trade.big_j}</span></div>}
+            {trade.big_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{trade.big_dif}</span></div>}
+            {trade.big_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{trade.big_dea}</span></div>}
+            {trade.big_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{trade.big_hist}</span></div>}
+            {trade.big_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-[var(--text-primary)]">{trade.big_rsi}</span></div>}
+            {trade.big_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{trade.big_k}</span></div>}
+            {trade.big_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{trade.big_d}</span></div>}
+            {trade.big_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{trade.big_j}</span></div>}
           </div>
         </div>
         <div>
           <p className="text-gray-400 font-semibold mb-2">{lowerTF}</p>
           <div className="space-y-1">
-            {trade.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-white">{trade.small_dif}</span></div>}
-            {trade.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-white">{trade.small_dea}</span></div>}
-            {trade.small_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-white">{trade.small_hist}</span></div>}
-            {trade.small_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-white">{trade.small_rsi}</span></div>}
-            {trade.small_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-white">{trade.small_k}</span></div>}
-            {trade.small_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-white">{trade.small_d}</span></div>}
-            {trade.small_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-white">{trade.small_j}</span></div>}
+            {trade.small_dif != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DIF</span><span className="text-[var(--text-primary)]">{trade.small_dif}</span></div>}
+            {trade.small_dea != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD DEA</span><span className="text-[var(--text-primary)]">{trade.small_dea}</span></div>}
+            {trade.small_hist != null && <div className="flex gap-3"><span className="text-gray-500 w-16">MACD柱</span><span className="text-[var(--text-primary)]">{trade.small_hist}</span></div>}
+            {trade.small_rsi != null && <div className="flex gap-3"><span className="text-gray-500 w-16">RSI</span><span className="text-[var(--text-primary)]">{trade.small_rsi}</span></div>}
+            {trade.small_k != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ K</span><span className="text-[var(--text-primary)]">{trade.small_k}</span></div>}
+            {trade.small_d != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ D</span><span className="text-[var(--text-primary)]">{trade.small_d}</span></div>}
+            {trade.small_j != null && <div className="flex gap-3"><span className="text-gray-500 w-16">KDJ J</span><span className="text-[var(--text-primary)]">{trade.small_j}</span></div>}
           </div>
         </div>
       </div>
@@ -378,7 +378,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
   onMouseEnter={() => setHoveredTrade(null)}
 >
   {trade.remark && (
-    <div className="absolute z-50 hidden group-hover/remark:block bottom-full left-0 mb-1 px-2 py-1 rounded text-xs text-white whitespace-nowrap pointer-events-none"
+    <div className="absolute z-50 hidden group-hover/remark:block bottom-full left-0 mb-1 px-2 py-1 rounded text-xs text-[var(--text-primary)] whitespace-nowrap pointer-events-none"
       style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a' }}>
       {trade.remark}
     </div>
