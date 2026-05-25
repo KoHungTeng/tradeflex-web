@@ -169,7 +169,7 @@ export default function CalendarView({ completed }: Props) {
                   <div className="flex flex-col gap-0.5">
                     {hasTrade && (
                       <>
-                        <span className={`text-xs font-bold ${theme === 'light' ? 'text-black' : 'text-white'}`}>
+                        <span className={`text-sm font-bold ${theme === 'light' ? 'text-black' : 'text-white'}`}>
                           {pnl > 0 ? '+' : ''}{pnl.toFixed(2)} P&L
                         </span>
                         <span className={`text-xs ${theme === 'light' ? 'text-black' : 'text-white'}`}>
@@ -181,7 +181,7 @@ export default function CalendarView({ completed }: Props) {
                       </>
                     )}
                   </div>
-                  <span className={`text-xs font-medium ${isToday ? 'text-[var(--gold)]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
+                  <span className={`text-base font-bold ${isToday ? 'text-[var(--gold)]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
                     {day}
                   </span>
                 </div>
