@@ -321,7 +321,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 近 7 天盈虧圖 */}
         {block.type === 'chart' && (
-          <div className="p-4 cursor-grab flex flex-col h-full">
+          <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
               <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
@@ -512,7 +512,7 @@ export default function StatsPanel({ completed, trades }: Props) {
 
         {/* 各策略交易佔比柱狀圖 */}
         {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
-          <div className="p-4 cursor-grab flex flex-col h-full">
+          <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
               <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
