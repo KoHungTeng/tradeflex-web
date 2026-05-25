@@ -492,7 +492,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
                         </span>
                         <span className="w-12 text-right text-gray-400">{data.total} {t('tradesCount')}</span>
-                        <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-red-400'}`} style={rate >= 50 ? { color: '#166534' } : {}}>
+                        <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-red-400'}`} style={rate >= 50 ? { color: 'var(--gold)' } : {}}>
                           {rate.toFixed(0)}%
                         </span>
                       </div>
@@ -500,7 +500,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                       <div
                         className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`}
-                        style={rate >= 50 ? { background: '#166534', width: `${rate}%` } : { width: `${rate}%` }}
+                        style={rate >= 50 ? { background: 'var(--gold)', width: `${rate}%` } : { width: `${rate}%` }}
                       />
                     </div>
                   </div>
