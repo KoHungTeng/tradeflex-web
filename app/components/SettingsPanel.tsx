@@ -608,7 +608,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const cardStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a' }
+  const cardStyle = { background: 'linear-gradient(160deg, #161616 0%, #0f0f0f 100%)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }
 
   return (
     <div className="flex-1 overflow-auto p-6">
