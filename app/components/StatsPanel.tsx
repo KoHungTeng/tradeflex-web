@@ -235,32 +235,27 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   function onCardMouseEnter(index: number) {
     if (draggingCardIndex.current === null || draggingCardIndex.current === index) return
-    draggingCardTarget.current = index
+    setCards(prev => {
+      if (prev[draggingCardIndex.current!]?.empty) return prev
+      const next = [...prev]
+      const temp = next[draggingCardIndex.current!]
+      next[draggingCardIndex.current!] = next[index]
+      next[index] = temp
+      draggingCardIndex.current = index
+      return next
+    })
     setHoverCardIndex(index)
   }
 
   function onCardMouseUp() {
-    if (draggingCardIndex.current !== null && draggingCardTarget.current !== null && draggingCardIndex.current !== draggingCardTarget.current) {
-      setCards(prev => {
-        const next = [...prev]
-        const from = draggingCardIndex.current!
-        const to = draggingCardTarget.current!
-        const temp = next[from]
-        next[from] = next[to]
-        next[to] = temp
-        try { localStorage.setItem('tradeflex-cards-order', JSON.stringify(next.map(c => c.id))) } catch {}
-        return next
-      })
-    } else {
-      setCards(prev => {
-        try { localStorage.setItem('tradeflex-cards-order', JSON.stringify(prev.map(c => c.id))) } catch {}
-        return prev
-      })
-    }
     draggingCardIndex.current = null
     draggingCardTarget.current = null
     setDraggingCardId(null)
     setHoverCardIndex(null)
+    setCards(prev => {
+      try { localStorage.setItem('tradeflex-cards-order', JSON.stringify(prev.map(c => c.id))) } catch {}
+      return prev
+    })
   }
 
   function onBlockMouseDown(index: number, id: string) {
