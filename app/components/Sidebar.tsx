@@ -2,6 +2,7 @@
 
 import { Portfolio } from '../page'
 import { useLanguage } from '../LanguageContext'
+import { useTheme } from '../ThemeContext'
 
 type Props = {
   page: string
@@ -13,6 +14,7 @@ type Props = {
 
 export default function Sidebar({ page, setPage, portfolios, activePortfolio, setActivePortfolio }: Props) {
   const { t } = useLanguage()
+  const { theme, toggle } = useTheme()
 
   const NAV_ITEMS = [
     {
@@ -119,6 +121,17 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
       })}
 
       <div className="flex-1" />
+
+      <button
+        onClick={toggle}
+        title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        className="w-10 h-10 rounded-lg flex items-center justify-center transition-all mb-1"
+        style={{ color: 'var(--gold)' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '' }}
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
 
       <div className="flex flex-col gap-1">
         {portfolios.map(p => {
