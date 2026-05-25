@@ -154,8 +154,8 @@ export default function CalendarView({ completed }: Props) {
                   isToday ? 'ring-2 ring-[#d4a843]' : ''
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''}`}
                 style={hasTrade ? {
-                  background: pnl > 0 ? 'rgba(20,83,45,0.5)' : 'rgba(127,29,29,0.5)',
-                  border: pnl > 0 ? '1px solid #166534' : '1px solid #7f1d1d',
+                  background: pnl > 0 ? '#00C076' : '#FF5B5B',
+                  border: pnl > 0 ? '1px solid #00C076' : '1px solid #FF5B5B',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 } : {
                   background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)',
