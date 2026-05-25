@@ -165,22 +165,26 @@ export default function CalendarView({ completed }: Props) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
               >
-                <span className={`text-xs font-medium ${isToday ? 'text-[var(--gold)]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
-                  {day}
-                </span>
-                {hasTrade && (
-                  <div className="mt-auto flex flex-col gap-0.5">
-                    <span className={`text-xs font-bold ${theme === 'light' ? 'text-black' : 'text-white'}`}>
-                      {pnl > 0 ? '+' : ''}{pnl.toFixed(2)} P&L
-                    </span>
-                    <span className={`text-xs ${theme === 'light' ? 'text-black' : 'text-white'}`}>
-                      {completed.filter(tr => {
-                        const d = new Date(tr.close_time)
-                        return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day
-                      }).length} Trades
-                    </span>
+                <div className="flex justify-between items-start w-full">
+                  <div className="flex flex-col gap-0.5">
+                    {hasTrade && (
+                      <>
+                        <span className={`text-xs font-bold ${theme === 'light' ? 'text-black' : 'text-white'}`}>
+                          {pnl > 0 ? '+' : ''}{pnl.toFixed(2)} P&L
+                        </span>
+                        <span className={`text-xs ${theme === 'light' ? 'text-black' : 'text-white'}`}>
+                          {completed.filter(tr => {
+                            const d = new Date(tr.close_time)
+                            return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day
+                          }).length} Trades
+                        </span>
+                      </>
+                    )}
                   </div>
-                )}
+                  <span className={`text-xs font-medium ${isToday ? 'text-[var(--gold)]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
+                    {day}
+                  </span>
+                </div>
                 {notes.length > 0 && (
                   <span className="text-xs text-[var(--gold)] mt-1">筆記 {notes.length}</span>
                 )}
