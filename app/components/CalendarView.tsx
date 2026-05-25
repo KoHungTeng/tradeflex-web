@@ -159,7 +159,7 @@ export default function CalendarView({ completed }: Props) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 } : {
                   background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)',
-                  border: '1px solid #3a3a3a',
+                  border: '1px solid var(--border-light)',
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
               >
@@ -198,7 +198,7 @@ export default function CalendarView({ completed }: Props) {
       className="rounded-2xl p-6 w-80 shadow-2xl"
       style={{
         background: 'var(--bg-card)',
-        border: '1px solid #2a2a2a',
+        border: '1px solid var(--border)',
         animation: 'modalPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
       }}
     >
