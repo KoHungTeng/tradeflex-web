@@ -677,7 +677,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   <td className="py-2 px-4"><input value={editingSymbol.default_fee} type="number" step="0.01" onChange={e => setEditingSymbol({...editingSymbol, default_fee: parseFloat(e.target.value) || 0})} className="input w-24" /></td>
                   <td className="py-2 px-4">
                     <div className="flex gap-2">
-                      <button onClick={updateSymbol} className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded">{t('save')}</button>
+                      <button onClick={updateSymbol} className="text-[var(--color-profit)] hover:text-[var(--color-profit)] text-xs px-2 py-1 rounded">{t('save')}</button>
                       <button onClick={() => setEditingSymbol(null)} className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded">{t('cancel')}</button>
                     </div>
                   </td>
@@ -693,7 +693,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   <td className="py-3 px-4">
                     <div className="flex gap-2">
                       <button onClick={() => setEditingSymbol(s)} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
-                      <button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
+                      <button onClick={() => deleteSymbol(s.id)} className="text-[var(--color-loss)] hover:text-[var(--color-loss)] text-xs px-2 py-1 rounded">{t('delete')}</button>
                     </div>
                   </td>
                 </>
@@ -719,7 +719,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             {categories.map(c => (
               <div key={c.id} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
                 <span className="text-sm">{c.name}</span>
-                <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
+                <button onClick={() => deleteCategory(c.id)} className="text-[var(--color-loss)] hover:text-[var(--color-loss)] text-xs px-2 py-1 rounded">{t('delete')}</button>
               </div>
             ))}
           </div>
@@ -767,7 +767,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={updateStrategy} className="text-green-400 text-xs px-2 py-1 rounded">{t('save')}</button>
+                      <button onClick={updateStrategy} className="text-[var(--color-profit)] text-xs px-2 py-1 rounded">{t('save')}</button>
                       <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs px-2 py-1 rounded">{t('cancel')}</button>
                     </div>
                   </div>
@@ -785,7 +785,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
-                      <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
+                      <button onClick={() => deleteStrategy(s.id)} className="text-[var(--color-loss)] hover:text-[var(--color-loss)] text-xs px-2 py-1 rounded">{t('delete')}</button>
                     </div>
                   </div>
                 )}
@@ -842,14 +842,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           className="bg-[#222] border border-[var(--gold)] rounded px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none w-32"
           autoFocus
         />
-        <button type="button" onClick={updateTag} className="text-green-400 text-xs px-1">✓</button>
+        <button type="button" onClick={updateTag} className="text-[var(--color-profit)] text-xs px-1">✓</button>
         <button type="button" onClick={() => { setEditingTag(null); setEditingTagName('') }} className="text-gray-500 text-xs px-1">✕</button>
       </div>
     ) : (
       <div className="flex items-center gap-1 px-3 py-1.5">
         <span className="text-gray-300">#{tag.name}</span>
         <button type="button" onClick={() => { setEditingTag(tag); setEditingTagName(tag.name) }} className="text-gray-600 hover:text-[var(--gold)] ml-1 text-xs">✎</button>
-<button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 text-xs">✕</button>
+<button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-[var(--color-loss)] text-xs">✕</button>
       </div>
     )}
   </div>
@@ -993,33 +993,33 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
 
             {(importStatus === 'done' || importStatus === 'error') && (
               <div>
-                <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>{importMessage}</p>
+                <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>{importMessage}</p>
                 <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('reimport')}</button>
               </div>
             )}
           </div>
 
           <div className="rounded-xl p-4" style={{ background: 'linear-gradient(160deg, #1a0a0a 0%, #110808 100%)', border: '1px solid #3a1a1a' }}>
-            <h3 className="text-sm font-semibold text-red-400 mb-1">{t('clearHistory')}</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-loss)] mb-1">{t('clearHistory')}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('clearDesc')}</p>
             {clearStatus === 'idle' && (
-              <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-card)', color: '#f87171', border: '1px solid #3a1a1a' }}>
+              <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-card)', color: 'var(--color-loss)', border: '1px solid #3a1a1a' }}>
                 {t('clearBtn')}
               </button>
             )}
             {clearStatus === 'confirm' && (
               <div>
-                <p className="text-xs text-red-400 mb-3">{t('clearConfirm')}</p>
+                <p className="text-xs text-[var(--color-loss)] mb-3">{t('clearConfirm')}</p>
                 <div className="flex gap-3">
                   <button onClick={clearAllTrades} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#7f1d1d', color: '#fca5a5' }}>{t('confirmClear')}</button>
                   <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
-            {clearStatus === 'clearing' && <p className="text-xs text-red-400">{t('clearing')}</p>}
+            {clearStatus === 'clearing' && <p className="text-xs text-[var(--color-loss)]">{t('clearing')}</p>}
             {clearStatus === 'done' && (
               <div>
-                <p className="text-xs text-green-400 mb-3">{t('cleared')}</p>
+                <p className="text-xs text-[var(--color-profit)] mb-3">{t('cleared')}</p>
                 <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('close')}</button>
               </div>
             )}

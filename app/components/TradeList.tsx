@@ -355,7 +355,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       const actualRR = direction * (trade.price - entryPrice) / Math.abs(entryPrice - trade.sl)
                       const achieved = actualRR >= expectedRR
                       return (
-                        <span className={`text-xs font-medium ${achieved ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className={`text-xs font-medium ${achieved ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
                           {Math.abs(actualRR).toFixed(2)}R
                         </span>
                       )
@@ -399,7 +399,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                   <td className="py-2 px-3 whitespace-nowrap overflow-hidden">
                     <button
                       onClick={() => deleteTrade(trade.id)}
-                      className="text-red-500 hover:text-red-400 text-sm px-1"
+                      className="text-[var(--color-loss)] hover:text-[var(--color-loss)] text-sm px-1"
                     >✕</button>
                   </td>
                 </tr>

@@ -101,7 +101,7 @@ const prefix = rawName.includes('/') ? rawName.split('/')[0] : rawName
           {selectedTags.length > 0 && (
             <div className="p-2 border-t border-[var(--border)]">
               <button onMouseDown={e => { e.preventDefault(); onClear(); setOpen(false) }}
-                className="w-full text-xs py-1 rounded" style={{ background: '#2a1a1a', color: '#f87171' }}>
+                className="w-full text-xs py-1 rounded" style={{ background: '#2a1a1a', color: 'var(--color-loss)' }}>
                 清除標籤
               </button>
             </div>
@@ -266,8 +266,8 @@ function exportPDF() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
                   { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-[var(--text-primary)]' },
-                  { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
-                  { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
+                  { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]' },
+                  { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]' },
                   { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[var(--gold)]' },
                   { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[var(--gold)]' },
                   { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-[var(--text-primary)]' },
@@ -283,7 +283,7 @@ function exportPDF() {
   <div className="grid grid-cols-4 gap-6">
     {/* 獲利指標平均值 */}
     <div>
-      <p className="text-xs font-semibold text-green-400 mb-3">獲利指標平均值（{wins.length} 筆）</p>
+      <p className="text-xs font-semibold text-[var(--color-profit)] mb-3">獲利指標平均值（{wins.length} 筆）</p>
       {wins.length === 0 ? <p className="text-xs text-gray-600">無資料</p> : (
         <div className="space-y-1.5">
           {[
@@ -306,7 +306,7 @@ function exportPDF() {
 
     {/* 虧損指標平均值 */}
     <div>
-      <p className="text-xs font-semibold text-red-400 mb-3">虧損指標平均值（{losses.length} 筆）</p>
+      <p className="text-xs font-semibold text-[var(--color-loss)] mb-3">虧損指標平均值（{losses.length} 筆）</p>
       {losses.length === 0 ? <p className="text-xs text-gray-600">無資料</p> : (
         <div className="space-y-1.5">
           {[
@@ -329,7 +329,7 @@ function exportPDF() {
 
     {/* 獲利標籤頻率 */}
     <div>
-      <p className="text-xs font-semibold text-green-400 mb-3">獲利標籤頻率</p>
+      <p className="text-xs font-semibold text-[var(--color-profit)] mb-3">獲利標籤頻率</p>
       {(() => {
         const tagStats: Record<string, { count: number; wins: number }> = {}
         wins.forEach(trade => {
@@ -348,7 +348,7 @@ function exportPDF() {
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-[var(--gold)]">{tag}</span>
-                  <span className="text-green-400 font-semibold">{freq.toFixed(0)}%</span>
+                  <span className="text-[var(--color-profit)] font-semibold">{freq.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
@@ -362,7 +362,7 @@ function exportPDF() {
 
     {/* 虧損標籤頻率 */}
     <div>
-      <p className="text-xs font-semibold text-red-400 mb-3">虧損標籤頻率</p>
+      <p className="text-xs font-semibold text-[var(--color-loss)] mb-3">虧損標籤頻率</p>
       {(() => {
         const tagStats: Record<string, { count: number }> = {}
         losses.forEach(trade => {
@@ -380,7 +380,7 @@ function exportPDF() {
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-[var(--gold)]">{tag}</span>
-                  <span className="text-red-400 font-semibold">{freq.toFixed(0)}%</span>
+                  <span className="text-[var(--color-loss)] font-semibold">{freq.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #ef4444, #dc2626)' }} />
@@ -411,7 +411,7 @@ function exportPDF() {
             {trade.remark && <span className="text-gray-500 text-xs truncate max-w-xs">{trade.remark}</span>}
           </div>
           <div className="flex items-center gap-4">
-            <span className={`font-semibold text-sm ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <span className={`font-semibold text-sm ${trade.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
               {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(0)}
             </span>
             <span className="text-gray-500 text-xs">{new Date(trade.close_time).toLocaleDateString('zh-TW')}</span>
@@ -650,8 +650,8 @@ function IndicatorCompare({ label, wins, losses, field, winLabel, lossLabel }: {
       <div className="flex justify-between text-xs text-gray-500 mb-1">
         <span>{label}</span>
         <div className="flex gap-4">
-          <span className="text-green-400">{winLabel}: {winAvg?.toFixed(2) ?? '--'}</span>
-          <span className="text-red-400">{lossLabel}: {lossAvg?.toFixed(2) ?? '--'}</span>
+          <span className="text-[var(--color-profit)]">{winLabel}: {winAvg?.toFixed(2) ?? '--'}</span>
+          <span className="text-[var(--color-loss)]">{lossLabel}: {lossAvg?.toFixed(2) ?? '--'}</span>
         </div>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
@@ -710,9 +710,9 @@ function TagAnalysisCard({ trades, cardStyle }: {
                 <span className="text-gray-600">{count} 筆</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-green-400">{wins}勝</span>
-                <span className="text-red-400">{losses}敗</span>
-                <span className={`font-semibold w-10 text-right ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                <span className="text-[var(--color-profit)]">{wins}勝</span>
+                <span className="text-[var(--color-loss)]">{losses}敗</span>
+                <span className={`font-semibold w-10 text-right ${winRate >= 50 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
                   勝{winRate.toFixed(0)}%
                 </span>
                 <span className="text-[var(--gold)] font-semibold w-12 text-right">
@@ -743,11 +743,11 @@ function TagAnalysisCard({ trades, cardStyle }: {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <p className="text-xs text-green-400 font-medium mb-3">開倉標籤</p>
+          <p className="text-xs text-[var(--color-profit)] font-medium mb-3">開倉標籤</p>
           <TagTable tagList={openTags} />
         </div>
         <div>
-          <p className="text-xs text-red-400 font-medium mb-3">平倉標籤</p>
+          <p className="text-xs text-[var(--color-loss)] font-medium mb-3">平倉標籤</p>
           <TagTable tagList={closeTags} />
         </div>
       </div>

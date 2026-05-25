@@ -95,8 +95,8 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && <p className="text-red-400 text-xs">{error}</p>}
-            {message && <p className="text-green-400 text-xs">{message}</p>}
+            {error && <p className="text-[var(--color-loss)] text-xs">{error}</p>}
+            {message && <p className="text-[var(--color-profit)] text-xs">{message}</p>}
 
             <button
               type="submit"

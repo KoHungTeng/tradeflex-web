@@ -280,7 +280,7 @@ export default function StatsPanel({ completed, trades }: Props) {
               {cards.map((card, ci) => {
                 const isPos = card.value >= 0
                 const color = card.isPrice
-                  ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-green-400' : 'text-red-400'
+                  ? card.value === 0 ? 'text-gray-400' : isPos ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'
                   : 'text-[var(--text-primary)]'
                 const isCardDragging = draggingCardId === card.id
                 return (
@@ -341,7 +341,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 const isPos = d.pnl >= 0
                 return (
                   <div key={d.date} className="flex-1 text-center">
-                    <span className={`font-medium ${isPos ? 'text-green-400' : 'text-red-400'}`} style={{ fontSize: 10 }}>
+                    <span className={`font-medium ${isPos ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`} style={{ fontSize: 10 }}>
                       {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : '-'}
                     </span>
                   </div>
@@ -488,11 +488,11 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-[var(--text-primary)]">{name}</span>
                       <div className="flex gap-2">
-                        <span className={`w-16 text-right ${data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className={`w-16 text-right ${data.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
                         </span>
                         <span className="w-12 text-right text-gray-400">{data.total} {t('tradesCount')}</span>
-                        <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-red-400'}`} style={rate >= 50 ? { color: 'var(--gold)' } : {}}>
+                        <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-[var(--color-loss)]'}`} style={rate >= 50 ? { color: 'var(--gold)' } : {}}>
                           {rate.toFixed(0)}%
                         </span>
                       </div>
@@ -594,7 +594,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       const rate = data.total > 0 ? (data.wins / data.total * 100).toFixed(0) : '0'
                       return (
                         <div key={name} className="flex-1 text-center">
-                          <span className="text-green-400" style={{ fontSize: 10 }}>{rate}%</span>
+                          <span className="text-[var(--color-profit)]" style={{ fontSize: 10 }}>{rate}%</span>
                         </div>
                       )
                     })}

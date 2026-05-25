@@ -291,7 +291,7 @@ export default function Home() {
                     <button
                       onClick={() => { setHistorySymbol('__all__'); setHistoryStrategy('__all__'); setHistoryDirection('all'); setHistoryDateFrom(''); setHistoryDateTo(''); setHistoryPage(1) }}
                       className="px-3 py-1.5 rounded-lg text-xs"
-                      style={{ background: '#2a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}
+                      style={{ background: '#2a1a1a', color: 'var(--color-loss)', border: '1px solid #3a1a1a' }}
                     >
                       清除篩選
                     </button>
@@ -328,7 +328,7 @@ export default function Home() {
                             {ct.strategy && <span className="text-[var(--gold)] text-xs">{ct.strategy}</span>}
                           </div>
                           <div className="flex items-center gap-6">
-                            <span className={`font-semibold ${ct.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            <span className={`font-semibold ${ct.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
                               {ct.pnl >= 0 ? '+' : ''}{ct.pnl.toFixed(0)}
                             </span>
                             <span className="text-gray-500 text-xs">

@@ -248,7 +248,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
               <button
                 onMouseDown={e => { e.preventDefault(); onChange(''); setOpen(false) }}
                 className="w-full text-xs py-1 rounded"
-                style={{ background: '#2a1a1a', color: '#f87171' }}
+                style={{ background: '#2a1a1a', color: 'var(--color-loss)' }}
               >
                 清除
               </button>
@@ -519,7 +519,7 @@ const newTrade: any = {
                 </div>
                 <div className="border-t border-[#1a3a1a] pt-2 flex justify-between text-xs">
                   <span className="text-gray-400">{t('avgPriceQty')}</span>
-                  <span className="text-green-400 font-semibold">
+                  <span className="text-[var(--color-profit)] font-semibold">
                     {avgOpenPrice.toFixed(2)} / {totalOpenQty}{t('lots')}
                   </span>
                 </div>
@@ -527,7 +527,7 @@ const newTrade: any = {
                   type="button"
                   onClick={() => setQuantity(String(totalOpenQty))}
                   className="mt-2 w-full text-xs py-1 rounded transition-colors"
-                  style={{ background: '#1a3a1a', color: '#4ade80', border: '1px solid #2a4a2a' }}
+                  style={{ background: '#1a3a1a', color: 'var(--color-profit)', border: '1px solid #2a4a2a' }}
                 >
                   {t('fillAllQty')} ({totalOpenQty}{t('lots')})
                 </button>
@@ -645,11 +645,11 @@ const newTrade: any = {
           <div className="rounded-lg p-3 space-y-1.5" style={{ background: '#0f1a0f', border: '1px solid #1a3a1a' }}>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">預估獲利</span>
-              <span className="text-green-400 font-semibold">+{profitAmt.toFixed(0)}</span>
+              <span className="text-[var(--color-profit)] font-semibold">+{profitAmt.toFixed(0)}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">預估虧損</span>
-              <span className="text-red-400 font-semibold">-{lossAmt.toFixed(0)}</span>
+              <span className="text-[var(--color-loss)] font-semibold">-{lossAmt.toFixed(0)}</span>
             </div>
             <div className="flex justify-between text-xs border-t border-[#1a3a1a] pt-1.5">
               <span className="text-gray-500">盈虧比</span>

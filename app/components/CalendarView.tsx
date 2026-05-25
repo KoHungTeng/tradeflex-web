@@ -109,11 +109,11 @@ export default function CalendarView({ completed }: Props) {
         <div className="text-center">
           <h2 className="text-xl font-bold">{headerTitle}</h2>
           <div className="flex gap-4 mt-1 text-sm justify-center">
-            <span className={monthPnL >= 0 ? 'text-green-400' : 'text-red-400'}>
+            <span className={monthPnL >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
               {monthPnL >= 0 ? '+' : ''}{monthPnL.toFixed(0)}
             </span>
             <span className="text-gray-400">{monthTrades.length} {t('calendarTrades')}</span>
-            <span className={monthWinRate >= 50 ? 'text-green-400' : 'text-red-400'}>
+            <span className={monthWinRate >= 50 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
               {t('calendarWinRate')} {monthWinRate.toFixed(0)}%
             </span>
           </div>
@@ -223,7 +223,7 @@ export default function CalendarView({ completed }: Props) {
       </div>
 
       {dailyPnL[selectedDay.toString()] !== undefined && (
-        <div className={`text-2xl font-bold mb-4 ${dailyPnL[selectedDay.toString()] > 0 ? 'text-green-400' : 'text-red-400'}`}>
+        <div className={`text-2xl font-bold mb-4 ${dailyPnL[selectedDay.toString()] > 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
           {dailyPnL[selectedDay.toString()] > 0 ? '+' : ''}{dailyPnL[selectedDay.toString()].toFixed(0)}
         </div>
       )}
@@ -240,7 +240,7 @@ export default function CalendarView({ completed }: Props) {
             {dayTrades.map((t, i) => (
               <div key={i} className="flex justify-between text-xs">
                 <span className="text-gray-400">{t.symbol}</span>
-                <span className={t.pnl >= 0 ? 'text-green-400' : 'text-red-400'}>
+                <span className={t.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
                   {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)}
                 </span>
               </div>
@@ -254,7 +254,7 @@ export default function CalendarView({ completed }: Props) {
           <span className="text-gray-300">• {n.text}</span>
           <button
             onClick={() => deleteNote(n.id)}
-            className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100"
+            className="text-gray-600 hover:text-[var(--color-loss)] text-xs opacity-0 group-hover:opacity-100"
           >✕</button>
         </div>
       ))}
