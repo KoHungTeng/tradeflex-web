@@ -500,7 +500,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                       <div
                         className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`}
-                        style={rate >= 50 ? { background: 'var(--gold)', width: `${rate}%` } : { width: `${rate}%` }}
+                        style={rate >= 50 ? { background: 'var(--gold-gradient)', width: `${rate}%` } : { width: `${rate}%` }}
                       />
                     </div>
                   </div>

@@ -315,7 +315,8 @@ export default function Home() {
                       <div key={ct.id}>
                         <div
                           className="rounded-lg p-4 flex items-center justify-between cursor-pointer"
-                          style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: `1px solid ${expandedHistory === ct.id ? 'var(--gold)' : 'var(--border-light)'}`, borderBottom: expandedHistory === ct.id ? 'none' : `1px solid var(--border-light)`, borderRadius: expandedHistory === ct.id ? '8px 8px 0 0' : '8px', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }}
+                          style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: `1px solid ${expandedHistory === ct.id ? 'var(--gold)' : 'var(--border-light)'}`,
+                          borderImage: expandedHistory === ct.id ? 'var(--gold-gradient) 1' : 'none', borderBottom: expandedHistory === ct.id ? 'none' : `1px solid var(--border-light)`, borderRadius: expandedHistory === ct.id ? '8px 8px 0 0' : '8px', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }}
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
@@ -340,7 +341,7 @@ export default function Home() {
 
                         {expandedHistory === ct.id && (
                           <div className="px-4 py-4 mb-1"
-                            style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--gold)', borderTop: 'none', borderRadius: '0 0 8px 8px', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }}>
+                            style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--gold)', borderImage: 'var(--gold-gradient) 1', borderTop: 'none', borderRadius: '0 0 8px 8px', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }}>
                             <div className="rounded-lg overflow-hidden text-xs">
                               {/* 第一行 */}
                               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>

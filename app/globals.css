@@ -15,6 +15,7 @@
   --text-muted: #6b7280;
   --gold: #BFA37A;
   --gold-dark: #a08860;
+  --gold-gradient: linear-gradient(135deg, #B08A5A 0%, #D6BB93 50%, #BFA37A 100%);
   --color-profit: #00C076;
   --color-loss: #FF5B5B;
   --scrollbar-thumb: #333333;
@@ -38,6 +39,7 @@
   --text-muted: #888888;
   --gold: #A6845E;
   --gold-dark: #8a6b48;
+  --gold-gradient: linear-gradient(135deg, #8A6A3E 0%, #C9A66B 50%, #9C7B52 100%);
   --color-profit: #00A865;
   --color-loss: #E14B4B;
   --shadow-card: 0 4px 12px rgba(0,0,0,0.12);

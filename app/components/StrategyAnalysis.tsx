@@ -419,7 +419,7 @@ function exportPDF() {
           </div>
         </div>
         {expandedTrade === trade.id && (
-          <div className="rounded-lg px-4 py-4 mb-1" style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--gold)', marginTop: -1 }}>
+          <div className="rounded-lg px-4 py-4 mb-1" style={{ background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--gold)', borderImage: 'var(--gold-gradient) 1', marginTop: -1 }}>
             <div className="rounded-lg overflow-hidden text-xs">
               <div className="grid grid-cols-6" style={{ borderBottom: '1px solid #1a1a1a' }}>
                 {[
