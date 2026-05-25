@@ -239,10 +239,10 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
   }
 
   const actionMap: Record<string, { bg: string; label: string }> = {
-    '做多': { bg: 'bg-green-900 text-green-400',    label: t('actionLong') },
-    '做空': { bg: 'bg-red-900 text-red-400',        label: t('actionShort') },
-    '平多': { bg: 'bg-green-800/50 text-green-500', label: t('actionCloseLong') },
-    '平空': { bg: 'bg-red-800/50 text-red-500',     label: t('actionCloseShort') },
+    '做多': { bg: 'bg-green-500 text-black',    label: t('actionLong') },
+    '做空': { bg: 'bg-red-500 text-black',      label: t('actionShort') },
+    '平多': { bg: 'bg-green-400 text-black',    label: t('actionCloseLong') },
+    '平空': { bg: 'bg-red-400 text-black',      label: t('actionCloseShort') },
   }
 
   const formatTime = (time: string) => {
