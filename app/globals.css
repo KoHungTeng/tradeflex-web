@@ -92,7 +92,7 @@ body {
 }
 
 .gold-border-inner {
-  background: linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card2) 100%);
+  background: var(--bg-base);
   box-shadow: var(--shadow-inset), var(--shadow-card);
   border-radius: 11px;
   width: 100%;
