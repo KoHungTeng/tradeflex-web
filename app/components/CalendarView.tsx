@@ -165,7 +165,7 @@ export default function CalendarView({ completed }: Props) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
               >
-                <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : theme === 'light' && hasTrade ? 'text-black' : 'text-white'}`}>
+                <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
                   {day}
                 </span>
                 {hasTrade && (
