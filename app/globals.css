@@ -92,7 +92,7 @@ body {
 }
 
 .gold-border-inner {
-  background: var(--bg-base);
+  background: linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card2) 100%);
   box-shadow: var(--shadow-inset), var(--shadow-card);
   border-radius: 11px;
   width: 100%;
@@ -122,6 +122,10 @@ body {
 [data-theme="light"] .calendar-day-win span,
 [data-theme="light"] .calendar-day-loss span {
   color: #000000 !important;
+}
+
+.sidebar-inner {
+  background: var(--bg-card2) !important;
 }
 
 @keyframes modalPop {
