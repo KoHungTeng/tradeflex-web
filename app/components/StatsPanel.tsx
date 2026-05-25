@@ -71,6 +71,13 @@ export default function StatsPanel({ completed, trades }: Props) {
     : 0
   const holdMins = wins.map(t => (new Date(t.close_time).getTime() - new Date(t.open_time).getTime()) / 60000)
   const maxHoldMin = holdMins.length > 0 ? Math.max(...holdMins) : 0
+
+  // 最大連勝/連敗
+  let maxWinStreak = 0, maxLossStreak = 0, curWin = 0, curLoss = 0
+  filteredCompleted.forEach(t => {
+    if (t.pnl > 0) { curWin++; curLoss = 0; maxWinStreak = Math.max(maxWinStreak, curWin) }
+    else { curLoss++; curWin = 0; maxLossStreak = Math.max(maxLossStreak, curLoss) }
+  })
   const minHoldMin = holdMins.length > 0 ? Math.min(...holdMins) : 0
 
   function formatHold(min: number) {
@@ -159,6 +166,8 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'maxLoss',     labelKey: 'maxLoss',     value: maxLoss,           isPrice: true },
     { id: 'avgWin',      labelKey: 'avgWin',      value: avgWin,            isPrice: true },
     { id: 'avgLoss',     labelKey: 'avgLoss',     value: avgLoss,           isPrice: true },
+    { id: 'maxWinStreak',  labelKey: 'maxWinStreak',  value: maxWinStreak,  custom: `${maxWinStreak}` },
+    { id: 'maxLossStreak', labelKey: 'maxLossStreak', value: maxLossStreak, custom: `${maxLossStreak}` },
   ]
 
   const [cards, setCards] = useState<CardItem[]>(() => {
@@ -190,6 +199,8 @@ export default function StatsPanel({ completed, trades }: Props) {
         case 'holdTime':  return { ...card, value: 0, custom: avgHoldDisplay }
         case 'maxHoldTime': return { ...card, value: 0, custom: formatHold(maxHoldMin) }
         case 'minHoldTime': return { ...card, value: 0, custom: formatHold(minHoldMin) }
+        case 'maxWinStreak':  return { ...card, value: maxWinStreak, custom: `${maxWinStreak}` }
+        case 'maxLossStreak': return { ...card, value: maxLossStreak, custom: `${maxLossStreak}` }
         case 'maxRR':     return { ...card, value: maxRR, custom: maxRR > 0 ? `${maxRR.toFixed(2)}R` : '--' }
         case 'minRR':     return { ...card, value: minRR, custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' }
         case 'maxWin':    return { ...card, value: maxWin }
