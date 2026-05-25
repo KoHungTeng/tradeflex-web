@@ -554,20 +554,30 @@ export default function StatsPanel({ completed, trades }: Props) {
                       )
                     })}
                     {/* 勝率折線 */}
-                    <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
-                      <polyline
-                        points={entries.map(([, data], i) => {
-                          const x = (i + 0.5) / entries.length * 700
-                          const winRate = data.total > 0 ? data.wins / data.total : 0
-                          const y = 160 - winRate * 150
-                          return `${x},${y}`
-                        }).join(' ')}
-                        fill="none"
-                        stroke="#d4a843"
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                        vectorEffect="non-scaling-stroke"
-                      />
+                    <svg className="absolute inset-0" width="100%" height="100%" style={{ pointerEvents: 'none', overflow: 'visible' }}>
+                      {entries.map(([, data], i) => {
+                        const next = entries[i + 1]
+                        if (!next) return null
+                        const winRate1 = data.total > 0 ? data.wins / data.total : 0
+                        const winRate2 = next[1].total > 0 ? next[1].wins / next[1].total : 0
+                        const x1 = `${(i + 0.5) / entries.length * 100}%`
+                        const y1 = `${100 - winRate1 * 95}%`
+                        const x2 = `${(i + 1.5) / entries.length * 100}%`
+                        const y2 = `${100 - winRate2 * 95}%`
+                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
+                      })}
+                      {entries.map(([, data], i) => {
+                        const winRate = data.total > 0 ? data.wins / data.total : 0
+                        return (
+                          <circle
+                            key={i}
+                            cx={`${(i + 0.5) / entries.length * 100}%`}
+                            cy={`${100 - winRate * 95}%`}
+                            r="3"
+                            fill="#d4a843"
+                          />
+                        )
+                      })}
                     </svg>
                   </div>
                   {/* 策略名稱 */}
