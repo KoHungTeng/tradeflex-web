@@ -367,7 +367,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 )
               })}
               {/* 折線疊在柱狀圖上 */}
-              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+              <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid none" style={{ pointerEvents: 'none' }}>
                 <polyline
                   points={last7.map((d, i) => {
                     const x = (i + 0.5) / last7.length * 700
@@ -548,7 +548,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       )
                     })}
                     {/* 勝率折線 */}
-                    <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+                    <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid none" style={{ pointerEvents: 'none' }}>
                       <polyline
                         points={entries.map(([, data], i) => {
                           const x = (i + 0.5) / entries.length * 700
