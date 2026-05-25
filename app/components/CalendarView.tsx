@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTheme } from '../ThemeContext'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
 
@@ -16,6 +17,7 @@ type DayNote = {
 
 export default function CalendarView({ completed }: Props) {
   const { t } = useLanguage()
+  const { theme } = useTheme()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [dayNotes, setDayNotes] = useState<DayNote[]>([])
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
@@ -163,15 +165,15 @@ export default function CalendarView({ completed }: Props) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
               >
-                <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : 'text-white'}`}>
+                <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : theme === 'light' && hasTrade ? 'text-black' : 'text-white'}`}>
                   {day}
                 </span>
                 {hasTrade && (
                   <div className="mt-auto flex flex-col gap-0.5">
-                    <span className="text-xs font-bold text-white">
+                    <span className={`text-xs font-bold ${theme === 'light' ? 'text-black' : 'text-white'}`}>
                       {pnl > 0 ? '+' : ''}{pnl.toFixed(2)} P&L
                     </span>
-                    <span className="text-xs text-white">
+                    <span className={`text-xs ${theme === 'light' ? 'text-black' : 'text-white'}`}>
                       {completed.filter(tr => {
                         const d = new Date(tr.close_time)
                         return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day
