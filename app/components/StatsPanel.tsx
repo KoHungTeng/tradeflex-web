@@ -310,7 +310,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     onMouseEnter={() => onCardMouseEnter(ci)}
                     onMouseUp={e => { e.stopPropagation(); onCardMouseUp() }}
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
-                      card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
+                      card.empty ? 'opacity-10 cursor-default pointer-events-auto' : 'cursor-grab active:cursor-grabbing'
                     } ${isCardDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : ''}`}
                     style={{ background: 'var(--bg-card)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
                   >
