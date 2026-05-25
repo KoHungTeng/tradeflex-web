@@ -186,7 +186,11 @@ export default function CalendarView({ completed }: Props) {
                   </span>
                 </div>
                 {notes.length > 0 && (
-                  <span className="text-xs text-[var(--gold)] mt-1">筆記 {notes.length}</span>
+                  <div className="mt-auto flex flex-col gap-0.5">
+                    {notes.map(n => (
+                      <span key={n.id} className={`text-xs ${theme === 'light' ? 'text-black' : 'text-[var(--gold)]'} truncate`}>{n.text}</span>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
