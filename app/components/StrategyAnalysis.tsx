@@ -350,7 +350,7 @@ function exportPDF() {
                   <span className="text-[#d4a843]">{tag}</span>
                   <span className="text-green-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
                 </div>
               </div>
@@ -382,7 +382,7 @@ function exportPDF() {
                   <span className="text-[#d4a843]">{tag}</span>
                   <span className="text-red-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #ef4444, #dc2626)' }} />
                 </div>
               </div>
