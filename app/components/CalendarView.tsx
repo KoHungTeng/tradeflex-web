@@ -150,24 +150,34 @@ export default function CalendarView({ completed }: Props) {
                   setSelectedDay(isSelected ? null : day)
                   setNoteInput('')
                 }}
-                className={`rounded-lg p-2 min-h-24 flex flex-col cursor-pointer transition-colors ${
+                className={`rounded-lg p-2 aspect-square flex flex-col cursor-pointer transition-colors ${
                   isToday ? 'ring-2 ring-[#d4a843]' : ''
-                } ${isSelected ? 'ring-2 ring-yellow-500' : ''} ${
-                  hasTrade
-  ? pnl > 0
-    ? 'bg-green-800/50 hover:bg-green-800/70'
-    : 'bg-red-800/50 hover:bg-red-800/70'
-  : ''
-                }`}
-                style={!hasTrade ? { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #333' } : {}}
+                } ${isSelected ? 'ring-2 ring-yellow-500' : ''}`}
+                style={hasTrade ? {
+                  background: pnl > 0 ? 'rgba(20,83,45,0.5)' : 'rgba(127,29,29,0.5)',
+                  border: pnl > 0 ? '1px solid #166534' : '1px solid #7f1d1d',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
+                } : {
+                  background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)',
+                  border: '1px solid #3a3a3a',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
+                }}
               >
                 <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : 'text-gray-400'}`}>
                   {day}
                 </span>
                 {hasTrade && (
-                  <span className={`text-xs font-semibold mt-1 ${pnl > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {pnl > 0 ? '+' : ''}{pnl.toFixed(0)}
-                  </span>
+                  <div className="mt-auto flex flex-col gap-0.5">
+                    <span className={`text-xs font-bold ${pnl > 0 ? 'text-green-300' : 'text-red-300'}`}>
+                      {pnl > 0 ? '+' : ''}{pnl.toFixed(2)} P&L
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {completed.filter(tr => {
+                        const d = new Date(tr.close_time)
+                        return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day
+                      }).length} Trades
+                    </span>
+                  </div>
                 )}
                 {notes.length > 0 && (
                   <span className="text-xs text-yellow-400 mt-1">📝 {notes.length}</span>
