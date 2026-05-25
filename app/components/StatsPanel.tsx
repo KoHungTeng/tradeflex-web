@@ -69,11 +69,18 @@ export default function StatsPanel({ completed, trades }: Props) {
         return s + diff / 60000
       }, 0) / filteredCompleted.length
     : 0
-  const avgHoldDisplay = avgHoldMin < 60
-    ? `${avgHoldMin.toFixed(0)}m`
-    : avgHoldMin < 1440
-    ? `${(avgHoldMin / 60).toFixed(1)}h`
-    : `${(avgHoldMin / 1440).toFixed(1)}d`
+  const holdMins = wins.map(t => (new Date(t.close_time).getTime() - new Date(t.open_time).getTime()) / 60000)
+  const maxHoldMin = holdMins.length > 0 ? Math.max(...holdMins) : 0
+  const minHoldMin = holdMins.length > 0 ? Math.min(...holdMins) : 0
+
+  function formatHold(min: number) {
+    if (min === 0) return '--'
+    if (min < 60) return `${min.toFixed(0)}m`
+    if (min < 1440) return `${(min / 60).toFixed(1)}h`
+    return `${(min / 1440).toFixed(1)}d`
+  }
+
+  const avgHoldDisplay = formatHold(avgHoldMin)
 
   const rrAchieveRate = wins.length > 0 && losses.length > 0
     ? Math.abs(avgWin / avgLoss)
@@ -148,6 +155,8 @@ export default function StatsPanel({ completed, trades }: Props) {
     { id: 'minRR',     labelKey: 'minRR',       value: minRR,             custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' },
     { id: 'rrRate',    labelKey: 'avgRR',       value: rrAchieveRate,     custom: `${rrAchieveRate.toFixed(2)}R` },
     { id: 'empty2',    labelKey: '',            value: 0,                 empty: true },
+    { id: 'maxHoldTime', labelKey: 'maxHoldTime', value: 0, custom: formatHold(maxHoldMin) },
+    { id: 'minHoldTime', labelKey: 'minHoldTime', value: 0, custom: formatHold(minHoldMin) },
     { id: 'maxWin',    labelKey: 'maxWin',      value: maxWin,            isPrice: true },
     { id: 'maxLoss',   labelKey: 'maxLoss',     value: maxLoss,           isPrice: true },
     { id: 'avgWin',    labelKey: 'avgWin',      value: avgWin,            isPrice: true },
@@ -181,6 +190,8 @@ export default function StatsPanel({ completed, trades }: Props) {
         case 'avgLoss':   return { ...card, value: avgLoss }
         case 'rrRate':    return { ...card, value: rrAchieveRate, custom: `${rrAchieveRate.toFixed(2)}R` }
         case 'holdTime':  return { ...card, value: 0, custom: avgHoldDisplay }
+        case 'maxHoldTime': return { ...card, value: 0, custom: formatHold(maxHoldMin) }
+        case 'minHoldTime': return { ...card, value: 0, custom: formatHold(minHoldMin) }
         case 'maxRR':     return { ...card, value: maxRR, custom: maxRR > 0 ? `${maxRR.toFixed(2)}R` : '--' }
         case 'minRR':     return { ...card, value: minRR, custom: minRR > 0 ? `${minRR.toFixed(2)}R` : '--' }
         case 'maxWin':    return { ...card, value: maxWin }

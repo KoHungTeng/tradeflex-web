@@ -126,6 +126,7 @@ body {
 
 .sidebar-inner {
   background: var(--bg-card3) !important;
+  background-color: var(--bg-card3) !important;
 }
 
 @keyframes modalPop {
