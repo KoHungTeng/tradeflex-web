@@ -221,6 +221,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   ])
 
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
+  const [hoverCardIndex, setHoverCardIndex] = useState<number | null>(null)
   const draggingCardIndex = useRef<number | null>(null)
   const [draggingBlockId, setDraggingBlockId] = useState<string | null>(null)
   const draggingBlockIndex = useRef<number | null>(null)
@@ -235,6 +236,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   function onCardMouseEnter(index: number) {
     if (draggingCardIndex.current === null || draggingCardIndex.current === index) return
     draggingCardTarget.current = index
+    setHoverCardIndex(index)
   }
 
   function onCardMouseUp() {
@@ -258,6 +260,7 @@ export default function StatsPanel({ completed, trades }: Props) {
     draggingCardIndex.current = null
     draggingCardTarget.current = null
     setDraggingCardId(null)
+    setHoverCardIndex(null)
   }
 
   function onBlockMouseDown(index: number, id: string) {
@@ -322,7 +325,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     onMouseUp={e => { e.stopPropagation(); onCardMouseUp() }}
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
-                    } ${isCardDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : ''}`}
+                    } ${isCardDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : hoverCardIndex === ci && draggingCardId ? 'ring-2 ring-[var(--gold)] opacity-90' : ''}`}
                     style={card.empty ? { background: 'transparent', border: '1px dashed var(--border-light)' } : { background: 'var(--bg-card)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
                   >
                     {!card.empty && (
