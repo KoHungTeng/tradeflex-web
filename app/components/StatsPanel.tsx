@@ -486,7 +486,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 return (
                   <div key={name}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-300">{name}</span>
+                      <span className="text-[var(--text-primary)]">{name}</span>
                       <div className="flex gap-2">
                         <span className={`w-16 text-right ${data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
