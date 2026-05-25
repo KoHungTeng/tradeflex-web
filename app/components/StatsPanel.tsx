@@ -252,9 +252,9 @@ export default function StatsPanel({ completed, trades }: Props) {
   }
 
   const blockStyle = {
-  background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)',
-  border: '1px solid #333333',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
+  background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)',
+  border: '1px solid var(--border-light)',
+  boxShadow: 'var(--shadow-inset), var(--shadow-card)',
 }
 
   const PIE_COLORS = ['var(--gold)', '#4ade80', '#f87171', '#60a5fa', '#c084fc', '#fb923c', '#34d399']
