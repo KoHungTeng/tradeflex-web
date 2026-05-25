@@ -319,7 +319,7 @@ export default function Home() {
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
-                            <span className={`w-12 text-center px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+                            <span className={`w-12 text-center px-2 py-0.5 rounded text-xs font-medium ${ct.direction === 'long' ? 'bg-green-700 text-white' : 'bg-red-700 text-white'}`}>
                               {ct.direction === 'long' ? t('long') : t('short')}
                             </span>
                             <span className="w-12 font-semibold">{ct.symbol}</span>

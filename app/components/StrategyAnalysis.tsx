@@ -403,7 +403,7 @@ function exportPDF() {
           onClick={() => setExpandedTrade(expandedTrade === trade.id ? null : trade.id)}
         >
           <div className="flex items-center gap-3">
-            <span className={`px-2 py-0.5 rounded text-xs ${trade.direction === 'long' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400'}`}>
+            <span className={`px-2 py-0.5 rounded text-xs ${trade.direction === 'long' ? 'bg-green-700 text-white' : 'bg-red-700 text-white'}`}>
               {trade.direction === 'long' ? t('directionLong') : t('directionShort')}
             </span>
             <span className="font-semibold text-sm">{trade.symbol}</span>
