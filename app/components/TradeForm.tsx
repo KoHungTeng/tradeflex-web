@@ -107,7 +107,7 @@ function SearchDropdown({ options, value, onChange, placeholder }: {
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -218,7 +218,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋標籤..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -578,7 +578,7 @@ const newTrade: any = {
           ))}
 
           {extraPrices.filter(p => p.price !== '').length > 0 && price && (
-            <p className="text-xs text-[#d4a843] mt-1">
+            <p className="text-xs text-[var(--gold)] mt-1">
               {t('avgPrice')}：{(() => {
                 const mainQty = parseFloat(quantity) || 1
                 const entries = [
@@ -653,7 +653,7 @@ const newTrade: any = {
             </div>
             <div className="flex justify-between text-xs border-t border-[#1a3a1a] pt-1.5">
               <span className="text-gray-500">盈虧比</span>
-              <span className="text-[#d4a843] font-semibold">{rr.toFixed(2)}R</span>
+              <span className="text-[var(--gold)] font-semibold">{rr.toFixed(2)}R</span>
             </div>
           </div>
         )
@@ -802,7 +802,7 @@ function MiniField({ label, value, onChange }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         type="number" step="0.01" placeholder="--"
-        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-[var(--text-primary)] text-center"
+        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded px-2 py-1 text-xs focus:outline-none focus:border-[var(--gold)] text-[var(--text-primary)] text-center"
       />
     </div>
   )

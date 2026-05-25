@@ -93,7 +93,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
             onClick={() => setPage(item.id)}
             className="w-10 h-10 rounded-lg flex items-center justify-center transition-all"
             style={isActive ? {
-              background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)',
+              background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)',
               color: '#000',
               boxShadow: '0 0 12px rgba(212,168,67,0.25)',
             } : { color: '#666' }}
@@ -132,7 +132,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
               title={p.name}
               className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold transition-all"
               style={isActive ? {
-                background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)',
+                background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)',
                 color: '#000',
                 boxShadow: '0 0 12px rgba(212,168,67,0.25)',
               } : { background: 'var(--bg-card)', color: '#666' }}

@@ -267,7 +267,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         onMouseDown={() => onBlockMouseDown(index, block.id)}
         onMouseEnter={() => onBlockMouseEnter(index)}
         onMouseUp={onBlockMouseUp}
-        className={`rounded-xl select-none transition-all h-full ${isDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
+        className={`rounded-xl select-none transition-all h-full ${isDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : ''}`}
         style={blockStyle}
       >
         {/* 數據卡片 */}
@@ -291,7 +291,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     onMouseUp={e => { e.stopPropagation(); onCardMouseUp() }}
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
-                    } ${isCardDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
+                    } ${isCardDragging ? 'ring-2 ring-[var(--gold)] opacity-70 scale-95' : ''}`}
                     style={{ background: 'var(--bg-card)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
                   >
                     {!card.empty && (
@@ -300,7 +300,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                           {card.labelKey ? t(card.labelKey as any) : ''}
                         </div>
                         {card.custom ? (
-                          <div className="text-lg font-bold text-[#d4a843]">{card.custom}</div>
+                          <div className="text-lg font-bold text-[var(--gold)]">{card.custom}</div>
                         ) : (
                           <div className={`text-lg font-bold ${color}`}>
                             {card.isPrice ? (
@@ -323,7 +323,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {block.type === 'chart' && (
           <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
-              <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
+              <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">{t('recentPnl')} {selectedSymbol !== '__all__' && <span className="text-xs text-[var(--gold)] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-sm bg-green-800" />
@@ -410,7 +410,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 資金成長曲線 */}
         {block.type === 'growth' && (
           <div className="pt-5 px-5 pb-5 cursor-grab" style={{ height: 280 }}>
-            <h3 className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-1">{t('growthCurve')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-1">{t('growthCurve')} {selectedSymbol !== '__all__' && <span className="text-xs text-[var(--gold)] ml-1">{selectedSymbol}</span>}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('initialCapitalLabel')}{convert(initialCapital)}</p>
             {growthData.length <= 1 ? (
               <div className="text-center text-gray-600 py-8">{t('noCompletedTrades')}</div>
@@ -451,7 +451,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   const lastPct = capitalRange === 0 ? 0 : (capital - minCapital) / capitalRange
                   return (
                     <div className="absolute right-0 text-right" style={{ bottom: `calc(${lastPct * 100}% - 10px)` }}>
-                      <div className="text-xs text-[#d4a843] font-semibold">{convert(capital)}</div>
+                      <div className="text-xs text-[var(--gold)] font-semibold">{convert(capital)}</div>
                       <div className="text-xs text-gray-600">
                         {capital >= initialCapital ? '+' : ''}
                         {((capital - initialCapital) / initialCapital * 100).toFixed(1)}%
@@ -479,7 +479,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {/* 策略勝率 */}
         {block.type === 'strategy' && Object.keys(strategyMap).length > 0 && (
           <div className="p-5 cursor-grab h-full">
-            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('strategyWinRate')} {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-1">{t('strategyWinRate')} {selectedSymbol !== '__all__' && <span className="text-xs text-[var(--gold)] ml-1">{selectedSymbol}</span>}</h3>
             <div className="space-y-3">
               {Object.entries(strategyMap).map(([name, data]) => {
                 const rate = data.wins / data.total * 100
@@ -514,7 +514,7 @@ export default function StatsPanel({ completed, trades }: Props) {
         {block.type === 'pie' && Object.keys(strategyMap).length > 0 && (
           <div className="p-4 cursor-grab flex flex-col" style={{ height: 280 }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
-              <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[#d4a843] ml-1">{selectedSymbol}</span>}</h3>
+              <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-1">各策略交易佔比 {selectedSymbol !== '__all__' && <span className="text-xs text-[var(--gold)] ml-1">{selectedSymbol}</span>}</h3>
               <div className="flex gap-3">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded-sm bg-green-800" />
@@ -627,7 +627,7 @@ export default function StatsPanel({ completed, trades }: Props) {
           <select
             value={selectedSymbol}
             onChange={e => setSelectedSymbol(e.target.value)}
-            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)] h-[38px] appearance-none"
           >
             <option value="__all__">全部標的</option>
             {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}

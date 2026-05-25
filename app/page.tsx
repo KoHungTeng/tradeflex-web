@@ -153,7 +153,7 @@ export default function Home() {
     </div>
   )
 
-  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)] h-[38px] appearance-none"
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: 8, gap: 8, overflow: 'hidden' }}>
@@ -325,7 +325,7 @@ export default function Home() {
                             <span className="w-12 font-semibold">{ct.symbol}</span>
                             <span className="w-36 text-gray-400 text-sm">{ct.open_price} → {ct.close_price}</span>
                             <span className="w-12 text-gray-400 text-sm">{ct.quantity} {t('lots')}</span>
-                            {ct.strategy && <span className="text-[#d4a843] text-xs">{ct.strategy}</span>}
+                            {ct.strategy && <span className="text-[var(--gold)] text-xs">{ct.strategy}</span>}
                           </div>
                           <div className="flex items-center gap-6">
                             <span className={`font-semibold ${ct.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -374,7 +374,7 @@ export default function Home() {
                                 </div>
                                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                   <p className="text-gray-500 mb-1">盈虧比</p>
-                                  <p className="text-[#d4a843] font-semibold">
+                                  <p className="text-[var(--gold)] font-semibold">
                                     {ct.sl && ct.sl !== ct.open_price
                                       ? `${Math.abs((ct.close_price - ct.open_price) / (ct.open_price - ct.sl)).toFixed(2)}R`
                                       : '--'}
@@ -382,11 +382,11 @@ export default function Home() {
                                 </div>
                                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                                   <p className="text-gray-500 mb-1">策略</p>
-                                  <p className="text-[#d4a843]">{ct.strategy || '--'}</p>
+                                  <p className="text-[var(--gold)]">{ct.strategy || '--'}</p>
                                 </div>
                                 <div className="px-3 py-2">
                                   <p className="text-gray-500 mb-1">備注</p>
-                                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{ct.remark || '--'}</div>
+                                  <div className="text-[var(--gold)] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{ct.remark || '--'}</div>
                                 </div>
                               </div>
                               {/* 第三行：指標 */}
@@ -418,9 +418,9 @@ export default function Home() {
                                   </div>
                                   <div className="px-3 py-2 col-span-4">
                                     <p className="text-gray-500 mb-2">開倉標籤</p>
-                                    <p className="text-[#d4a843] leading-relaxed mb-3">{ct.open_remark || '--'}</p>
+                                    <p className="text-[var(--gold)] leading-relaxed mb-3">{ct.open_remark || '--'}</p>
                                     <p className="text-gray-500 mb-2">平倉標籤</p>
-                                    <p className="text-[#d4a843] leading-relaxed">{ct.close_remark || '--'}</p>
+                                    <p className="text-[var(--gold)] leading-relaxed">{ct.close_remark || '--'}</p>
                                   </div>
                                 </div>
                               )}

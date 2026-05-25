@@ -54,7 +54,7 @@ export default function LoginPage() {
               onClick={() => setLanguage(lang.code as any)}
               className="px-3 py-1 rounded text-xs font-medium transition-colors"
               style={language === lang.code
-                ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
                 : { background: 'var(--bg-card)', color: '#666' }
               }
             >
@@ -102,7 +102,7 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className="w-full py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+              style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
             >
               {loading ? '處理中...' : isSignUp ? '註冊' : '登入'}
             </button>

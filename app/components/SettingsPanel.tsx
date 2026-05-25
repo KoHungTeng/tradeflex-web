@@ -628,7 +628,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             onClick={() => setActiveTab(tab.key as any)}
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={activeTab === tab.key
-              ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+              ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
               : { background: 'var(--bg-card)', color: '#888' }
             }
           >
@@ -649,7 +649,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         <div><label className="text-xs text-gray-500 mb-1 block">{t('tickValue')}</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
         <div><label className="text-xs text-gray-500 mb-1 block">{t('defaultFee')}</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
       </div>
-      <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
+      <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
     </div>
     <div className="rounded-xl overflow-hidden" style={cardStyle}>
       <table className="w-full text-sm">
@@ -692,7 +692,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   <td className="py-3 px-4">{s.default_fee}</td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2">
-                      <button onClick={() => setEditingSymbol(s)} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button>
+                      <button onClick={() => setEditingSymbol(s)} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
                       <button onClick={() => deleteSymbol(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
                     </div>
                   </td>
@@ -712,7 +712,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addCategory')}</h3>
             <div className="flex gap-3">
               <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder={t('categoryName')} className="input flex-1" />
-              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('add')}</button>
+              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('add')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -739,14 +739,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                     <button key={ind} type="button" onClick={() => toggleIndicator(ind)}
                       className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                       style={newStrategyIndicators.includes(ind)
-                        ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                        ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
                         : { background: 'var(--bg-card)', color: '#888' }
                       }
                     >{ind}</button>
                   ))}
                 </div>
               </div>
-              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('addStrategyBtn')}</button>
+              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('addStrategyBtn')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -760,7 +760,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                         <button key={ind} type="button" onClick={() => toggleEditingIndicator(ind)}
                           className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                           style={editingStrategy.indicators.includes(ind)
-                            ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                            ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
                             : { background: 'var(--bg-card)', color: '#888' }
                           }
                         >{ind}</button>
@@ -784,7 +784,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[#d4a843] text-xs px-2 py-1 rounded">{t('edit')}</button>
+                      <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
                       <button onClick={() => deleteStrategy(s.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
                     </div>
                   </div>
@@ -812,7 +812,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           type="button"
           onClick={addTag}
           className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-          style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+          style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
         >{t('add')}</button>
       </div>
     </div>
@@ -839,7 +839,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           value={editingTagName}
           onChange={e => setEditingTagName(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') updateTag(); if (e.key === 'Escape') { setEditingTag(null); setEditingTagName('') } }}
-          className="bg-[#222] border border-[#d4a843] rounded px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none w-32"
+          className="bg-[#222] border border-[var(--gold)] rounded px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none w-32"
           autoFocus
         />
         <button type="button" onClick={updateTag} className="text-green-400 text-xs px-1">✓</button>
@@ -848,7 +848,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     ) : (
       <div className="flex items-center gap-1 px-3 py-1.5">
         <span className="text-gray-300">#{tag.name}</span>
-        <button type="button" onClick={() => { setEditingTag(tag); setEditingTagName(tag.name) }} className="text-gray-600 hover:text-[#d4a843] ml-1 text-xs">✎</button>
+        <button type="button" onClick={() => { setEditingTag(tag); setEditingTagName(tag.name) }} className="text-gray-600 hover:text-[var(--gold)] ml-1 text-xs">✎</button>
 <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-red-400 text-xs">✕</button>
       </div>
     )}
@@ -873,7 +873,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <button key={lang.code} onClick={() => setLanguage(lang.code as any)}
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={language === lang.code
-                    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
                     : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{lang.label}</button>
@@ -888,7 +888,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               {['USD', 'TWD', 'EUR', 'JPY', 'CNY'].map(c => (
                 <button key={c} onClick={() => setCurrency(c)} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={currency === c
-                    ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
+                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
                     : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{c}</button>
@@ -899,7 +899,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               <p className="text-xs text-gray-500 mb-4">{t('capitalDesc')}</p>
               <div className="flex gap-3">
                 <input value={initialCapital} onChange={e => setInitialCapital(e.target.value)} type="number" className="input flex-1" placeholder="10000" />
-                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('save')}</button>
+                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('save')}</button>
               </div>
             </div>
             <p className="text-xs text-gray-600 mt-4">{t('current')}{currency} {symbol}</p>
@@ -914,10 +914,10 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <p className="text-xs text-gray-600 mb-4">{t('exportDesc')}</p>
             <div className="flex gap-3 mb-4">
               <button onClick={() => setExportRange('all')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
+                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('allData')}</button>
               <button onClick={() => setExportRange('custom')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
+                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('customDate')}</button>
             </div>
             {exportRange === 'custom' && (
@@ -926,7 +926,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">{t('endDate')}</label><input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" /></div>
               </div>
             )}
-            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('downloadCSV')}</button>
+            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('downloadCSV')}</button>
           </div>
 
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -981,14 +981,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   </table>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('confirmImport')}</button>
+                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('confirmImport')}</button>
                   <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
 
             {importStatus === 'importing' && (
-              <p className="text-xs text-[#d4a843]">匯入中，請稍候...</p>
+              <p className="text-xs text-[var(--gold)]">匯入中，請稍候...</p>
             )}
 
             {(importStatus === 'done' || importStatus === 'error') && (

@@ -114,7 +114,7 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="bg-[var(--bg-input)] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-[var(--text-primary)] w-full focus:outline-none"
+          className="bg-[var(--bg-input)] border border-[var(--gold)] rounded px-1 py-0.5 text-xs text-[var(--text-primary)] w-full focus:outline-none"
         />
         {showDropdown && filtered.length > 0 && (
           <div
@@ -336,7 +336,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       if (!isClose) {
                         if (trade.sl === trade.price) return <span className="text-gray-500 text-xs">--</span>
                         const rr = Math.abs((trade.tp - trade.price) / (trade.price - trade.sl))
-                        return <span className="text-[#d4a843] text-xs">{rr.toFixed(2)}R</span>
+                        return <span className="text-[var(--gold)] text-xs">{rr.toFixed(2)}R</span>
                       }
                       const openAction = trade.action === '平多' ? '做多' : '做空'
                       const openTrade = trades.find(t =>
@@ -366,7 +366,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
                       value={trade.strategy || ''}
                       tradeId={trade.id}
                       field="strategy"
-                      color="text-[#d4a843]"
+                      color="text-[var(--gold)]"
                       onSaved={onCompletedChanged}
                       options={strategies}
                       placeholder={t('searchStrategy')}

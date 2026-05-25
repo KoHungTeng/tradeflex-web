@@ -56,7 +56,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
       <button ref={btnRef} onClick={handleOpen}
         className="flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors"
         style={{
-          background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : 'var(--bg-card)',
+          background: selectedTags.length > 0 ? 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)' : 'var(--bg-card)',
           color: selectedTags.length > 0 ? '#000' : '#aaa',
           border: '1px solid #2a2a2a', width: 120, height: 38, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}
@@ -70,7 +70,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
           <div className="p-2 border-b border-[var(--border)]">
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
               placeholder="搜尋標籤..."
-              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]" />
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]" />
           </div>
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {allTags.length === 0 ? <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }
-  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)] h-[38px] appearance-none w-[120px]"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
@@ -201,18 +201,18 @@ function exportPDF() {
           <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid #2a2a2a' }}>
             <button onClick={() => setMode('single')}
               className="px-3 py-1.5 text-sm font-medium transition-colors"
-              style={mode === 'single' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
+              style={mode === 'single' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
               單策略
             </button>
             <button onClick={() => setMode('compare')}
               className="px-3 py-1.5 text-sm font-medium transition-colors"
-              style={mode === 'compare' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
+              style={mode === 'compare' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
               策略比較
             </button>
           </div>
           <button onClick={exportPDF}
             className="no-print px-4 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>
+            style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>
             ↓ 輸出 PDF
           </button>
         </div>
@@ -268,8 +268,8 @@ function exportPDF() {
                   { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-[var(--text-primary)]' },
                   { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-green-400' : 'text-red-400' },
                   { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-green-400' : 'text-red-400' },
-                  { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[#d4a843]' },
-                  { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[#d4a843]' },
+                  { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[var(--gold)]' },
+                  { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[var(--gold)]' },
                   { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-[var(--text-primary)]' },
                 ].map(item => (
                   <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
@@ -347,7 +347,7 @@ function exportPDF() {
             {list.map(({ tag, count, freq }) => (
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#d4a843]">{tag}</span>
+                  <span className="text-[var(--gold)]">{tag}</span>
                   <span className="text-green-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
@@ -379,7 +379,7 @@ function exportPDF() {
             {list.map(({ tag, count, freq }) => (
               <div key={tag}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-[#d4a843]">{tag}</span>
+                  <span className="text-[var(--gold)]">{tag}</span>
                   <span className="text-red-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
@@ -451,7 +451,7 @@ function exportPDF() {
                 </div>
                 <div className="px-3 py-2" style={{ borderRight: '1px solid #1a1a1a' }}>
                   <p className="text-gray-500 mb-1">盈虧比</p>
-                  <p className="text-[#d4a843] font-semibold">
+                  <p className="text-[var(--gold)] font-semibold">
                     {trade.tp && trade.sl && trade.sl !== trade.open_price
                       ? `${Math.abs((trade.close_price - trade.open_price) / (trade.open_price - trade.sl)).toFixed(2)}R`
                       : '--'}
@@ -459,7 +459,7 @@ function exportPDF() {
                 </div>
                 <div className="px-3 py-2 col-span-2">
                   <p className="text-gray-500 mb-1">標籤</p>
-                  <div className="text-[#d4a843] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{trade.remark || '--'}</div>
+                  <div className="text-[var(--gold)] leading-relaxed overflow-y-auto" style={{ height: 32 }}>{trade.remark || '--'}</div>
                 </div>
               </div>
               {(trade.big_dif != null || trade.big_rsi != null || trade.small_dif != null) && (
@@ -490,9 +490,9 @@ function exportPDF() {
                   </div>
                   <div className="px-3 py-2 col-span-2">
                     <p className="text-gray-500 mb-2">開倉標籤</p>
-                    <p className="text-[#d4a843] leading-relaxed mb-3">{trade.open_remark || '--'}</p>
+                    <p className="text-[var(--gold)] leading-relaxed mb-3">{trade.open_remark || '--'}</p>
                     <p className="text-gray-500 mb-2">平倉標籤</p>
-                    <p className="text-[#d4a843] leading-relaxed">{trade.close_remark || '--'}</p>
+                    <p className="text-[var(--gold)] leading-relaxed">{trade.close_remark || '--'}</p>
                   </div>
                 </div>
               )}
@@ -706,7 +706,7 @@ function TagAnalysisCard({ trades, cardStyle }: {
           <div key={tag}>
             <div className="flex items-center justify-between text-xs mb-1">
               <div className="flex items-center gap-2">
-                <span className="text-[#d4a843] font-medium">{tag}</span>
+                <span className="text-[var(--gold)] font-medium">{tag}</span>
                 <span className="text-gray-600">{count} 筆</span>
               </div>
               <div className="flex items-center gap-3">
@@ -715,13 +715,13 @@ function TagAnalysisCard({ trades, cardStyle }: {
                 <span className={`font-semibold w-10 text-right ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                   勝{winRate.toFixed(0)}%
                 </span>
-                <span className="text-[#d4a843] font-semibold w-12 text-right">
+                <span className="text-[var(--gold)] font-semibold w-12 text-right">
                   出現{freq.toFixed(0)}%
                 </span>
               </div>
             </div>
             <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: 'var(--bg-card)' }}>
-              <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #d4a843, #b8892e)' }} />
+              <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, var(--gold), var(--gold-dark))' }} />
             </div>
             <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
               <div className="h-full rounded-full" style={{

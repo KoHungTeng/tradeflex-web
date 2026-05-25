@@ -153,7 +153,7 @@ export default function CalendarView({ completed }: Props) {
                   setNoteInput('')
                 }}
                 className={`rounded-lg p-2 aspect-square flex flex-col cursor-pointer transition-colors ${
-                  isToday ? 'ring-2 ring-[#d4a843]' : ''
+                  isToday ? 'ring-2 ring-[var(--gold)]' : ''
                 } ${isSelected ? 'ring-2 ring-yellow-500' : ''}`}
                 style={hasTrade ? {
                   background: pnl > 0 ? '#00C076' : '#FF5B5B',
@@ -165,7 +165,7 @@ export default function CalendarView({ completed }: Props) {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
               >
-                <span className={`text-xs font-medium ${isToday ? 'text-[#d4a843]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
+                <span className={`text-xs font-medium ${isToday ? 'text-[var(--gold)]' : theme === 'light' ? 'text-black' : 'text-white'}`}>
                   {day}
                 </span>
                 {hasTrade && (
@@ -182,7 +182,7 @@ export default function CalendarView({ completed }: Props) {
                   </div>
                 )}
                 {notes.length > 0 && (
-                  <span className="text-xs text-[#d4a843] mt-1">筆記 {notes.length}</span>
+                  <span className="text-xs text-[var(--gold)] mt-1">筆記 {notes.length}</span>
                 )}
               </div>
             </div>
@@ -260,13 +260,13 @@ export default function CalendarView({ completed }: Props) {
           onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
           placeholder={t('calendarNotePlaceholder')}
           autoFocus
-          className="flex-1 bg-[var(--bg-input)] border border-gray-600 rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#d4a843]"
+          className="flex-1 bg-[var(--bg-input)] border border-gray-600 rounded-lg px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold)]"
         />
         <button
           onClick={saveNote}
           disabled={saving}
           className="px-3 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-          style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}
+          style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
         >
           {t('calendarSave')}
         </button>

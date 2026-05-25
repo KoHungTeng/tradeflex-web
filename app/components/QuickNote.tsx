@@ -67,7 +67,7 @@ export default function QuickNote() {
             <button
               onClick={addNote}
               disabled={submitting}
-              className="px-3 py-1.5 bg-[#d4a843] hover:bg-[#b8892e] rounded text-xs text-[var(--text-primary)] disabled:opacity-50"
+              className="px-3 py-1.5 bg-[var(--gold)] hover:bg-[var(--gold-dark)] rounded text-xs text-[var(--text-primary)] disabled:opacity-50"
             >
               {t('noteAdd')}
             </button>
