@@ -101,7 +101,7 @@ export default function CalendarView({ completed }: Props) {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={prevMonth}
-          className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors"
+          className="p-2 hover:bg-[var(--bg-card)] rounded-lg transition-colors"
         >←</button>
 
         <div className="text-center">
@@ -119,7 +119,7 @@ export default function CalendarView({ completed }: Props) {
 
         <button
           onClick={nextMonth}
-          className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors"
+          className="p-2 hover:bg-[var(--bg-card)] rounded-lg transition-colors"
         >→</button>
       </div>
 
@@ -197,7 +197,7 @@ export default function CalendarView({ completed }: Props) {
       onClick={e => e.stopPropagation()}
       className="rounded-2xl p-6 w-80 shadow-2xl"
       style={{
-        background: '#1a1a1a',
+        background: 'var(--bg-card)',
         border: '1px solid #2a2a2a',
         animation: 'modalPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
       }}
@@ -258,7 +258,7 @@ export default function CalendarView({ completed }: Props) {
           onKeyDown={e => { if (e.key === 'Enter' && !isComposingRef.current && Date.now() - compositionEndTimeRef.current > 50) { e.preventDefault(); saveNote() } }}
           placeholder={t('calendarNotePlaceholder')}
           autoFocus
-          className="flex-1 bg-[#222222] border border-gray-600 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+          className="flex-1 bg-[var(--bg-input)] border border-gray-600 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#d4a843]"
         />
         <button
           onClick={saveNote}

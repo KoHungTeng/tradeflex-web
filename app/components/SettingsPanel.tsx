@@ -629,7 +629,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={activeTab === tab.key
               ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-              : { background: '#1a1a1a', color: '#888' }
+              : { background: 'var(--bg-card)', color: '#888' }
             }
           >
             {tab.label}
@@ -654,7 +654,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     <div className="rounded-xl overflow-hidden" style={cardStyle}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-gray-500 border-b border-[#2a2a2a] text-left">
+          <tr className="text-gray-500 border-b border-[var(--border)] text-left">
             <th className="py-3 px-4">{t('symbolName')}</th>
             <th className="py-3 px-4">{t('category')}</th>
             <th className="py-3 px-4">{t('tickSize')}</th>
@@ -666,7 +666,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         </thead>
         <tbody>
           {symbols.map(s => (
-            <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[#1a1a1a]/30">
+            <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[var(--bg-card)]/30">
               {editingSymbol?.id === s.id ? (
                 <>
                   <td className="py-2 px-4"><input value={editingSymbol.name} onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})} className="input w-24" /></td>
@@ -717,7 +717,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
             {categories.map(c => (
-              <div key={c.id} className="flex items-center justify-between py-2 border-b border-[#2a2a2a]">
+              <div key={c.id} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
                 <span className="text-sm">{c.name}</span>
                 <button onClick={() => deleteCategory(c.id)} className="text-red-500 hover:text-red-400 text-xs px-2 py-1 rounded">{t('delete')}</button>
               </div>
@@ -740,7 +740,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                       style={newStrategyIndicators.includes(ind)
                         ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                        : { background: '#1a1a1a', color: '#888' }
+                        : { background: 'var(--bg-card)', color: '#888' }
                       }
                     >{ind}</button>
                   ))}
@@ -751,7 +751,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
             {[...strategies].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')).map(s => (
-              <div key={s.id} className="border-b border-[#2a2a2a] py-3">
+              <div key={s.id} className="border-b border-[var(--border)] py-3">
                 {editingStrategy?.id === s.id ? (
                   <div className="flex flex-col gap-2">
                     <input value={editingStrategy.name} onChange={e => setEditingStrategy({...editingStrategy, name: e.target.value})} className="input" />
@@ -761,7 +761,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                           className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                           style={editingStrategy.indicators.includes(ind)
                             ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                            : { background: '#1a1a1a', color: '#888' }
+                            : { background: 'var(--bg-card)', color: '#888' }
                           }
                         >{ind}</button>
                       ))}
@@ -778,7 +778,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                       {s.indicators && s.indicators.length > 0 && (
                         <div className="flex gap-1 mt-1">
                           {s.indicators.map(ind => (
-                            <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: '#1a1a1a', color: '#888' }}>{ind}</span>
+                            <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', color: '#888' }}>{ind}</span>
                           ))}
                         </div>
                       )}
@@ -832,7 +832,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         <p className="text-xs text-gray-500 mb-2">{prefix}</p>
         <div className="flex flex-wrap gap-2">
           {groupTags.map(tag => (
-  <div key={tag.id} className="flex items-center gap-1 rounded-full text-sm group" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+  <div key={tag.id} className="flex items-center gap-1 rounded-full text-sm group" style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a' }}>
     {editingTag?.id === tag.id ? (
       <div className="flex items-center gap-1 px-2 py-1">
         <input
@@ -874,7 +874,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={language === lang.code
                     ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                    : { background: '#1a1a1a', color: '#888' }
+                    : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{lang.label}</button>
               ))}
@@ -889,7 +889,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <button key={c} onClick={() => setCurrency(c)} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={currency === c
                     ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                    : { background: '#1a1a1a', color: '#888' }
+                    : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{c}</button>
               ))}
@@ -914,10 +914,10 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <p className="text-xs text-gray-600 mb-4">{t('exportDesc')}</p>
             <div className="flex gap-3 mb-4">
               <button onClick={() => setExportRange('all')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
+                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('allData')}</button>
               <button onClick={() => setExportRange('custom')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}
+                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('customDate')}</button>
             </div>
             {exportRange === 'custom' && (
@@ -942,7 +942,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
 
             {importStatus === 'idle' && (
-              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}>
+              <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-card)', color: 'var(--gold)', border: '1px solid #2a2a2a' }}>
                 {t('selectCSV')}
               </button>
             )}
@@ -953,7 +953,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <div className="overflow-x-auto mb-4">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-gray-500 border-b border-[#2a2a2a]">
+                      <tr className="text-gray-500 border-b border-[var(--border)]">
                         {[t('closeTime'), t('symbol'), t('strategyLabel'), t('entryPrice'), t('closePrice'), t('quantity'), 'P&L'].map(h => (
                           <th key={h} className="py-2 px-2 text-left">{h}</th>
                         ))}
@@ -982,7 +982,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }}>{t('confirmImport')}</button>
-                  <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
+                  <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
@@ -994,7 +994,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             {(importStatus === 'done' || importStatus === 'error') && (
               <div>
                 <p className={`text-xs mb-3 ${importStatus === 'done' ? 'text-green-400' : 'text-red-400'}`}>{importMessage}</p>
-                <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('reimport')}</button>
+                <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('reimport')}</button>
               </div>
             )}
           </div>
@@ -1003,7 +1003,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <h3 className="text-sm font-semibold text-red-400 mb-1">{t('clearHistory')}</h3>
             <p className="text-xs text-gray-600 mb-4">{t('clearDesc')}</p>
             {clearStatus === 'idle' && (
-              <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#1a1a1a', color: '#f87171', border: '1px solid #3a1a1a' }}>
+              <button onClick={() => setClearStatus('confirm')} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'var(--bg-card)', color: '#f87171', border: '1px solid #3a1a1a' }}>
                 {t('clearBtn')}
               </button>
             )}
@@ -1012,7 +1012,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <p className="text-xs text-red-400 mb-3">{t('clearConfirm')}</p>
                 <div className="flex gap-3">
                   <button onClick={clearAllTrades} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#7f1d1d', color: '#fca5a5' }}>{t('confirmClear')}</button>
-                  <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
+                  <button onClick={() => setClearStatus('idle')} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
             )}
@@ -1020,7 +1020,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             {clearStatus === 'done' && (
               <div>
                 <p className="text-xs text-green-400 mb-3">{t('cleared')}</p>
-                <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}>{t('close')}</button>
+                <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('close')}</button>
               </div>
             )}
           </div>

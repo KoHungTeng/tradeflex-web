@@ -1,31 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-base: #0a0a0a;
+  --bg-card: #1a1a1a;
+  --bg-card2: #161616;
+  --bg-card3: #272727;
+  --bg-card4: #1e1e1e;
+  --bg-input: #222222;
+  --bg-hover: #2a2a2a;
+  --border: #2a2a2a;
+  --border-light: #3a3a3a;
+  --text-primary: #e5e5e5;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --gold: #d4a843;
+  --gold-dark: #b8892e;
+  --scrollbar-thumb: #333333;
+  --scrollbar-track: #0a0a0a;
+}
+
+[data-theme="light"] {
+  --bg-base: #f0f0f0;
+  --bg-card: #ffffff;
+  --bg-card2: #f8f8f8;
+  --bg-card3: #eeeeee;
+  --bg-card4: #f5f5f5;
+  --bg-input: #f0f0f0;
+  --bg-hover: #e0e0e0;
+  --border: #d0d0d0;
+  --border-light: #bbbbbb;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  --gold: #b8892e;
+  --gold-dark: #9a7020;
+  --scrollbar-thumb: #bbbbbb;
+  --scrollbar-track: #e8e8e8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: #0a0a0a;
-  color: #e5e5e5;
+  background: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
 .input {
-  @apply w-full border rounded-lg px-3 py-2 text-sm focus:outline-none text-white;
-  background: #1a1a1a;
-  border-color: #2a2a2a;
+  @apply w-full border rounded-lg px-3 py-2 text-sm focus:outline-none;
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
 .input:focus {
-  border-color: #d4a843;
+  border-color: var(--gold);
 }
 
 /* 漸層外框 */
@@ -40,7 +74,7 @@ body {
   inset: 0;
   border-radius: 12px;
   padding: 1px;
-  background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 50%, #3a3a3a 100%);
+  background: linear-gradient(135deg, var(--border-light) 0%, var(--border) 50%, var(--border-light) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -48,7 +82,7 @@ body {
 }
 
 .gold-border-inner {
-  background: linear-gradient(160deg, #161616 0%, #0f0f0f 100%);
+  background: linear-gradient(160deg, var(--bg-card2) 0%, var(--bg-base) 100%);
   border-radius: 11px;
   width: 100%;
   height: 100%;
@@ -57,62 +91,18 @@ body {
 
 @media print {
   .no-print { display: none !important; }
-
-  body, html {
-    background: #fff !important;
-  }
-
-  body * {
-    color: #000 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .gold-border::before {
-    display: none !important;
-  }
-
-  .gold-border-inner {
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
-
-  .flex-1 {
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
+  body, html { background: #fff !important; }
+  body * { color: #000 !important; background: transparent !important; box-shadow: none !important; }
+  .gold-border::before { display: none !important; }
+  .gold-border-inner { overflow: visible !important; height: auto !important; max-height: none !important; }
+  .flex-1 { overflow: visible !important; height: auto !important; max-height: none !important; }
 }
+
 @keyframes modalPop {
   0% { opacity: 0; transform: scale(0.85); }
   100% { opacity: 1; transform: scale(1); }
 }
-/* 統一捲軸樣式 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
 
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #444444;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #333333 #0a0a0a;
-}
-
-/* 頁面切換淡入動畫 */
 @keyframes pageFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -122,14 +112,13 @@ body {
   animation: pageFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* 數字等寬字體 */
-.num {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
 
-/* 數字等寬字體 - 套用到所有數字顯示 */
-.font-bold, .font-semibold {
+.num, .font-bold, .font-semibold {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }

@@ -81,7 +81,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
       className="w-14 flex flex-col items-center py-4 gap-1"
       style={{ background: 'linear-gradient(180deg, #111111 0%, #0a0a0a 100%)' }}
     >
-      <div className="font-bold text-xs mb-4" style={{ color: '#d4a843' }}>TF</div>
+      <div className="font-bold text-xs mb-4" style={{ color: 'var(--gold)' }}>TF</div>
 
       {NAV_ITEMS.map(item => {
         const isActive = page === item.id
@@ -97,8 +97,8 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
             } : { color: '#666' }}
             onMouseEnter={e => {
               if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = '#1a1a1a'
-                ;(e.currentTarget as HTMLElement).style.color = '#d4a843'
+                (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'
+                ;(e.currentTarget as HTMLElement).style.color = 'var(--gold)'
               }
             }}
             onMouseLeave={e => {
@@ -111,7 +111,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
             {item.icon}
           </button>
           <div className="absolute left-14 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50"
-            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#d4a843', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
+            style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a', color: 'var(--gold)', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
             {item.label}
           </div>
           </div>
@@ -133,7 +133,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
                 background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)',
                 color: '#000',
                 boxShadow: '0 0 12px rgba(212,168,67,0.25)',
-              } : { background: '#1a1a1a', color: '#666' }}
+              } : { background: 'var(--bg-card)', color: '#666' }}
             >
               {p.name.slice(0, 2)}
             </button>

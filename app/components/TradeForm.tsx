@@ -96,18 +96,18 @@ function SearchDropdown({ options, value, onChange, placeholder }: {
             top: pos.top,
             left: pos.left,
             width: pos.width,
-            background: '#1a1a1a',
+            background: 'var(--bg-card)',
             border: '1px solid #2a2a2a',
           }}
         >
-          <div className="p-2 border-b border-[#2a2a2a]">
+          <div className="p-2 border-b border-[var(--border)]">
             <input
               ref={inputRef}
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋..."
-              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -124,7 +124,7 @@ function SearchDropdown({ options, value, onChange, placeholder }: {
                     setSearch('')
                   }}
                   className="px-3 py-2 text-xs cursor-pointer hover:bg-[#2a2a2a]"
-                  style={{ color: value === opt ? '#d4a843' : '#ccc' }}
+                  style={{ color: value === opt ? 'var(--gold)' : '#ccc' }}
                 >
                   {opt}
                 </div>
@@ -207,18 +207,18 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
             top: pos.top,
             left: pos.left,
             width: Math.max(pos.width, 160),
-            background: '#1a1a1a',
+            background: 'var(--bg-card)',
             border: '1px solid #2a2a2a',
           }}
         >
-          <div className="p-2 border-b border-[#2a2a2a]">
+          <div className="p-2 border-b border-[var(--border)]">
             <input
               ref={inputRef}
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
               placeholder="搜尋標籤..."
-              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]"
             />
           </div>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -234,7 +234,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
     className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
     style={{
       background: selectedTags.includes(tag) ? '#2a2000' : 'transparent',
-      color: selectedTags.includes(tag) ? '#d4a843' : '#ccc',
+      color: selectedTags.includes(tag) ? 'var(--gold)' : '#ccc',
     }}
   >
     <span>{tag}</span>
@@ -244,7 +244,7 @@ function TagDropdown({ tags, value, onChange, placeholder }: {
             )}
           </div>
           {value && (
-            <div className="p-2 border-t border-[#2a2a2a]">
+            <div className="p-2 border-t border-[var(--border)]">
               <button
                 onMouseDown={e => { e.preventDefault(); onChange(''); setOpen(false) }}
                 className="w-full text-xs py-1 rounded"
@@ -465,7 +465,7 @@ const newTrade: any = {
                 ? a === '做多' || a === '平多'
                   ? 'bg-green-600 text-white'
                   : 'bg-red-600 text-white'
-                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222]'
+                : 'bg-[var(--bg-card)] text-gray-400 hover:bg-[var(--bg-input)]'
             }`}
           >
             {actionLabels[i]}
@@ -545,7 +545,7 @@ const newTrade: any = {
                 type="button"
                 onClick={addExtraPrice}
                 className="text-xs px-1.5 py-0.5 rounded transition-colors"
-                style={{ background: '#1a1a1a', color: '#d4a843', border: '1px solid #2a2a2a' }}
+                style={{ background: 'var(--bg-card)', color: 'var(--gold)', border: '1px solid #2a2a2a' }}
               >
                 {t('splitPosition')}
               </button>
@@ -566,7 +566,7 @@ const newTrade: any = {
                   type="button"
                   onClick={() => removeExtraPrice(i)}
                   className="text-xs px-2 rounded flex-shrink-0"
-                  style={{ background: '#1a1a1a', color: '#888', border: '1px solid #2a2a2a' }}
+                  style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}
                 >✕</button>
               </div>
               <input
@@ -678,8 +678,8 @@ const newTrade: any = {
               }}
               className="text-xs px-1.5 py-0.5 rounded transition-colors"
               style={useCustomTime
-                ? { background: '#2a1a00', color: '#d4a843', border: '1px solid #3a2a00' }
-                : { background: '#1a1a1a', color: '#666', border: '1px solid #2a2a2a' }
+                ? { background: '#2a1a00', color: 'var(--gold)', border: '1px solid #3a2a00' }
+                : { background: 'var(--bg-card)', color: '#666', border: '1px solid #2a2a2a' }
               }
             >
               {useCustomTime ? t('customTime') : t('currentTime')}
@@ -802,7 +802,7 @@ function MiniField({ label, value, onChange }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         type="number" step="0.01" placeholder="--"
-        className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-white text-center"
+        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#d4a843] text-white text-center"
       />
     </div>
   )

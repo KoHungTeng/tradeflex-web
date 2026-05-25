@@ -114,13 +114,13 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="bg-[#222222] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
+          className="bg-[var(--bg-input)] border border-[#d4a843] rounded px-1 py-0.5 text-xs text-white w-full focus:outline-none"
         />
         {showDropdown && filtered.length > 0 && (
           <div
             className="fixed z-50 rounded-lg shadow-xl"
             style={{
-              background: '#1a1a1a',
+              background: 'var(--bg-card)',
               border: '1px solid #2a2a2a',
               minWidth: 150,
               maxHeight: 160,
@@ -138,13 +138,13 @@ function DropdownEditCell({ value, tradeId, field, color, onSaved, options, plac
                   className="px-3 py-1.5 text-xs cursor-pointer flex items-center justify-between gap-2"
                   style={{
                     background: isSelected ? '#2a2000' : 'transparent',
-                    color: isSelected ? '#d4a843' : '#ccc',
+                    color: isSelected ? 'var(--gold)' : '#ccc',
                   }}
-                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = '#2a2a2a' }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = 'var(--border)' }}
                   onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
                 >
                   <span>{opt}</span>
-                  {isSelected && <span style={{ color: '#d4a843' }}>✓</span>}
+                  {isSelected && <span style={{ color: 'var(--gold)' }}>✓</span>}
                 </div>
               )
             })}
@@ -179,7 +179,7 @@ function IndicatorTooltip({ trade, pos, higherTF, lowerTF }: {
   return (
     <div
       className="fixed z-50 rounded-lg p-3 shadow-xl text-xs pointer-events-none"
-      style={{ left: pos.x + 10, top: pos.y + 10, minWidth: 320, background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+      style={{ left: pos.x + 10, top: pos.y + 10, minWidth: 320, background: 'var(--bg-card)', border: '1px solid #2a2a2a' }}
     >
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -298,12 +298,12 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
             ))}
           </colgroup>
           <thead>
-            <tr className="text-gray-500 border-b border-[#222222] text-left">
+            <tr className="text-gray-500 border-b border-[var(--border)] text-left">
               {COLS.map(col => (
                 <th key={col.key} className="py-2 px-3 select-none whitespace-nowrap overflow-hidden font-medium text-center relative">
   {col.label}
   {col.key !== 'delete' && (
-    <div className="absolute right-0 top-0 h-full w-[1px]" style={{ background: '#2a2a2a' }} />
+    <div className="absolute right-0 top-0 h-full w-[1px]" style={{ background: 'var(--border)' }} />
   )}
 </th>
               ))}
@@ -315,7 +315,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
               return (
                 <tr
                   key={trade.id}
-                  className="border-b border-[#222222]/50 hover:bg-[#111111]/50"
+                  className="border-b border-[var(--border)]/50 hover:bg-[var(--bg-card)]/50"
                   onMouseEnter={() => setHoveredTrade(trade)}
                   onMouseLeave={() => setHoveredTrade(null)}
                 >
@@ -379,7 +379,7 @@ export default function TradeList({ trades, onDeleted, onCompletedChanged }: Pro
 >
   {trade.remark && (
     <div className="absolute z-50 hidden group-hover/remark:block bottom-full left-0 mb-1 px-2 py-1 rounded text-xs text-white whitespace-nowrap pointer-events-none"
-      style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+      style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a' }}>
       {trade.remark}
     </div>
   )}

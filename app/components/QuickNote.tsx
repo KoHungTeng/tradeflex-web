@@ -50,9 +50,9 @@ export default function QuickNote() {
   }
 
   return (
-    <div className="bg-[#111111] px-4 py-3" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="bg-[var(--bg-card)] px-4 py-3" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div className="flex gap-2 items-center flex-shrink-0 justify-between">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4a843" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
@@ -85,7 +85,7 @@ export default function QuickNote() {
           <p className="text-gray-600 text-xs px-1">{t('noNotes')}</p>
         ) : (
           notes.map(n => (
-            <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[#1a1a1a] gap-2 relative">
+            <div key={n.id} className="flex items-center px-3 py-1.5 text-sm group flex-shrink-0 rounded-lg transition-colors hover:bg-[var(--bg-card)] gap-2 relative">
               <span className="text-gray-500 text-xs flex-shrink-0">•</span>
               <span className="text-white min-w-0 truncate flex-1">{n.text}</span>
               <span className="text-gray-500 text-xs flex-shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>{(() => {
@@ -100,7 +100,7 @@ export default function QuickNote() {
               })()}</span>
               <button
                 onClick={() => deleteNote(n.id)}
-                className="absolute right-3 text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity bg-[#1a1a1a] px-1"
+                className="absolute right-3 text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-card)] px-1"
               >
                 ✕
               </button>

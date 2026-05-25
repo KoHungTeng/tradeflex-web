@@ -56,7 +56,7 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
       <button ref={btnRef} onClick={handleOpen}
         className="flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors"
         style={{
-          background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : '#1a1a1a',
+          background: selectedTags.length > 0 ? 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)' : 'var(--bg-card)',
           color: selectedTags.length > 0 ? '#000' : '#aaa',
           border: '1px solid #2a2a2a', width: 120, height: 38, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}
@@ -66,11 +66,11 @@ function TagDropdown({ allTags, selectedTags, onToggle, onClear }: {
       </button>
       {open && (
         <div ref={dropRef} className="fixed z-50 rounded-lg shadow-xl"
-          style={{ top: pos.top, left: pos.left, background: '#1a1a1a', border: '1px solid #2a2a2a', width: 200 }}>
-          <div className="p-2 border-b border-[#2a2a2a]">
+          style={{ top: pos.top, left: pos.left, background: 'var(--bg-card)', border: '1px solid #2a2a2a', width: 200 }}>
+          <div className="p-2 border-b border-[var(--border)]">
             <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
               placeholder="搜尋標籤..."
-              className="w-full bg-[#222222] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]" />
+              className="w-full bg-[var(--bg-input)] border border-[#333] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#d4a843]" />
           </div>
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {allTags.length === 0 ? <div className="px-3 py-2 text-xs text-gray-600">尚無標籤</div>
@@ -89,7 +89,7 @@ const prefix = rawName.includes('/') ? rawName.split('/')[0] : rawName
                     {groupTags.map(tag => (
                       <div key={tag} onMouseDown={e => { e.preventDefault(); onToggle(tag) }}
                         className="px-3 py-2 text-xs cursor-pointer flex items-center justify-between"
-                        style={{ background: selectedTags.includes(tag) ? '#2a2000' : 'transparent', color: selectedTags.includes(tag) ? '#d4a843' : '#ccc' }}>
+                        style={{ background: selectedTags.includes(tag) ? '#2a2000' : 'transparent', color: selectedTags.includes(tag) ? 'var(--gold)' : '#ccc' }}>
                         <span>{tag}</span>
                         {selectedTags.includes(tag) && <span>✓</span>}
                       </div>
@@ -99,7 +99,7 @@ const prefix = rawName.includes('/') ? rawName.split('/')[0] : rawName
               })()}
           </div>
           {selectedTags.length > 0 && (
-            <div className="p-2 border-t border-[#2a2a2a]">
+            <div className="p-2 border-t border-[var(--border)]">
               <button onMouseDown={e => { e.preventDefault(); onClear(); setOpen(false) }}
                 className="w-full text-xs py-1 rounded" style={{ background: '#2a1a1a', color: '#f87171' }}>
                 清除標籤
@@ -167,7 +167,7 @@ function exportPDF() {
   const strategyNames = Array.from(new Set(completed.map(t => t.strategy).filter(Boolean)))
 
   const cardStyle = { background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none w-[120px]"
 
   // 單策略篩選
   const byStrategy = selected === '__all__' ? completed : completed.filter(t => t.strategy === selected)
@@ -201,12 +201,12 @@ function exportPDF() {
           <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid #2a2a2a' }}>
             <button onClick={() => setMode('single')}
               className="px-3 py-1.5 text-sm font-medium transition-colors"
-              style={mode === 'single' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}>
+              style={mode === 'single' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
               單策略
             </button>
             <button onClick={() => setMode('compare')}
               className="px-3 py-1.5 text-sm font-medium transition-colors"
-              style={mode === 'compare' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: '#1a1a1a', color: '#888' }}>
+              style={mode === 'compare' ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}>
               策略比較
             </button>
           </div>
@@ -350,7 +350,7 @@ function exportPDF() {
                   <span className="text-[#d4a843]">{tag}</span>
                   <span className="text-green-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #22c55e, #16a34a)' }} />
                 </div>
               </div>
@@ -382,7 +382,7 @@ function exportPDF() {
                   <span className="text-[#d4a843]">{tag}</span>
                   <span className="text-red-400 font-semibold">{freq.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                   <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #ef4444, #dc2626)' }} />
                 </div>
               </div>
@@ -399,7 +399,7 @@ function exportPDF() {
     {filtered.map(trade => (
       <div key={trade.id}>
         <div
-          className="flex items-center justify-between py-2 border-b border-[#222222] cursor-pointer"
+          className="flex items-center justify-between py-2 border-b border-[var(--border)] cursor-pointer"
           onClick={() => setExpandedTrade(expandedTrade === trade.id ? null : trade.id)}
         >
           <div className="flex items-center gap-3">
@@ -654,7 +654,7 @@ function IndicatorCompare({ label, wins, losses, field, winLabel, lossLabel }: {
           <span className="text-red-400">{lossLabel}: {lossAvg?.toFixed(2) ?? '--'}</span>
         </div>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
         {winAvg !== null && (
           <div className="h-full bg-green-500 rounded-full"
             style={{ width: `${Math.min(Math.abs(winAvg) / (Math.abs(winAvg) + Math.abs(lossAvg ?? 1)) * 100, 100)}%` }} />
@@ -720,10 +720,10 @@ function TagAnalysisCard({ trades, cardStyle }: {
                 </span>
               </div>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: '#1a1a1a' }}>
+            <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: 'var(--bg-card)' }}>
               <div className="h-full rounded-full" style={{ width: `${freq}%`, background: 'linear-gradient(90deg, #d4a843, #b8892e)' }} />
             </div>
-            <div className="h-1 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
               <div className="h-full rounded-full" style={{
                 width: `${winRate}%`,
                 background: winRate >= 50 ? 'linear-gradient(90deg, #22c55e, #16a34a)' : 'linear-gradient(90deg, #ef4444, #dc2626)',

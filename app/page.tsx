@@ -148,15 +148,15 @@ export default function Home() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen text-white text-lg" style={{ background: '#0a0a0a' }}>
+    <div className="flex items-center justify-center h-screen text-white text-lg" style={{ background: 'var(--bg-base)' }}>
       載入中...
     </div>
   )
 
-  const selectStyle = "bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+  const selectStyle = "bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0a0a', color: 'white', padding: 8, gap: 8, overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)', padding: 8, gap: 8, overflow: 'hidden' }}>
 
       <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
 
@@ -315,7 +315,7 @@ export default function Home() {
                       <div key={ct.id}>
                         <div
                           className="rounded-lg p-4 flex items-center justify-between cursor-pointer"
-                          style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: `1px solid ${expandedHistory === ct.id ? '#d4a843' : '#3a3a3a'}`, borderBottom: expandedHistory === ct.id ? 'none' : `1px solid #3a3a3a`, borderRadius: expandedHistory === ct.id ? '8px 8px 0 0' : '8px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
+                          style={{ background: 'linear-gradient(160deg, #272727 0%, #1e1e1e 100%)', border: `1px solid ${expandedHistory === ct.id ? 'var(--gold)' : 'var(--border-light)'}`, borderBottom: expandedHistory === ct.id ? 'none' : `1px solid #3a3a3a`, borderRadius: expandedHistory === ct.id ? '8px 8px 0 0' : '8px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
                           onClick={() => setExpandedHistory(expandedHistory === ct.id ? null : ct.id)}
                         >
                           <div className="flex items-center gap-4">
@@ -447,13 +447,13 @@ export default function Home() {
                         <div className="flex items-center justify-center gap-2 mt-4">
                           <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1}
                             className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-30"
-                            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#aaa' }}>
+                            style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a', color: '#aaa' }}>
                             ← 上一頁
                           </button>
                           <span className="text-xs text-gray-500">{historyPage} / {totalPages}</span>
                           <button onClick={() => setHistoryPage(p => Math.min(totalPages, p + 1))} disabled={historyPage === totalPages}
                             className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-30"
-                            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#aaa' }}>
+                            style={{ background: 'var(--bg-card)', border: '1px solid #2a2a2a', color: '#aaa' }}>
                             下一頁 →
                           </button>
                         </div>

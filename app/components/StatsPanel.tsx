@@ -257,7 +257,7 @@ export default function StatsPanel({ completed, trades }: Props) {
   boxShadow: '0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
 }
 
-  const PIE_COLORS = ['#d4a843', '#4ade80', '#f87171', '#60a5fa', '#c084fc', '#fb923c', '#34d399']
+  const PIE_COLORS = ['var(--gold)', '#4ade80', '#f87171', '#60a5fa', '#c084fc', '#fb923c', '#34d399']
 
   function renderBlock(block: BlockItem, index: number) {
     const isDragging = draggingBlockId === block.id
@@ -292,7 +292,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     className={`rounded-lg p-3 h-20 flex flex-col justify-between select-none transition-all ${
                       card.empty ? 'opacity-10 cursor-default' : 'cursor-grab active:cursor-grabbing'
                     } ${isCardDragging ? 'ring-2 ring-[#d4a843] opacity-70 scale-95' : ''}`}
-                    style={{ background: '#1a1a1a', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
+                    style={{ background: 'var(--bg-card)', border: '1px solid #3a3a3a', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4)' }}
                   >
                     {!card.empty && (
                       <>
@@ -330,7 +330,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <span className="text-xs text-gray-500">盈虧</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-4 h-0.5" style={{ background: '#d4a843' }} />
+                  <div className="w-4 h-0.5" style={{ background: 'var(--gold)' }} />
                   <span className="text-xs text-gray-500">次數</span>
                 </div>
               </div>
@@ -361,7 +361,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                         style={{ height: `${Math.max(height, 4)}%` }}
                       />
                     ) : (
-                      <div className="w-full h-0.5" style={{ background: '#2a2a2a' }} />
+                      <div className="w-full h-0.5" style={{ background: 'var(--border)' }} />
                     )}
                   </div>
                 )
@@ -375,7 +375,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   const y1 = `${100 - (d.count / maxCount) * 95}%`
                   const x2 = `${(i + 1.5) / last7.length * 100}%`
                   const y2 = `${100 - (next.count / maxCount) * 95}%`
-                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
+                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" />
                 })}
                 {last7.map((d, i) => (
                   <circle
@@ -383,7 +383,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     cx={`${(i + 0.5) / last7.length * 100}%`}
                     cy={`${100 - (d.count / maxCount) * 95}%`}
                     r="3"
-                    fill="#d4a843"
+                    fill="var(--gold)"
                   />
                 ))}
               </svg>
@@ -401,7 +401,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             <div className="flex gap-2 flex-shrink-0">
               {last7.map(d => (
                 <div key={d.date} className="flex-1 text-center">
-                  <span style={{ fontSize: 10, color: d.count > 0 ? '#d4a843' : '#666' }}>{d.count > 0 ? d.count + '筆' : '-'}</span>
+                  <span style={{ fontSize: 10, color: d.count > 0 ? 'var(--gold)' : '#666' }}>{d.count > 0 ? d.count + '筆' : '-'}</span>
                 </div>
               ))}
             </div>
@@ -420,8 +420,8 @@ export default function StatsPanel({ completed, trades }: Props) {
                 <svg width="100%" height="100%" viewBox={`0 0 ${growthData.length * 40} 160`} preserveAspectRatio="none" style={{ display: 'block' }}>
                   <defs>
                     <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d4a843" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#d4a843" stopOpacity="0" />
+                      <stop offset="0%" stopColor="var(--gold)" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="var(--gold)" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   <polyline
@@ -431,7 +431,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       return `${x},${y}`
                     }).join(' ')}
                     fill="none"
-                    stroke="#d4a843"
+                    stroke="var(--gold)"
                     strokeWidth="2"
                   />
                   <polygon
@@ -497,7 +497,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                         </span>
                       </div>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                       <div
                         className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`}
                         style={rate >= 50 ? { background: '#166534', width: `${rate}%` } : { width: `${rate}%` }}
@@ -521,7 +521,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <span className="text-xs text-gray-500">次數</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-4 h-0.5" style={{ background: '#d4a843' }} />
+                  <div className="w-4 h-0.5" style={{ background: 'var(--gold)' }} />
                   <span className="text-xs text-gray-500">勝率</span>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                         const y1 = `${100 - winRate1 * 95}%`
                         const x2 = `${(i + 1.5) / entries.length * 100}%`
                         const y2 = `${100 - winRate2 * 95}%`
-                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
+                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" />
                       })}
                       {entries.map(([, data], i) => {
                         const winRate = data.total > 0 ? data.wins / data.total : 0
@@ -574,7 +574,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                             cx={`${(i + 0.5) / entries.length * 100}%`}
                             cy={`${100 - winRate * 95}%`}
                             r="3"
-                            fill="#d4a843"
+                            fill="var(--gold)"
                           />
                         )
                       })}
@@ -627,7 +627,7 @@ export default function StatsPanel({ completed, trades }: Props) {
           <select
             value={selectedSymbol}
             onChange={e => setSelectedSymbol(e.target.value)}
-            className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
+            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-3 pr-8 py-1.5 text-sm text-white focus:outline-none focus:border-[#d4a843] h-[38px] appearance-none"
           >
             <option value="__all__">全部標的</option>
             {allSymbols.map(s => <option key={s} value={s}>{s}</option>)}

@@ -44,7 +44,7 @@ export default function LoginPage() {
   ]
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
       <div className="w-full max-w-sm">
         {/* 語言切換 */}
         <div className="flex justify-center gap-2 mb-6">
@@ -55,7 +55,7 @@ export default function LoginPage() {
               className="px-3 py-1 rounded text-xs font-medium transition-colors"
               style={language === lang.code
                 ? { background: 'linear-gradient(135deg, #d4a843 0%, #b8892e 100%)', color: '#000' }
-                : { background: '#1a1a1a', color: '#666' }
+                : { background: 'var(--bg-card)', color: '#666' }
               }
             >
               {lang.label}
@@ -64,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-center mb-8">
-          <div className="text-2xl font-bold mb-1" style={{ color: '#d4a843' }}>TradeFlex</div>
+          <div className="text-2xl font-bold mb-1" style={{ color: 'var(--gold)' }}>TradeFlex</div>
           <div className="text-gray-500 text-sm">Trading Journal</div>
         </div>
 
