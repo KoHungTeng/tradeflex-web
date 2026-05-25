@@ -104,12 +104,12 @@ body {
 }
 
 [data-theme="light"] .calendar-day-win {
-  background: rgba(20, 83, 45, 0.85) !important;
-  border-color: #14532d !important;
+  background: #14532d !important;
+  border-color: #166534 !important;
 }
 [data-theme="light"] .calendar-day-loss {
-  background: rgba(127, 29, 29, 0.85) !important;
-  border-color: #7f1d1d !important;
+  background: #7f1d1d !important;
+  border-color: #991b1b !important;
 }
 
 @keyframes modalPop {
