@@ -122,26 +122,7 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
 
       <div className="flex-1" />
 
-      <div className="flex flex-col gap-1">
-        {portfolios.map(p => {
-          const isActive = activePortfolio === p.id
-          return (
-            <button
-              key={p.id}
-              onClick={() => setActivePortfolio(p.id)}
-              title={p.name}
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold transition-all"
-              style={isActive ? {
-                background: 'var(--gold-gradient)',
-                color: '#000',
-                boxShadow: '0 0 12px rgba(191,163,122,0.25)',
-              } : { background: 'var(--bg-card)', color: '#666' }}
-            >
-              {p.name.slice(0, 2)}
-            </button>
-          )
-        })}
-      </div>
+
 
       <button
         onClick={toggle}
