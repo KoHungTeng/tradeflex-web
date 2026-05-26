@@ -714,7 +714,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     <div className="rounded-xl overflow-hidden" style={cardStyle}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-gray-500 border-b border-[var(--border)] text-left">
+          <tr className="text-gray-500 border-b border-[var(--border)]/30 text-left">
             <th className="py-3 px-4">{t('symbolName')}</th>
             <th className="py-3 px-4">{t('category')}</th>
             <th className="py-3 px-4">{t('tickSize')}</th>
