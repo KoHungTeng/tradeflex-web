@@ -3,6 +3,7 @@
 import { Portfolio } from '../page'
 import { useLanguage } from '../LanguageContext'
 import { useTheme } from '../ThemeContext'
+import { useSubscription } from '../hooks/useSubscription'
 
 type Props = {
   page: string
@@ -15,6 +16,7 @@ type Props = {
 export default function Sidebar({ page, setPage, portfolios, activePortfolio, setActivePortfolio }: Props) {
   const { t } = useLanguage()
   const { theme, toggle } = useTheme()
+  const { isPro, upgrade } = useSubscription()
 
   const NAV_ITEMS = [
     {
@@ -150,6 +152,21 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
           </svg>
         )}
       </button>
+
+      {!isPro && (
+        <button
+          onClick={upgrade}
+          title="升級 Pro"
+          className="w-10 h-10 rounded-lg flex items-center justify-center transition-all mt-1"
+          style={{ background: 'var(--gold-gradient)', color: '#000' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.85' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+      )}
     </div>
   )
 }
