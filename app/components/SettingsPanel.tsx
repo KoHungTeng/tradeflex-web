@@ -1086,7 +1086,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           </div>
         </div>
       )}
-    </div>
 
       {activeTab === 'account' && (
         <div className="space-y-4">
