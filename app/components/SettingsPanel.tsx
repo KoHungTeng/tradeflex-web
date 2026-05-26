@@ -907,7 +907,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
       </div>
     ) : (
       <div className="flex items-center gap-1 px-3 py-1.5">
-        <span className="text-gray-300">#{tag.name}</span>
+        <span className="text-[var(--text-primary)]">#{tag.name}</span>
         <button type="button" onClick={() => { setEditingTag(tag); setEditingTagName(tag.name) }} className="text-gray-600 hover:text-[var(--gold)] ml-1 text-xs">✎</button>
 <button type="button" onClick={() => deleteTag(tag.id)} className="text-gray-600 hover:text-[var(--color-loss)] text-xs">✕</button>
       </div>
