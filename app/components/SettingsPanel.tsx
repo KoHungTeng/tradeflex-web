@@ -744,7 +744,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 </>
               ) : (
                 <>
-                  <td className="py-3 px-4 font-semibold">{s.name}</td>
+                  <td className="py-3 px-4">{s.name}</td>
                   <td className="py-3 px-4 text-[var(--text-secondary)]">{s.category}</td>
                   <td className="py-3 px-4">{s.tick_size}</td>
                   <td className="py-3 px-4">{s.tick_value}</td>
