@@ -1264,11 +1264,33 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             </div>
           </div>
 
+          {/* 美國股票 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">美國股票</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Interactive Brokers', desc: '支援美股、ETF、選擇權、全球市場', status: '開發中' },
+                { name: 'Alpaca', desc: '支援美股、ETF，Python API 簡單易用', status: '開發中' },
+                { name: 'TD Ameritrade / Schwab', desc: '支援美股、ETF、選擇權', status: '開發中' },
+                { name: 'Webull', desc: '支援美股、ETF', status: '開發中' },
+              ].map(p => (
+                <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{p.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* 加密貨幣 */}
           <div className="rounded-xl p-4" style={cardStyle}>
             <h3 className="text-sm font-semibold text-gray-400 mb-4">加密貨幣</h3>
             <div className="space-y-3">
               {[
+                { name: 'Bitunix', desc: '支援加密貨幣合約、現貨', status: '開發中' },
                 { name: 'Binance', desc: '支援現貨、合約', status: '開發中' },
                 { name: 'Coinbase', desc: '支援現貨', status: '開發中' },
               ].map(p => (
