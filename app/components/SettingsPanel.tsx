@@ -726,7 +726,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         </thead>
         <tbody>
           {symbols.map(s => (
-            <tr key={s.id} className="border-b border-[#1a1a1a] hover:bg-[var(--bg-card)]/30">
+            <tr key={s.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-card)]/30">
               {editingSymbol?.id === s.id ? (
                 <>
                   <td className="py-2 px-4"><input value={editingSymbol.name} onChange={e => setEditingSymbol({...editingSymbol, name: e.target.value})} className="input w-24" /></td>
