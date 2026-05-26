@@ -688,7 +688,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             onClick={() => setActiveTab(tab.key as any)}
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={activeTab === tab.key
-              ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
+              ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
               : { background: 'var(--bg-card)', color: '#888' }
             }
           >
@@ -709,7 +709,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
         <div><label className="text-xs text-gray-500 mb-1 block">{t('tickValue')}</label><input value={newTickValue} onChange={e => setNewTickValue(e.target.value)} type="number" step="0.01" className="input" /></div>
         <div><label className="text-xs text-gray-500 mb-1 block">{t('defaultFee')}</label><input value={newFee} onChange={e => setNewFee(e.target.value)} type="number" step="0.01" className="input" /></div>
       </div>
-      <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('addSymbolBtn')}</button>
+      <button onClick={addSymbol} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('addSymbolBtn')}</button>
     </div>
     <div className="rounded-xl overflow-hidden" style={cardStyle}>
       <table className="w-full text-sm">
@@ -772,7 +772,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <h3 className="text-sm font-semibold text-gray-400 mb-4">{t('addCategory')}</h3>
             <div className="flex gap-3">
               <input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder={t('categoryName')} className="input flex-1" />
-              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('add')}</button>
+              <button onClick={addCategory} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('add')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -799,14 +799,14 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                     <button key={ind} type="button" onClick={() => toggleIndicator(ind)}
                       className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                       style={newStrategyIndicators.includes(ind)
-                        ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
+                        ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
                         : { background: 'var(--bg-card)', color: '#888' }
                       }
                     >{ind}</button>
                   ))}
                 </div>
               </div>
-              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('addStrategyBtn')}</button>
+              <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('addStrategyBtn')}</button>
             </div>
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -820,7 +820,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                         <button key={ind} type="button" onClick={() => toggleEditingIndicator(ind)}
                           className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
                           style={editingStrategy.indicators.includes(ind)
-                            ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
+                            ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
                             : { background: 'var(--bg-card)', color: '#888' }
                           }
                         >{ind}</button>
@@ -872,7 +872,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           type="button"
           onClick={addTag}
           className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-          style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
+          style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}
         >{t('add')}</button>
       </div>
     </div>
@@ -933,7 +933,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <button key={lang.code} onClick={() => setLanguage(lang.code as any)}
                   className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={language === lang.code
-                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
+                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
                     : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{lang.label}</button>
@@ -948,7 +948,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               {['USD', 'TWD', 'EUR', 'JPY', 'CNY'].map(c => (
                 <button key={c} onClick={() => setCurrency(c)} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   style={currency === c
-                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }
+                    ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
                     : { background: 'var(--bg-card)', color: '#888' }
                   }
                 >{c}</button>
@@ -959,7 +959,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               <p className="text-xs text-gray-500 mb-4">{t('capitalDesc')}</p>
               <div className="flex gap-3">
                 <input value={initialCapital} onChange={e => setInitialCapital(e.target.value)} type="number" className="input flex-1" placeholder="10000" />
-                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('save')}</button>
+                <button onClick={saveCapital} className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('save')}</button>
               </div>
             </div>
             <p className="text-xs text-gray-600 mt-4">{t('current')}{currency} {symbol}</p>
@@ -974,10 +974,10 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
             <p className="text-xs text-gray-600 mb-4">{t('exportDesc')}</p>
             <div className="flex gap-3 mb-4">
               <button onClick={() => setExportRange('all')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
+                style={exportRange === 'all' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('allData')}</button>
               <button onClick={() => setExportRange('custom')} className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' } : { background: 'var(--bg-card)', color: '#888' }}
+                style={exportRange === 'custom' ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' } : { background: 'var(--bg-card)', color: '#888' }}
               >{t('customDate')}</button>
             </div>
             {exportRange === 'custom' && (
@@ -986,7 +986,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <div className="flex-1"><label className="text-xs text-gray-500 mb-1 block">{t('endDate')}</label><input type="date" value={exportTo} onChange={e => setExportTo(e.target.value)} className="input" /></div>
               </div>
             )}
-            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('downloadCSV')}</button>
+            <button onClick={exportCSV} className="px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('downloadCSV')}</button>
           </div>
 
           <div className="rounded-xl p-4" style={cardStyle}>
@@ -1041,7 +1041,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   </table>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}>{t('confirmImport')}</button>
+                  <button onClick={confirmImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('confirmImport')}</button>
                   <button onClick={resetImport} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('cancel')}</button>
                 </div>
               </div>
@@ -1113,7 +1113,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 onClick={saveAccountInfo}
                 disabled={savingAccount}
                 className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
+                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}
               >
                 {savingAccount ? '儲存中...' : '儲存資料'}
               </button>
@@ -1142,7 +1142,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 onClick={changePassword}
                 disabled={savingAccount}
                 className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
+                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}
               >
                 {savingAccount ? '更新中...' : '更新密碼'}
               </button>
