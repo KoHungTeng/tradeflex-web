@@ -4,6 +4,7 @@ import { Portfolio } from '../page'
 import { useLanguage } from '../LanguageContext'
 import { useTheme } from '../ThemeContext'
 import { useSubscription } from '../hooks/useSubscription'
+import { createBrowserClient } from '@supabase/ssr'
 
 type Props = {
   page: string
@@ -17,6 +18,14 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
   const { t } = useLanguage()
   const { theme, toggle } = useTheme()
   const { isPro, upgrade } = useSubscription()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    window.location.href = '/login'
+  }
 
   const NAV_ITEMS = [
     {
@@ -167,6 +176,21 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
           </svg>
         </button>
       )}
+
+      <button
+        onClick={handleSignOut}
+        title="登出"
+        className="w-10 h-10 rounded-lg flex items-center justify-center transition-all mt-1"
+        style={{ color: '#666' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-loss)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = '#666' }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
     </div>
   )
 }
