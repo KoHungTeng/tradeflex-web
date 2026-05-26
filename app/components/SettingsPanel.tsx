@@ -1252,6 +1252,8 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 { name: '元大證券', desc: '支援台股', status: '開發中' },
                 { name: '富邦證券', desc: '支援台股', status: '開發中' },
                 { name: '凱基證券', desc: '支援台股', status: '開發中' },
+                { name: '中國信託證券', desc: '支援台股、期權、複委託', status: '開發中' },
+                { name: '玉山證券', desc: '支援台股，多平台多語言', status: '開發中' },
               ].map(p => (
                 <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
                   <div>
