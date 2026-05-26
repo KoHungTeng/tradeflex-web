@@ -845,8 +845,16 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                     ) : (
                       <>
                         <td className="py-3 px-4">{s.name}</td>
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">
-                          {s.indicators && s.indicators.length > 0 ? s.indicators.join(' ') : '-'}
+                        <td className="py-3 px-4">
+                          {s.indicators && s.indicators.length > 0 ? (
+                            <div className="flex gap-1 flex-wrap">
+                              {s.indicators.map(ind => (
+                                <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{ind}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-[var(--text-secondary)]">-</span>
+                          )}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2 justify-end">
