@@ -135,6 +135,20 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
 
       <div className="flex flex-col items-center gap-1 pb-2">
         <button
+          onClick={!isPro ? upgrade : undefined}
+          title={isPro ? 'TradeFlex Pro' : '升級到 Pro'}
+          className="w-10 h-10 rounded-lg flex items-center justify-center transition-all"
+          style={isPro
+            ? { background: 'var(--gold-gradient)', color: '#000', cursor: 'default' }
+            : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+          }
+          onMouseEnter={e => { if (!isPro) { (e.currentTarget as HTMLElement).style.background = 'var(--gold-gradient)'; (e.currentTarget as HTMLElement).style.color = '#000' } }}
+          onMouseLeave={e => { if (!isPro) { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)' } }}
+        >
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em' }}>{isPro ? 'PRO' : 'LITE'}</span>
+        </button>
+
+        <button
           onClick={toggle}
           title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           className="w-10 h-10 rounded-lg flex items-center justify-center transition-all"
@@ -159,20 +173,6 @@ export default function Sidebar({ page, setPage, portfolios, activePortfolio, se
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
             </svg>
           )}
-        </button>
-
-        <button
-          onClick={!isPro ? upgrade : undefined}
-          title={isPro ? 'TradeFlex Pro' : '升級到 Pro'}
-          className="w-10 h-10 rounded-lg flex items-center justify-center transition-all"
-          style={isPro
-            ? { background: 'var(--gold-gradient)', color: '#000', cursor: 'default' }
-            : { background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-          }
-          onMouseEnter={e => { if (!isPro) { (e.currentTarget as HTMLElement).style.background = 'var(--gold-gradient)'; (e.currentTarget as HTMLElement).style.color = '#000' } }}
-          onMouseLeave={e => { if (!isPro) { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)' } }}
-        >
-          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.05em' }}>{isPro ? 'PRO' : 'LITE'}</span>
         </button>
 
         <button
