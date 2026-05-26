@@ -1193,7 +1193,6 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           </div>
         </div>
       )}
-    </div>
 
       {activeTab === 'platform' && (
         <div className="space-y-4">
