@@ -280,7 +280,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency' | 'data' | 'account'>('symbols')
+  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency' | 'data' | 'account' | 'platform'>('symbols')
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('期貨')
   const [newTickSize, setNewTickSize] = useState('0.25')
@@ -682,6 +682,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           { key: 'currency', label: t('currencySettings') },
           { key: 'data', label: t('dataManagement') },
           { key: 'account', label: '帳號設定' },
+          { key: 'platform', label: '平台設定' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -1188,6 +1189,98 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               >
                 刪除帳號
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+      {activeTab === 'platform' && (
+        <div className="space-y-4">
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <p className="text-xs text-gray-500 mb-4">綁定你的交易平台後，系統將自動同步成交明細到 TradeFlex。目前功能開發中，敬請期待。</p>
+          </div>
+
+          {/* 美期 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">美國期貨</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Tradovate', desc: '支援 MES / MNQ / MGC 等美期品種', status: '開發中' },
+                { name: 'NinjaTrader', desc: '支援多數美期品種，需安裝 Add-on', status: '開發中' },
+                { name: 'Interactive Brokers', desc: '支援全球股票、期貨、選擇權', status: '開發中' },
+                { name: 'TradeStation', desc: '支援美股、美期', status: '開發中' },
+              ].map(p => (
+                <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{p.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 台灣期貨 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">台灣期貨</h3>
+            <div className="space-y-3">
+              {[
+                { name: '永豐金期貨', desc: '支援台指期、選擇權', status: '開發中' },
+                { name: '元大期貨', desc: '支援台指期、選擇權、國外期貨', status: '開發中' },
+                { name: '凱基期貨', desc: '支援台指期、選擇權', status: '開發中' },
+                { name: '富邦期貨', desc: '支援台指期、選擇權', status: '開發中' },
+                { name: '統一期貨', desc: '支援台指期、選擇權', status: '開發中' },
+              ].map(p => (
+                <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{p.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 台灣股票 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">台灣股票</h3>
+            <div className="space-y-3">
+              {[
+                { name: '永豐金證券', desc: '支援台股，Python SDK 文件完整', status: '開發中' },
+                { name: '元大證券', desc: '支援台股', status: '開發中' },
+                { name: '富邦證券', desc: '支援台股', status: '開發中' },
+                { name: '凱基證券', desc: '支援台股', status: '開發中' },
+              ].map(p => (
+                <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{p.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 加密貨幣 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">加密貨幣</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Binance', desc: '支援現貨、合約', status: '開發中' },
+                { name: 'Coinbase', desc: '支援現貨', status: '開發中' },
+              ].map(p => (
+                <div key={p.name} className="flex items-center justify-between py-2 border-b border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>{p.status}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
