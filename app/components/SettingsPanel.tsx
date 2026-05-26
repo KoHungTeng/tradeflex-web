@@ -809,47 +809,58 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
               <button onClick={addStrategy} className="px-4 py-2 rounded-lg text-sm font-medium w-fit" style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }}>{t('addStrategyBtn')}</button>
             </div>
           </div>
-          <div className="rounded-xl p-4" style={cardStyle}>
-            {[...strategies].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')).map(s => (
-              <div key={s.id} className="border-b border-[var(--border)] py-3 min-h-[56px] flex flex-col justify-center">
-                {editingStrategy?.id === s.id ? (
-                  <div className="flex flex-col gap-2">
-                    <input value={editingStrategy.name} onChange={e => setEditingStrategy({...editingStrategy, name: e.target.value})} className="input" />
-                    <div className="flex gap-2">
-                      {INDICATOR_OPTIONS.map(ind => (
-                        <button key={ind} type="button" onClick={() => toggleEditingIndicator(ind)}
-                          className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
-                          style={editingStrategy.indicators.includes(ind)
-                            ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
-                            : { background: 'var(--bg-card)', color: '#888' }
-                          }
-                        >{ind}</button>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={updateStrategy} className="text-[var(--color-profit)] text-xs px-2 py-1 rounded">{t('save')}</button>
-                      <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs px-2 py-1 rounded">{t('cancel')}</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-sm">{s.name}</span>
-                      <div className="flex gap-1 mt-1" style={{ minHeight: 22 }}>
-                        {s.indicators && s.indicators.map(ind => (
-                          <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', color: '#888' }}>{ind}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
-                      <button onClick={() => deleteStrategy(s.id)} className="text-[var(--color-loss)] hover:text-[var(--color-loss)] text-xs px-2 py-1 rounded">{t('delete')}</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-            {strategies.length === 0 && <p className="text-gray-600 text-sm py-2">{t('noStrategy')}</p>}
+          <div className="rounded-xl overflow-hidden" style={cardStyle}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] text-gray-500">
+                  <th className="py-3 px-4 text-left font-medium">策略名稱</th>
+                  <th className="py-3 px-4 text-left font-medium">指標</th>
+                  <th className="py-3 px-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...strategies].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')).map(s => (
+                  <tr key={s.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-card)]/30">
+                    {editingStrategy?.id === s.id ? (
+                      <td colSpan={3} className="py-3 px-4">
+                        <div className="flex flex-col gap-2">
+                          <input value={editingStrategy.name} onChange={e => setEditingStrategy({...editingStrategy, name: e.target.value})} className="input" />
+                          <div className="flex gap-2">
+                            {INDICATOR_OPTIONS.map(ind => (
+                              <button key={ind} type="button" onClick={() => toggleEditingIndicator(ind)}
+                                className="px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                                style={editingStrategy.indicators.includes(ind)
+                                  ? { background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#fff' }
+                                  : { background: 'var(--bg-card)', color: '#888' }
+                                }
+                              >{ind}</button>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <button onClick={updateStrategy} className="text-[var(--color-profit)] text-xs px-2 py-1 rounded">{t('save')}</button>
+                            <button onClick={() => setEditingStrategy(null)} className="text-gray-400 text-xs px-2 py-1 rounded">{t('cancel')}</button>
+                          </div>
+                        </div>
+                      </td>
+                    ) : (
+                      <>
+                        <td className="py-3 px-4">{s.name}</td>
+                        <td className="py-3 px-4 text-[var(--text-secondary)]">
+                          {s.indicators && s.indicators.length > 0 ? s.indicators.join(' ') : '-'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-2 justify-end">
+                            <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
+                            <button onClick={() => deleteStrategy(s.id)} className="text-[var(--color-loss)] text-xs px-2 py-1 rounded">{t('delete')}</button>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {strategies.length === 0 && <p className="text-gray-600 text-sm p-4">{t('noStrategy')}</p>}
           </div>
         </div>
       )}
