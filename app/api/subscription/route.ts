@@ -1,19 +1,24 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const ENABLE_BILLING = process.env.ENABLE_BILLING === 'true'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (!ENABLE_BILLING) {
     return NextResponse.json({ plan: 'pro', status: 'active' })
   }
 
-  const cookieStore = cookies()
+  const res = NextResponse.next()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get: (n) => cookieStore.get(n)?.value } }
+    {
+      cookies: {
+        get: (n) => req.cookies.get(n)?.value,
+        set: () => {},
+        remove: () => {},
+      }
+    }
   )
 
   const { data: { session } } = await supabase.auth.getSession()
