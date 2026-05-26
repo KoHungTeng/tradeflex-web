@@ -1,4 +1,5 @@
 'use client'
+import { createBrowserClient } from '@supabase/ssr'
 
 import { useEffect, useState, useRef } from 'react'
 import { useCurrency } from '../CurrencyContext'
@@ -608,6 +609,64 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  const [accountName, setAccountName] = useState('')
+  const [accountPhone, setAccountPhone] = useState('')
+  const [accountEmail, setAccountEmail] = useState('')
+  const [lastLogin, setLastLogin] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [accountMsg, setAccountMsg] = useState('')
+  const [accountErr, setAccountErr] = useState('')
+  const [savingAccount, setSavingAccount] = useState(false)
+  const [showCurrentPw, setShowCurrentPw] = useState(false)
+  const [showNewPw, setShowNewPw] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setAccountEmail(data.user.email || '')
+        setAccountName(data.user.user_metadata?.full_name || '')
+        setAccountPhone(data.user.user_metadata?.phone || '')
+        setLastLogin(data.user.last_sign_in_at ? new Date(data.user.last_sign_in_at).toLocaleString('zh-TW') : '')
+      }
+    })
+  }, [])
+
+  async function saveAccountInfo() {
+    setSavingAccount(true)
+    setAccountMsg('')
+    setAccountErr('')
+    const { error } = await supabase.auth.updateUser({
+      data: { full_name: accountName, phone: accountPhone }
+    })
+    if (error) setAccountErr(error.message)
+    else setAccountMsg('已儲存！')
+    setSavingAccount(false)
+  }
+
+  async function changePassword() {
+    setAccountMsg('')
+    setAccountErr('')
+    if (newPassword !== confirmPassword) { setAccountErr('兩次密碼不一致'); return }
+    if (newPassword.length < 6) { setAccountErr('密碼至少 6 位'); return }
+    setSavingAccount(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) setAccountErr(error.message)
+    else { setAccountMsg('密碼已更新！'); setCurrentPassword(''); setNewPassword(''); setConfirmPassword('') }
+    setSavingAccount(false)
+  }
+
+  async function deleteAccount() {
+    if (deleteConfirm !== accountEmail) { setAccountErr('請輸入正確的 Email 確認'); return }
+    setAccountErr('帳號刪除功能需要聯絡管理員處理')
+  }
+
   const cardStyle = { background: 'linear-gradient(160deg, var(--bg-card3) 0%, var(--bg-card4) 100%)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-inset), var(--shadow-card)' }
 
   return (
@@ -622,6 +681,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           { key: 'tags', label: t('tagSettings') },
           { key: 'currency', label: t('currencySettings') },
           { key: 'data', label: t('dataManagement') },
+          { key: 'account', label: '帳號設定' },
         ].map(tab => (
           <button
             key={tab.key}
@@ -1023,6 +1083,96 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                 <button onClick={() => { setClearStatus('idle'); onImported?.() }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-card)', color: '#888', border: '1px solid #2a2a2a' }}>{t('close')}</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+    </div>
+
+      {activeTab === 'account' && (
+        <div className="space-y-4">
+          {/* 基本資料 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">基本資料</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">名稱</label>
+                <input value={accountName} onChange={e => setAccountName(e.target.value)} placeholder="你的名稱" className="input" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Email（不可修改）</label>
+                <input value={accountEmail} disabled className="input opacity-50 cursor-not-allowed" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">手機</label>
+                <input value={accountPhone} onChange={e => setAccountPhone(e.target.value)} placeholder="+886 912 345 678" className="input" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">最後登入時間</label>
+                <input value={lastLogin} disabled className="input opacity-50 cursor-not-allowed" />
+              </div>
+              <button
+                onClick={saveAccountInfo}
+                disabled={savingAccount}
+                className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
+              >
+                {savingAccount ? '儲存中...' : '儲存資料'}
+              </button>
+            </div>
+          </div>
+
+          {/* 修改密碼 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">修改密碼</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">新密碼</label>
+                <div className="relative">
+                  <input value={newPassword} onChange={e => setNewPassword(e.target.value)} type={showNewPw ? 'text' : 'password'} placeholder="至少 6 位" className="input pr-10" />
+                  <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    {showNewPw ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">確認新密碼</label>
+                <input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} type="password" placeholder="再輸入一次" className="input" />
+              </div>
+              <button
+                onClick={changePassword}
+                disabled={savingAccount}
+                className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%)', color: '#000' }}
+              >
+                {savingAccount ? '更新中...' : '更新密碼'}
+              </button>
+            </div>
+          </div>
+
+          {accountMsg && <p className="text-sm text-[var(--color-profit)]">{accountMsg}</p>}
+          {accountErr && <p className="text-sm text-[var(--color-loss)]">{accountErr}</p>}
+
+          {/* 通知設定 */}
+          <div className="rounded-xl p-4" style={cardStyle}>
+            <h3 className="text-sm font-semibold text-gray-400 mb-4">通知設定</h3>
+            <p className="text-xs text-gray-500">即將推出</p>
+          </div>
+
+          {/* 危險區域 */}
+          <div className="rounded-xl p-4" style={{ ...cardStyle, border: '1px solid var(--color-loss)' }}>
+            <h3 className="text-sm font-semibold text-[var(--color-loss)] mb-4">危險區域</h3>
+            <p className="text-xs text-gray-500 mb-3">刪除帳號將永久移除所有資料，無法復原。請輸入你的 Email 確認。</p>
+            <div className="flex gap-2">
+              <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder={accountEmail} className="input flex-1" />
+              <button
+                onClick={deleteAccount}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
+                style={{ background: 'var(--color-loss)', color: '#fff' }}
+              >
+                刪除帳號
+              </button>
+            </div>
           </div>
         </div>
       )}
