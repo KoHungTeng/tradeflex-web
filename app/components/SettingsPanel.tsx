@@ -835,13 +835,11 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-sm">{s.name}</span>
-                      {s.indicators && s.indicators.length > 0 && (
-                        <div className="flex gap-1 mt-1">
-                          {s.indicators.map(ind => (
-                            <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', color: '#888' }}>{ind}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div className="flex gap-1 mt-1" style={{ minHeight: 22 }}>
+                        {s.indicators && s.indicators.map(ind => (
+                          <span key={ind} className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', color: '#888' }}>{ind}</span>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setEditingStrategy({...s, indicators: s.indicators || []})} className="text-[var(--gold)] text-xs px-2 py-1 rounded">{t('edit')}</button>
