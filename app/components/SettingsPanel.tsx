@@ -811,7 +811,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
           </div>
           <div className="rounded-xl p-4" style={cardStyle}>
             {[...strategies].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')).map(s => (
-              <div key={s.id} className="border-b border-[var(--border)] py-3">
+              <div key={s.id} className="border-b border-[var(--border)] py-3 min-h-[56px] flex flex-col justify-center">
                 {editingStrategy?.id === s.id ? (
                   <div className="flex flex-col gap-2">
                     <input value={editingStrategy.name} onChange={e => setEditingStrategy({...editingStrategy, name: e.target.value})} className="input" />
