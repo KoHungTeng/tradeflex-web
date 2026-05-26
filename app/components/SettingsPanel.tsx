@@ -280,7 +280,7 @@ export default function SettingsPanel({ onImported }: SettingsProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency' | 'data'>('symbols')
+  const [activeTab, setActiveTab] = useState<'symbols' | 'categories' | 'strategies' | 'tags' | 'currency' | 'data' | 'account'>('symbols')
   const [newName, setNewName] = useState('')
   const [newCategory, setNewCategory] = useState('期貨')
   const [newTickSize, setNewTickSize] = useState('0.25')
