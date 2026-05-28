@@ -529,7 +529,8 @@ export default function StatsPanel({ completed, trades }: Props) {
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                       <div
                         className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`}
-                        style={rate >= 50 ? { background: 'var(--gold-gradient)', width: `${rate}%`, animation: 'barExpandX 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' } : { width: `${rate}%`, animation: 'barExpandX 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}
+                        style={rate >= 50 ? { background: 'var(--gold-gradient)', width: `${rate}%` } : { width: `${rate}%` }}
+                        className="bar-expand-x"
                       />
                     </div>
                   </div>
