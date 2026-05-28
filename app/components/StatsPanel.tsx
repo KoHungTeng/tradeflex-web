@@ -3,7 +3,7 @@
 import { CompletedTrade, Trade } from '../page'
 import { useCurrency } from '../CurrencyContext'
 import { useLanguage } from '../LanguageContext'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 type Props = {
   completed: CompletedTrade[]
@@ -185,6 +185,24 @@ export default function StatsPanel({ completed, trades }: Props) {
     return initialCards
   })
   const [animKey, setAnimKey] = useState(0)
+  const [visibleBlocks, setVisibleBlocks] = useState<Set<string>>(new Set())
+  const blockRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = (entry.target as HTMLDivElement).dataset.blockId
+            if (id) setVisibleBlocks(prev => new Set([...prev, id]))
+          }
+        })
+      },
+      { threshold: 0.2 }
+    )
+    Object.values(blockRefs.current).forEach(el => { if (el) observer.observe(el) })
+    return () => observer.disconnect()
+  }, [blocks])
 
   useEffect(() => {
     setCards(prev => prev.map(card => {
@@ -293,6 +311,8 @@ export default function StatsPanel({ completed, trades }: Props) {
     return (
       <div
         key={block.id}
+        ref={el => { blockRefs.current[block.id] = el }}
+        data-block-id={block.id}
         onMouseDown={() => onBlockMouseDown(index, block.id)}
         onMouseEnter={() => onBlockMouseEnter(index)}
         onMouseUp={onBlockMouseUp}
@@ -386,7 +406,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <div key={d.date} className="flex-1 flex flex-col justify-end h-full items-center">
                     {d.pnl !== 0 ? (
                       <div
-                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'} bar-grow`}
+                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'} ${visibleBlocks.has(block.id) ? 'bar-grow' : ''}`}
                         style={{ height: `${Math.max(height, 4)}%`, animationDelay: `${i * 0.08}s` }}
                       />
                     ) : (
@@ -528,7 +548,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                       <div
-                        className={`h-full rounded-full bar-expand-x ${rate >= 50 ? '' : 'bg-red-500'}`}
+                        className={`h-full rounded-full ${visibleBlocks.has(block.id) ? 'bar-expand-x' : ''} ${rate >= 50 ? '' : 'bg-red-500'}`}
                         style={rate >= 50 ? { background: 'var(--gold-gradient)', width: `${rate}%` } : { width: `${rate}%` }}
                       />
                     </div>
