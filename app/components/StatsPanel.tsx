@@ -185,27 +185,7 @@ export default function StatsPanel({ completed, trades }: Props) {
     return initialCards
   })
   const [animKey, setAnimKey] = useState(0)
-  const [visibleBlocks, setVisibleBlocks] = useState<Set<string>>(new Set())
-  const blockRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const id = (entry.target as HTMLDivElement).dataset.blockId
-              if (id) setTimeout(() => setVisibleBlocks(prev => new Set([...prev, id])), 1000)
-            }
-          })
-        },
-        { threshold: 0.1 }
-      )
-      Object.values(blockRefs.current).forEach(el => { if (el) observer.observe(el) })
-      return () => observer.disconnect()
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [animKey])
 
   useEffect(() => {
     setCards(prev => prev.map(card => {
@@ -314,8 +294,6 @@ export default function StatsPanel({ completed, trades }: Props) {
     return (
       <div
         key={block.id}
-        ref={el => { blockRefs.current[block.id] = el }}
-        data-block-id={block.id}
         onMouseDown={() => onBlockMouseDown(index, block.id)}
         onMouseEnter={() => onBlockMouseEnter(index)}
         onMouseUp={onBlockMouseUp}
@@ -352,9 +330,9 @@ export default function StatsPanel({ completed, trades }: Props) {
                           {card.labelKey ? t(card.labelKey as any) : ''}
                         </div>
                         {card.custom ? (
-                          <div key={card.custom} className="text-lg font-bold text-[var(--gold)] num-anim">{card.custom}</div>
+                          <div className="text-lg font-bold text-[var(--gold)]">{card.custom}</div>
                         ) : (
-                          <div key={card.value} className={`text-lg font-bold ${color} num-anim`}>
+                          <div className={`text-lg font-bold ${color}`}>
                             {card.isPrice ? (
                               <>{card.value > 0 ? '+$' : card.value < 0 ? '-$' : '$'}{Math.abs(card.value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
                             ) : (
@@ -409,7 +387,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <div key={d.date} className="flex-1 flex flex-col justify-end h-full items-center">
                     {d.pnl !== 0 ? (
                       <div
-                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'} ${visibleBlocks.has(block.id) ? 'bar-grow' : ''}`}
+                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
                         style={{ height: `${Math.max(height, 4)}%`, animationDelay: `${i * 0.08}s` }}
                       />
                     ) : (
@@ -551,7 +529,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
                       <div
-                        className={`h-full rounded-full ${visibleBlocks.has(block.id) ? 'bar-expand-x' : ''} ${rate >= 50 ? '' : 'bg-red-500'}`}
+                        className={`h-full rounded-full ${rate >= 50 ? '' : 'bg-red-500'}`}
                         style={rate >= 50 ? { background: 'var(--gold-gradient)', width: `${rate}%` } : { width: `${rate}%` }}
                       />
                     </div>
