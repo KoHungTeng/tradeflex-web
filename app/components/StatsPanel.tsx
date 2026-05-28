@@ -189,20 +189,23 @@ export default function StatsPanel({ completed, trades }: Props) {
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const id = (entry.target as HTMLDivElement).dataset.blockId
-            if (id) setVisibleBlocks(prev => new Set([...prev, id]))
-          }
-        })
-      },
-      { threshold: 0.2 }
-    )
-    Object.values(blockRefs.current).forEach(el => { if (el) observer.observe(el) })
-    return () => observer.disconnect()
-  }, [])
+    const timer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = (entry.target as HTMLDivElement).dataset.blockId
+              if (id) setVisibleBlocks(prev => new Set([...prev, id]))
+            }
+          })
+        },
+        { threshold: 0.1 }
+      )
+      Object.values(blockRefs.current).forEach(el => { if (el) observer.observe(el) })
+      return () => observer.disconnect()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [animKey])
 
   useEffect(() => {
     setCards(prev => prev.map(card => {
