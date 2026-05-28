@@ -202,7 +202,7 @@ export default function StatsPanel({ completed, trades }: Props) {
     )
     Object.values(blockRefs.current).forEach(el => { if (el) observer.observe(el) })
     return () => observer.disconnect()
-  }, [blocks])
+  }, [])
 
   useEffect(() => {
     setCards(prev => prev.map(card => {
