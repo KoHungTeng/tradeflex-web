@@ -329,9 +329,9 @@ export default function StatsPanel({ completed, trades }: Props) {
                           {card.labelKey ? t(card.labelKey as any) : ''}
                         </div>
                         {card.custom ? (
-                          <div className="text-lg font-bold text-[var(--gold)]">{card.custom}</div>
+                          <div key={card.custom} className="text-lg font-bold text-[var(--gold)] num-anim">{card.custom}</div>
                         ) : (
-                          <div className={`text-lg font-bold ${color}`}>
+                          <div key={card.value} className={`text-lg font-bold ${color} num-anim`}>
                             {card.isPrice ? (
                               <>{card.value > 0 ? '+$' : card.value < 0 ? '-$' : '$'}{Math.abs(card.value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
                             ) : (
@@ -386,8 +386,8 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <div key={d.date} className="flex-1 flex flex-col justify-end h-full items-center">
                     {d.pnl !== 0 ? (
                       <div
-                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
-                        style={{ height: `${Math.max(height, 4)}%` }}
+                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'} bar-grow`}
+                        style={{ height: `${Math.max(height, 4)}%`, animationDelay: `${i * 0.08}s` }}
                       />
                     ) : (
                       <div className="w-full h-0.5" style={{ background: 'var(--border)' }} />
