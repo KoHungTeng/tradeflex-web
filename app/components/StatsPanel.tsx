@@ -195,7 +195,7 @@ export default function StatsPanel({ completed, trades }: Props) {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const id = (entry.target as HTMLDivElement).dataset.blockId
-              if (id) setVisibleBlocks(prev => new Set([...prev, id]))
+              if (id) setTimeout(() => setVisibleBlocks(prev => new Set([...prev, id])), 1000)
             }
           })
         },
