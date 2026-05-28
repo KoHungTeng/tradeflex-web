@@ -166,6 +166,11 @@ body {
   animation: numFadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes barExpandX {
+  from { width: 0% !important; }
+  to {}
+}
+
 .line-draw {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
