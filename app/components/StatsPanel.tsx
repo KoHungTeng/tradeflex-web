@@ -366,7 +366,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             </div>
             {/* 盈虧金額 */}
             <div className="flex gap-2 flex-shrink-0">
-              {last7.map(d => {
+              {last7.map((d, i) => {
                 const isPos = d.pnl >= 0
                 return (
                   <div key={d.date} className="flex-1 text-center">
@@ -379,7 +379,7 @@ export default function StatsPanel({ completed, trades }: Props) {
             </div>
             {/* 柱狀圖 + 折線疊加 */}
             <div className="relative flex items-end gap-8 px-4" style={{ height: 120 }}>
-              {last7.map(d => {
+              {last7.map((d, i) => {
                 const height = Math.abs(d.pnl) / maxAbsPnl * 100
                 const isPos = d.pnl >= 0
                 return (
