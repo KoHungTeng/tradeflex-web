@@ -379,17 +379,34 @@ export default function StatsPanel({ completed, trades }: Props) {
               })}
             </div>
             {/* 柱狀圖 + 折線疊加 */}
-            <div className="relative flex items-end gap-8 px-4" style={{ height: 120 }}>
+            <div className="relative flex items-center gap-8 px-4" style={{ height: 120 }}>
+              {/* 中間基準線 */}
+              <div className="absolute left-0 right-0" style={{ top: '50%', height: 1, background: 'var(--border)', zIndex: 0 }} />
               {last7.map((d, i) => {
-                const height = Math.abs(d.pnl) / maxAbsPnl * 100
+                const height = Math.abs(d.pnl) / maxAbsPnl * 50
                 const isPos = d.pnl >= 0
                 return (
-                  <div key={d.date} className="flex-1 flex flex-col justify-end h-full items-center">
+                  <div key={d.date} className="flex-1 flex flex-col items-center h-full justify-center" style={{ zIndex: 1 }}>
                     {d.pnl !== 0 ? (
-                      <div
-                        className={`w-full rounded-t ${isPos ? 'bg-green-800' : 'bg-red-800'}`}
-                        style={{ height: `${Math.max(height, 4)}%`, animationDelay: `${i * 0.08}s` }}
-                      />
+                      <div className="w-full flex flex-col items-center" style={{ height: '100%', justifyContent: 'center' }}>
+                        {isPos ? (
+                          <>
+                            <div
+                              className="w-full rounded-t"
+                              style={{ height: `${Math.max(height, 2)}%`, background: '#166534' }}
+                            />
+                            <div style={{ height: '50%' }} />
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ height: '50%' }} />
+                            <div
+                              className="w-full rounded-b"
+                              style={{ height: `${Math.max(height, 2)}%`, background: '#7f1d1d' }}
+                            />
+                          </>
+                        )}
+                      </div>
                     ) : (
                       <div className="w-full h-0.5" style={{ background: 'var(--border)' }} />
                     )}
