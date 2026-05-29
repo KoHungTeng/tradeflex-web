@@ -160,7 +160,7 @@ export default function Home() {
 
       <div style={{ display: 'flex', flex: 1, gap: 8, minHeight: 0 }}>
 
-        <div className="gold-border flex-shrink-0 no-print" style={{ overflow: 'hidden' }}>
+        <div className="gold-border flex-shrink-0 no-print" style={{ overflow: 'visible' }}>
           <div className="gold-border-inner sidebar-inner" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg-card3)' }}>
             <Sidebar
               page={page}
