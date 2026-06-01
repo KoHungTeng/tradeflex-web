@@ -67,6 +67,7 @@ export type CompletedTrade = {
   close_time: string
   strategy: string
   pnl: number
+  currency?: string
   big_dif?: number
   big_dea?: number
   big_hist?: number

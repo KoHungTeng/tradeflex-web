@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 type CurrencyContextType = {
   currency: string
   rate: number
+  rates: Record<string, number>
   symbol: string
   convert: (usdAmount: number) => string
   setCurrency: (currency: string) => void
@@ -13,6 +14,7 @@ type CurrencyContextType = {
 const CurrencyContext = createContext<CurrencyContextType>({
   currency: 'USD',
   rate: 1,
+  rates: { USD: 1 },
   symbol: '$',
   convert: (n) => n.toFixed(0),
   setCurrency: () => {},
@@ -56,7 +58,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <CurrencyContext.Provider value={{ currency, rate, symbol, convert, setCurrency }}>
+    <CurrencyContext.Provider value={{ currency, rate, rates, symbol, convert, setCurrency }}>
       {children}
     </CurrencyContext.Provider>
   )

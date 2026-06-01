@@ -26,7 +26,28 @@ type BlockItem = {
 }
 
 export default function StatsPanel({ completed, trades }: Props) {
-  const { convert } = useCurrency()
+  const { convert, rate, rates, currency: displayCurrency } = useCurrency()
+
+  function normalizePnl(pnl: number, tradeCurrency?: string): number {
+    const tc = tradeCurrency || 'USD'
+    if (tc === 'USD') return pnl * rate
+    // 先把 tradeCurrency 換成 USD，再換成 displayCurrency
+    const tcToUSD = 1 / (rates[tc] || 1)
+    return pnl * tcToUSD * rate
+  }
+
+  function displayPnl(pnl: number, tradeCurrency?: string): string {
+    const converted = normalizePnl(pnl, tradeCurrency)
+    return convert(converted / rate)
+  }
+
+  function convertPnl(pnl: number, currency?: string): string {
+    if (!currency || currency === 'USD') return convert(pnl)
+    // 非 USD 的幣別不做匯率換算，直接顯示
+    const currencySymbols: Record<string, string> = { TWD: 'NT$', EUR: '€', JPY: '¥', CNY: '¥' }
+    const sym = currencySymbols[currency] || currency
+    return `${pnl >= 0 ? '+' : ''}${sym}${Math.abs(pnl).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  }
   const { t } = useLanguage()
   const [initialCapital, setInitialCapital] = useState(10000)
   const [selectedSymbol, setSelectedSymbol] = useState<string>('__all__')
