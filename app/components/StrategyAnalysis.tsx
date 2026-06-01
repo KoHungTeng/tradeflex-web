@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
+import { useCurrency } from '../CurrencyContext'
 
 type Props = {
   completed: CompletedTrade[]
