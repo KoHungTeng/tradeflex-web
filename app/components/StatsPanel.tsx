@@ -60,29 +60,29 @@ export default function StatsPanel({ completed, trades }: Props) {
 
   const allSymbols = Array.from(new Set(completed.map(t => t.symbol))).sort()
   const filteredCompleted = selectedSymbol === '__all__' ? completed : completed.filter(t => t.symbol === selectedSymbol)
-  const totalPnL = filteredCompleted.reduce((s, t) => s + t.pnl, 0)
+  const totalPnL = filteredCompleted.reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0)
   const wins = filteredCompleted.filter(t => t.pnl > 0)
   const losses = filteredCompleted.filter(t => t.pnl < 0)
   const winRate = filteredCompleted.length > 0 ? (wins.length / filteredCompleted.length * 100) : 0
-  const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0
-  const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length : 0
+  const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0) / wins.length : 0
+  const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0) / losses.length : 0
 
   const today = new Date()
   const todayPnL = filteredCompleted
     .filter(t => new Date(t.close_time).toDateString() === today.toDateString())
-    .reduce((s, t) => s + t.pnl, 0)
+    .reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0)
 
   const thisMonth = today.getMonth()
   const monthPnL = filteredCompleted
     .filter(t => new Date(t.close_time).getMonth() === thisMonth)
-    .reduce((s, t) => s + t.pnl, 0)
+    .reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0)
 
   const startOfWeek = new Date(today)
   startOfWeek.setDate(today.getDate() - today.getDay())
   startOfWeek.setHours(0, 0, 0, 0)
   const weekPnL = filteredCompleted
     .filter(t => new Date(t.close_time) >= startOfWeek)
-    .reduce((s, t) => s + t.pnl, 0)
+    .reduce((s, t) => s + normalizePnl(t.pnl, t.currency), 0)
 
   const avgHoldMin = filteredCompleted.length > 0
     ? filteredCompleted.reduce((s, t) => {
@@ -148,9 +148,9 @@ export default function StatsPanel({ completed, trades }: Props) {
     .filter(r => r > 0 && r < 100)
   const maxRR = rrList.length > 0 ? Math.max(...rrList) : 0
   const minRR = rrList.length > 0 ? Math.min(...rrList) : 0
-  const maxWin = winTrades.length > 0 ? Math.max(...winTrades.map(t => t.pnl)) : 0
+  const maxWin = winTrades.length > 0 ? Math.max(...winTrades.map(t => normalizePnl(t.pnl, t.currency))) : 0
   const lossTrades = filteredCompleted.filter(t => t.pnl < 0)
-  const maxLoss = lossTrades.length > 0 ? Math.min(...lossTrades.map(t => t.pnl)) : 0
+  const maxLoss = lossTrades.length > 0 ? Math.min(...lossTrades.map(t => normalizePnl(t.pnl, t.currency))) : 0
   const maxCount = Math.max(...last7.map(d => d.count), 1)
 
   const sortedTrades = [...filteredCompleted].sort((a, b) =>
