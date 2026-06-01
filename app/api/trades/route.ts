@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
       const { data: symbolData } = await supabase
         .from('symbols')
-        .select('tick_size, tick_value')
+        .select('tick_size, tick_value, currency')
         .eq('name', body.symbol)
         .eq('user_id', user.id)
         .single()
@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         tp: openTrade.tp || 0,
         sl: openTrade.sl || 0,
         pnl: Math.round(pnl * 100) / 100,
+        currency: symbolData?.currency || 'USD',
         big_dif: openTrade.big_dif, big_dea: openTrade.big_dea, big_hist: openTrade.big_hist,
         big_rsi: openTrade.big_rsi, big_k: openTrade.big_k, big_d: openTrade.big_d, big_j: openTrade.big_j,
         small_dif: openTrade.small_dif, small_dea: openTrade.small_dea, small_hist: openTrade.small_hist,
