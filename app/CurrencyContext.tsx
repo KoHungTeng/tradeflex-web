@@ -44,8 +44,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   function convert(usdAmount: number): string {
     const converted = usdAmount * rate
-    if (currency === 'JPY') return `${symbol}${Math.round(converted).toLocaleString()}`
-    return `${symbol}${converted.toFixed(0)}`
+    if (currency === 'JPY') return `${symbol}${Math.round(converted).toLocaleString()} ${currency}`
+    return `${symbol}${converted.toFixed(0)} ${currency}`
   }
 
   async function setCurrency(newCurrency: string) {

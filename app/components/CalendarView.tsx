@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../ThemeContext'
+import { useCurrency } from '../CurrencyContext'
 import { CompletedTrade } from '../page'
 import { useLanguage } from '../LanguageContext'
 
@@ -18,6 +19,7 @@ type DayNote = {
 export default function CalendarView({ completed }: Props) {
   const { t } = useLanguage()
   const { theme } = useTheme()
+  const { currency } = useCurrency()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [dayNotes, setDayNotes] = useState<DayNote[]>([])
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
@@ -110,7 +112,7 @@ export default function CalendarView({ completed }: Props) {
           <h2 className="text-xl font-bold">{headerTitle}</h2>
           <div className="flex gap-4 mt-1 text-sm justify-center">
             <span className={monthPnL >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
-              {monthPnL >= 0 ? '+' : ''}{monthPnL.toFixed(0)}
+              {monthPnL >= 0 ? '+' : ''}{monthPnL.toFixed(0)} {currency}
             </span>
             <span className="text-gray-400">{monthTrades.length} {t('calendarTrades')}</span>
             <span className={monthWinRate >= 50 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
@@ -224,7 +226,7 @@ export default function CalendarView({ completed }: Props) {
 
       {dailyPnL[selectedDay.toString()] !== undefined && (
         <div className={`text-2xl font-bold mb-4 ${dailyPnL[selectedDay.toString()] > 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
-          {dailyPnL[selectedDay.toString()] > 0 ? '+' : ''}{dailyPnL[selectedDay.toString()].toFixed(0)}
+          {dailyPnL[selectedDay.toString()] > 0 ? '+' : ''}{dailyPnL[selectedDay.toString()].toFixed(0)} {currency}
         </div>
       )}
 
@@ -241,7 +243,7 @@ export default function CalendarView({ completed }: Props) {
               <div key={i} className="flex justify-between text-xs">
                 <span className="text-gray-400">{t.symbol}</span>
                 <span className={t.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
-                  {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)}
+                  {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)} {t.currency || 'USD'}
                 </span>
               </div>
             ))}

@@ -355,7 +355,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                         ) : (
                           <div className={`text-lg font-bold ${color}`}>
                             {card.isPrice ? (
-                              <>{card.value > 0 ? '+$' : card.value < 0 ? '-$' : '$'}{Math.abs(card.value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
+                              <>{convert(card.value)}</>
                             ) : (
                               <>{card.value.toFixed(card.suffix ? 1 : 0)}{card.suffix}</>
                             )}
@@ -393,7 +393,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                 return (
                   <div key={d.date} className="flex-1 text-center">
                     <span className={`font-medium ${isPos ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`} style={{ fontSize: 10 }}>
-                      {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) : '-'}
+                      {d.pnl !== 0 ? (isPos ? '+' : '') + d.pnl.toFixed(0) + ' ' + displayCurrency : '-'}
                     </span>
                   </div>
                 )
@@ -548,7 +548,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       <span className="text-[var(--text-primary)]">{name}</span>
                       <div className="flex gap-2">
                         <span className={`w-16 text-right ${data.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
-                          {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)}
+                          {data.pnl >= 0 ? '+' : ''}{data.pnl.toFixed(0)} {displayCurrency}
                         </span>
                         <span className="w-12 text-right text-gray-400">{data.total} {t('tradesCount')}</span>
                         <span className={`w-10 text-right ${rate >= 50 ? '' : 'text-[var(--color-loss)]'}`} style={rate >= 50 ? { color: 'var(--gold)' } : {}}>

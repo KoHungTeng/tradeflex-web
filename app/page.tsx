@@ -331,7 +331,7 @@ export default function Home() {
                           </div>
                           <div className="flex items-center gap-6">
                             <span className={`font-semibold ${ct.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}`}>
-                              {ct.pnl >= 0 ? '+' : ''}{ct.pnl.toFixed(0)}
+                              {ct.pnl >= 0 ? '+' : ''}{ct.pnl.toFixed(0)} {ct.currency || 'USD'}
                             </span>
                             <span className="text-gray-500 text-xs">
                               {new Date(ct.close_time).toLocaleDateString('zh-TW')}

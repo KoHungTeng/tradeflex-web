@@ -134,6 +134,7 @@ function calcStats(trades: CompletedTrade[]) {
 
 export default function StrategyAnalysis({ completed }: Props) {
   const { t } = useLanguage()
+  const { currency } = useCurrency()
   const [mode, setMode] = useState<'single' | 'compare'>('single')
 
   // 單策略
@@ -267,10 +268,10 @@ function exportPDF() {
                 {[
                   { label: t('totalTrades2'), value: `${filtered.length} ${t('trades2')}`, color: 'text-[var(--text-primary)]' },
                   { label: t('winRate'), value: `${winRate.toFixed(1)}%`, color: winRate >= 50 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]' },
-                  { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}`, color: totalPnL >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]' },
+                  { label: t('totalPnl'), value: `${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)} ${currency}`, color: totalPnL >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]' },
                   { label: t('avgHoldTime'), value: avgHoldDisplay, color: 'text-[var(--gold)]' },
                   { label: t('profitFactor'), value: profitFactor > 0 ? `${profitFactor.toFixed(2)}R` : '--', color: 'text-[var(--gold)]' },
-                  { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)}`, color: 'text-[var(--text-primary)]' },
+                  { label: `${wins.length} 勝 / ${losses.length} 敗`, value: `+${avgWin.toFixed(0)} / ${avgLoss.toFixed(0)} ${currency}`, color: 'text-[var(--text-primary)]' },
                 ].map(item => (
                   <div key={item.label} className="rounded-xl p-4" style={cardStyle}>
                     <div className="text-xs text-gray-500 mb-1">{item.label}</div>
