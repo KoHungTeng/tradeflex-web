@@ -410,7 +410,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                   <div key={d.date} className="flex-1 relative" style={{ zIndex: 1 }}>
                     {d.pnl !== 0 ? (
                       <div
-                        className={`absolute w-full ${isPos ? 'rounded-t' : 'rounded-b'}`}
+                        className={`absolute w-full`}
                         style={{
                           height: `${Math.max(height, 2)}%`,
                           background: isPos ? '#166534' : '#7f1d1d',
@@ -606,7 +606,7 @@ export default function StatsPanel({ completed, trades }: Props) {
                       return (
                         <div key={name} className="flex-1 flex flex-col justify-end h-full">
                           <div
-                            className="w-full rounded-t"
+                            className="w-full"
                             style={{ height: `${Math.max(height, 4)}%`, background: '#166534', opacity: 0.9 }}
                           />
                         </div>
