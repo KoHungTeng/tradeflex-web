@@ -238,13 +238,22 @@ export default function CalendarView({ completed }: Props) {
         })
         if (dayTrades.length === 0) return null
         return (
-          <div className="mb-4 space-y-1">
+          <div className="mb-4 space-y-2">
             {dayTrades.map((t, i) => (
-              <div key={i} className="flex justify-between text-xs">
-                <span className="text-gray-400">{t.symbol}</span>
-                <span className={t.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
-                  {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)} {t.currency || 'USD'}
-                </span>
+              <div key={i} className="text-xs rounded-lg p-2" style={{ background: 'var(--bg-base)', border: '1px solid var(--border)' }}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-400">{t.symbol}</span>
+                  <span className={t.pnl >= 0 ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
+                    {t.pnl >= 0 ? '+' : ''}{t.pnl.toFixed(0)} {t.currency || 'USD'}
+                  </span>
+                </div>
+                {(t.remark || t.open_remark || t.close_remark) && (
+                  <div className="text-gray-500 text-xs mt-1 border-t border-[var(--border)] pt-1">
+                    {t.open_remark && <div>開倉：{t.open_remark}</div>}
+                    {t.close_remark && <div>平倉：{t.close_remark}</div>}
+                    {!t.open_remark && !t.close_remark && t.remark && <div>{t.remark}</div>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
