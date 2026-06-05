@@ -14,33 +14,44 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
-    // 先從 localStorage 快速套用，避免閃爍
     const local = localStorage.getItem('tradeflex-theme') as Theme
     if (local) {
       setTheme(local)
       document.documentElement.setAttribute('data-theme', local)
     }
 
-    // 再從 Supabase 讀取同步
-    supabase.from('settings').select('data').eq('id', 'theme').single().then(({ data }) => {
-      if (data?.data?.theme) {
-        const t = data.data.theme as Theme
-        setTheme(t)
-        localStorage.setItem('tradeflex-theme', t)
-        document.documentElement.setAttribute('data-theme', t)
-      }
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return
+      supabase
+        .from('settings')
+        .select('data')
+        .eq('id', 'theme')
+        .eq('user_id', data.user.id)
+        .single()
+        .then(({ data: setting }) => {
+          if (setting?.data?.theme) {
+            const t = setting.data.theme as Theme
+            setTheme(t)
+            localStorage.setItem('tradeflex-theme', t)
+            document.documentElement.setAttribute('data-theme', t)
+          }
+        })
     })
   }, [])
 
   async function toggle() {
+    const { data } = await supabase.auth.getUser()
     setTheme(prev => {
       const next = prev === 'dark' ? 'light' : 'dark'
       localStorage.setItem('tradeflex-theme', next)
       document.documentElement.setAttribute('data-theme', next)
-
-      // 同步到 Supabase
-      supabase.from('settings').upsert({ id: 'theme', data: { theme: next } })
-
+      if (data.user) {
+        supabase.from('settings').upsert({
+          id: `theme_${data.user.id}`,
+          user_id: data.user.id,
+          data: { theme: next }
+        })
+      }
       return next
     })
   }
