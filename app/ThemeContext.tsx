@@ -7,6 +7,7 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({ theme
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark')
+  const [userId, setUserId] = useState<string | null>(null)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,19 +15,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
+    // 先從 localStorage 快速套用避免閃爍
     const local = localStorage.getItem('tradeflex-theme') as Theme
     if (local) {
       setTheme(local)
       document.documentElement.setAttribute('data-theme', local)
     }
 
+    // 從 Supabase 讀取
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return
+      setUserId(data.user.id)
       supabase
         .from('settings')
         .select('data')
-        .eq('id', 'theme')
-        .eq('user_id', data.user.id)
+        .eq('id', `theme_${data.user.id}`)
         .single()
         .then(({ data: setting }) => {
           if (setting?.data?.theme) {
@@ -40,20 +43,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   async function toggle() {
-    const { data } = await supabase.auth.getUser()
-    setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark'
-      localStorage.setItem('tradeflex-theme', next)
-      document.documentElement.setAttribute('data-theme', next)
-      if (data.user) {
-        supabase.from('settings').upsert({
-          id: `theme_${data.user.id}`,
-          user_id: data.user.id,
-          data: { theme: next }
-        })
-      }
-      return next
-    })
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('tradeflex-theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+
+    if (userId) {
+      await supabase.from('settings').upsert({
+        id: `theme_${userId}`,
+        user_id: userId,
+        data: { theme: next }
+      })
+    }
   }
 
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>
