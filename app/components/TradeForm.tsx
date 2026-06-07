@@ -350,7 +350,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
 
   function handlePriceKeyDown(e: React.KeyboardEvent<HTMLInputElement>, val: string, setter: (v: string) => void) {
-    const tickSize = symbolInfo?.tick_size || 1
+    const tickSize = symbolList.find(s => s.name === symbol)?.tick_size || 1
     const current = parseFloat(val) || 0
     if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -363,7 +363,7 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
 
   function handlePriceWheel(e: React.WheelEvent<HTMLInputElement>, val: string, setter: (v: string) => void) {
     e.preventDefault()
-    const tickSize = symbolInfo?.tick_size || 1
+    const tickSize = symbolList.find(s => s.name === symbol)?.tick_size || 1
     const current = parseFloat(val) || 0
     if (e.deltaY < 0) {
       setter((Math.round((current + tickSize) * 10000) / 10000).toString())
