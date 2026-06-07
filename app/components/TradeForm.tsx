@@ -349,6 +349,29 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
   const showKDJ = requiredIndicators.includes('KDJ')
   const showIndicators = isOpen && (showMACD || showRSI || showKDJ)
 
+  function handlePriceKeyDown(e: React.KeyboardEvent<HTMLInputElement>, val: string, setter: (v: string) => void) {
+    const tickSize = symbolInfo?.tick_size || 1
+    const current = parseFloat(val) || 0
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setter((Math.round((current + tickSize) * 10000) / 10000).toString())
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setter((Math.round((current - tickSize) * 10000) / 10000).toString())
+    }
+  }
+
+  function handlePriceWheel(e: React.WheelEvent<HTMLInputElement>, val: string, setter: (v: string) => void) {
+    e.preventDefault()
+    const tickSize = symbolInfo?.tick_size || 1
+    const current = parseFloat(val) || 0
+    if (e.deltaY < 0) {
+      setter((Math.round((current + tickSize) * 10000) / 10000).toString())
+    } else {
+      setter((Math.round((current - tickSize) * 10000) / 10000).toString())
+    }
+  }
+
   function addExtraPrice() {
     setExtraPrices(prev => [...prev, { price: '', quantity: quantity }])
   }
@@ -552,6 +575,8 @@ const newTrade: any = {
             )}
           </div>
           <input value={price} onChange={e => setPrice(e.target.value)}
+            onKeyDown={e => handlePriceKeyDown(e, price, setPrice)}
+            onWheel={e => handlePriceWheel(e, price, setPrice)}
             placeholder="0.00" type="number" step="0.01" className="input" />
 
           {extraPrices.map((p, i) => (
@@ -560,6 +585,8 @@ const newTrade: any = {
                 <input
                   value={p.price}
                   onChange={e => updateExtraPrice(i, 'price', e.target.value)}
+                  onKeyDown={e => handlePriceKeyDown(e, p.price, v => updateExtraPrice(i, 'price', v))}
+                  onWheel={e => handlePriceWheel(e, p.price, v => updateExtraPrice(i, 'price', v))}
                   placeholder="0.00" type="number" step="0.01" className="input flex-1"
                 />
                 <button
