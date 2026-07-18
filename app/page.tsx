@@ -182,7 +182,7 @@ export default function Home() {
                   <TradeForm
   activePortfolio={activePortfolio}
   onAdded={optimisticAddTrade}
-  onCompletedChanged={loadCompleted}
+  onCompletedChanged={() => { loadCompleted(); loadTrades() }}
   loadAfterAdd={loadTrades}
 />
                 </div>
@@ -192,7 +192,7 @@ export default function Home() {
                   <TradeList
                     trades={trades}
                     onDeleted={optimisticDeleteTrade}
-                    onCompletedChanged={loadCompleted}
+                    onCompletedChanged={() => { loadCompleted(); loadTrades() }}
                   />
                 </div>
               </div>

@@ -467,7 +467,7 @@ const newTrade: any = {
         }
       }
       onCompletedChanged()
-      setTimeout(() => loadAfterAdd?.(), 500)
+      setTimeout(() => { loadAfterAdd?.() }, 1000)
     })
   }
 
