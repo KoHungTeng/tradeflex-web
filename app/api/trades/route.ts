@@ -50,11 +50,32 @@ export async function POST(request: NextRequest) {
       .eq('action', openAction).eq('user_id', user.id).neq('is_closed', true).order('trade_time', { ascending: false })
 
     if (openTrades && openTrades.length > 0) {
-      // 加權均價計算
-      const totalQty = openTrades.reduce((s: number, t: any) => s + t.quantity, 0)
-      const avgPrice = openTrades.reduce((s: number, t: any) => s + t.price * t.quantity, 0) / totalQty
-      const totalFee = openTrades.reduce((s: number, t: any) => s + (t.fee || 0), 0)
-      const openTrade = openTrades[0] // 用最新一筆的 tp/sl/remark 等資訊
+      // 支援部分平倉：只用足夠口數的開倉單
+      let remainQty = body.quantity
+      const usedTrades: any[] = []
+      const partialTrades: any[] = []
+
+      for (const t of openTrades) {
+        if (remainQty <= 0) break
+        if (t.quantity <= remainQty) {
+          usedTrades.push(t)
+          remainQty -= t.quantity
+        } else {
+          // 部分使用這筆開倉單
+          partialTrades.push({ trade: t, usedQty: remainQty })
+          remainQty = 0
+        }
+      }
+
+      // 計算加權均價（只用實際平倉的口數）
+      const allUsed = [
+        ...usedTrades.map((t: any) => ({ price: t.price, quantity: t.quantity, fee: t.fee || 0 })),
+        ...partialTrades.map(({ trade, usedQty }) => ({ price: trade.price, quantity: usedQty, fee: (trade.fee || 0) * usedQty / trade.quantity }))
+      ]
+      const totalUsedQty = allUsed.reduce((s, t) => s + t.quantity, 0)
+      const avgPrice = allUsed.reduce((s, t) => s + t.price * t.quantity, 0) / totalUsedQty
+      const totalFee = allUsed.reduce((s, t) => s + t.fee, 0)
+      const openTrade = openTrades[0]
 
       const { data: symbolData } = await supabase
         .from('symbols')
@@ -62,6 +83,7 @@ export async function POST(request: NextRequest) {
         .eq('name', body.symbol)
         .eq('user_id', user.id)
         .single()
+
       let pnl = 0
       if (symbolData && symbolData.tick_size > 0) {
         const priceDiff = direction === 'long' ? body.price - avgPrice : avgPrice - body.price
@@ -91,16 +113,25 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
       })
 
-      // 把開倉單的 tp/sl 更新到平倉單
       await supabase.from('trades').update({ tp: openTrade.tp || 0, sl: openTrade.sl || 0, open_price: openTrade.price || 0 })
-  .eq('id', trade.id)
-  .eq('user_id', user.id)
-
-      // 標記所有開倉單為已平倉
-      const openTradeIds = openTrades.map((t: any) => t.id)
-      await supabase.from('trades').update({ is_closed: true })
-        .in('id', openTradeIds)
+        .eq('id', trade.id)
         .eq('user_id', user.id)
+
+      // 只標記完全用掉的開倉單為已平倉
+      if (usedTrades.length > 0) {
+        const usedIds = usedTrades.map((t: any) => t.id)
+        await supabase.from('trades').update({ is_closed: true })
+          .in('id', usedIds)
+          .eq('user_id', user.id)
+      }
+
+      // 部分使用的開倉單：減少口數
+      for (const { trade, usedQty } of partialTrades) {
+        const newQty = trade.quantity - usedQty
+        await supabase.from('trades').update({ quantity: newQty })
+          .eq('id', trade.id)
+          .eq('user_id', user.id)
+      }
     }
   }
 
