@@ -319,6 +319,12 @@ export default function TradeForm({ activePortfolio, onAdded, onCompletedChanged
     }
   }, [isClose])
 
+  function refreshOpenTrades() {
+    fetch('/api/trades').then(r => r.json()).then(data => {
+      setOpenTrades(Array.isArray(data) ? data : [])
+    })
+  }
+
   // 選標的時自動帶入預設手續費
   function handleSymbolChange(name: string) {
     setSymbol(name)
@@ -467,7 +473,7 @@ const newTrade: any = {
         }
       }
       onCompletedChanged()
-      setTimeout(() => { loadAfterAdd?.() }, 1000)
+      setTimeout(() => { loadAfterAdd?.(); refreshOpenTrades() }, 1000)
     })
   }
 
