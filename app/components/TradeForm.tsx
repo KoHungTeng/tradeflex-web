@@ -473,7 +473,7 @@ const newTrade: any = {
         }
       }
       onCompletedChanged()
-      setTimeout(() => { loadAfterAdd?.(); refreshOpenTrades() }, 1000)
+      setTimeout(() => { loadAfterAdd?.(); if (isClose) refreshOpenTrades(); else refreshOpenTrades() }, 1000)
     })
   }
 
